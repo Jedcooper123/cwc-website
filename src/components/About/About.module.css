@@ -1,0 +1,126 @@
+/* ── About Section ─────────────────────────────────────────────────────────── */
+.about {
+  border-top: 1px solid var(--border);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+
+/* ── Content (left) ── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.accent {
+  color: var(--accent-lt);
+}
+
+.intro {
+  max-width: 100%;
+  font-size: 1.05rem;
+}
+
+.body {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  line-height: 1.78;
+}
+
+/* Pillars */
+.pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+.pillar {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+.checkIcon {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cta {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+/* ── Stats Grid (right) ── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-self: center;
+}
+
+.statCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: border-color var(--ease), background var(--ease), transform var(--ease);
+}
+
+.statCard:hover {
+  border-color: var(--border-hover);
+  background: var(--card-hover);
+  transform: translateY(-3px);
+}
+
+.statVal {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.statLabel {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.statDesc {
+  font-size: 0.78rem;
+  color: var(--text-3);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .statsGrid {
+    max-width: 480px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+    max-width: 100%;
+  }
+  .statVal { font-size: 1.6rem; }
+}

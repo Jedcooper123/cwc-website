@@ -1,0 +1,138 @@
+/* ── Client Portal Teaser ───────────────────────────────────────────────── */
+.section {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 60% 50%, rgba(77,124,254,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse at 10% 80%, rgba(124,92,252,0.05) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* ── Layout ── */
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+
+/* ── Content (left) ── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: sticky;
+  top: 96px;
+}
+
+.statusChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 0.38rem 0.9rem;
+  width: fit-content;
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #facc15;
+  box-shadow: 0 0 6px #facc15;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.body {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  line-height: 1.78;
+  margin: 0;
+}
+
+.cta {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+/* ── Feature cards (right) ── */
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.featureCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 1.25rem 1.5rem;
+  transition: border-color var(--ease), background var(--ease);
+}
+
+.featureCard:hover {
+  border-color: var(--border-hover);
+  background: var(--card-hover);
+}
+
+.featureIcon {
+  width: 38px;
+  height: 38px;
+  background: var(--accent-bg);
+  border: 1px solid rgba(77,124,254,0.18);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-lt);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.featureTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+
+.featureDesc {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .content { position: static; }
+}

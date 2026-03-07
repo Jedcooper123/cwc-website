@@ -1,0 +1,420 @@
+/* ── Hero Section ─────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 6rem 0 4rem;
+}
+
+/* Subtle grid background */
+.gridBg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+
+/* Ambient glows */
+.glow1 {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 55%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(77, 124, 254, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.glow2 {
+  position: absolute;
+  bottom: 0;
+  right: -5%;
+  width: 45%;
+  height: 50%;
+  background: radial-gradient(ellipse, rgba(124, 92, 252, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Inner layout ── */
+.inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+/* ── Copy ── */
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-lt);
+  background: var(--accent-bg);
+  border: 1px solid rgba(77, 124, 254, 0.25);
+  border-radius: 100px;
+  padding: 0.4rem 1rem;
+  width: fit-content;
+}
+
+.badgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* Headline */
+.headline {
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.13;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  animation: fadeUp 0.8s ease both;
+}
+
+.gradText {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Sub */
+.sub {
+  font-size: 1.05rem;
+  color: var(--text-2);
+  line-height: 1.78;
+  max-width: 480px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+
+/* Trust signals */
+.trust {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  animation: fadeUp 0.8s 0.3s ease both;
+  margin-top: 0.5rem;
+}
+
+.trustItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.trustNum {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.trustLabel {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.trustDivider {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+}
+
+/* ── Browser Mockup ── */
+.mockupWrap {
+  position: relative;
+  animation: fadeUp 0.9s 0.15s ease both;
+}
+
+.mockup {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow), 0 0 60px rgba(77,124,254,0.06);
+}
+
+/* Browser chrome bar */
+.browserBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.browserDots {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-hover);
+}
+
+.dot:first-child  { background: #ff5f57; }
+.dot:nth-child(2) { background: #febc2e; }
+.dot:last-child   { background: #28c840; }
+
+.browserUrl {
+  flex: 1;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-3);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.28rem 0.65rem;
+  text-align: center;
+}
+
+.browserRefresh {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border-hover);
+  border-top-color: transparent;
+  border-radius: 50%;
+}
+
+/* Simulated page */
+.pageContent {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Shimmer base */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--border) 0%,
+    var(--border-hover) 50%,
+    var(--border) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2.2s ease infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Simulated nav */
+.simNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+}
+.simLogo  { width: 70px; height: 10px; }
+.simNavLinks { display: flex; gap: 0.5rem; }
+.simLink  { width: 36px; height: 8px; }
+
+/* Simulated hero */
+.simHero {
+  padding: 1rem 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.simH1      { width: 90%; height: 12px; }
+.simH1Short { width: 65%; }
+.simP       { width: 100%; height: 8px; }
+.simPShort  { width: 75%; }
+
+.simBtns {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+.simBtn {
+  width: 80px;
+  height: 22px;
+  border-radius: 6px;
+}
+.simBtnPrimary {
+  background: var(--accent-bg);
+  border: 1px solid rgba(77,124,254,0.3);
+  animation: none;
+}
+
+/* Simulated cards */
+.simCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+.simCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.simIcon      { width: 22px; height: 22px; border-radius: 4px; }
+.simCardTitle { width: 80%; height: 8px; margin-top: 0.2rem; }
+.simCardBody  { width: 100%; height: 6px; }
+.simCardBodyShort { width: 60%; }
+
+/* Simulated metrics */
+.simMetrics {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+.simMetric {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.simMetricVal {
+  font-size: 0.7rem;
+  color: var(--accent-lt);
+}
+.simMetricLabel {
+  font-size: 0.65rem;
+  color: var(--text-3);
+}
+
+/* ── Floating badges ── */
+.floatBadge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.65rem 0.9rem;
+  box-shadow: var(--shadow-card);
+  animation: float 4s ease-in-out infinite;
+}
+
+.floatBadge1 {
+  top: -20px;
+  left: -30px;
+  animation-delay: 0s;
+}
+
+.floatBadge2 {
+  bottom: -18px;
+  right: -24px;
+  animation-delay: 1.8s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.floatIcon {
+  font-size: 1.2rem;
+}
+
+.floatTitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.floatSub {
+  font-size: 0.67rem;
+  color: var(--text-3);
+}
+
+/* ── Scroll hint ── */
+.scrollHint {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-3);
+  display: flex;
+  animation: bounce 2.4s ease infinite;
+  transition: color var(--ease);
+}
+
+.scrollHint:hover { color: var(--accent-lt); }
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(5px); }
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
+  .sub, .actions, .trust { align-self: center; margin: 0 auto; }
+  .actions { justify-content: center; }
+  .trust   { justify-content: center; }
+  .sub     { max-width: 560px; }
+  .mockupWrap { max-width: 540px; margin: 0 auto; }
+  .floatBadge1 { top: -14px; left: 0; }
+  .floatBadge2 { bottom: -14px; right: 0; }
+}
+
+@media (max-width: 480px) {
+  .hero { padding: 5rem 0 3rem; }
+  .floatBadge1, .floatBadge2 { display: none; }
+  .simCards { grid-template-columns: repeat(2, 1fr); }
+  .simCards .simCard:last-child { display: none; }
+}

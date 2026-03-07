@@ -1,0 +1,159 @@
+/* ── Services Section ─────────────────────────────────────────────────────── */
+.services {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Header */
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3.5rem;
+}
+
+.header .section-label { /* override alignment for centered label */
+  align-self: center;
+}
+
+.sub {
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: border-color var(--ease), background var(--ease), transform var(--ease), box-shadow var(--ease);
+  cursor: default;
+}
+
+.card:hover {
+  border-color: rgba(77, 124, 254, 0.35);
+  background: var(--card-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(77,124,254,0.07);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+/* Icon */
+.iconWrap {
+  width: 44px;
+  height: 44px;
+  background: var(--accent-bg);
+  border: 1px solid rgba(77,124,254,0.2);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-lt);
+  font-size: 1.2rem;
+  transition: background var(--ease), border-color var(--ease);
+}
+
+.card:hover .iconWrap {
+  background: rgba(77,124,254,0.18);
+  border-color: rgba(77,124,254,0.4);
+}
+
+/* Tag */
+.tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--border);
+  border-radius: 100px;
+  padding: 0.28rem 0.65rem;
+}
+
+/* Card body */
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.cardDesc {
+  font-size: 0.875rem;
+  color: var(--text-2);
+  line-height: 1.72;
+  flex: 1;
+}
+
+/* Card footer */
+.cardFooter {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.learnMore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-3);
+  transition: color var(--ease), gap var(--ease);
+}
+
+.learnMore:hover {
+  color: var(--accent-lt);
+  gap: 0.55rem;
+}
+
+/* ── Bottom CTA ── */
+.bottomCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+
+.bottomCta p {
+  font-size: 1rem;
+  color: var(--text-2);
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .bottomCta {
+    flex-direction: column;
+    text-align: center;
+  }
+}

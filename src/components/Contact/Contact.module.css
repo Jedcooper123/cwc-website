@@ -1,0 +1,261 @@
+/* ── Contact Section ─────────────────────────────────────────────────────── */
+.contact {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.header {
+  margin-bottom: 3rem;
+}
+
+/* ── Layout ── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 3rem;
+  align-items: start;
+}
+
+/* ── Form ── */
+.formWrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 2.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-2);
+  letter-spacing: 0.01em;
+}
+
+.input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--ease), background var(--ease), box-shadow var(--ease);
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.input::placeholder { color: var(--text-3); }
+
+.input:focus {
+  border-color: rgba(77,124,254,0.5);
+  background: var(--card);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+/* Select arrow */
+select.input {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234d5673' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.5rem;
+}
+
+select.input option {
+  background: var(--card);
+  color: var(--text);
+}
+
+.error {
+  font-size: 0.75rem;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.submitBtn {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* ── Success State ── */
+.successState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.successIcon {
+  color: var(--accent-lt);
+}
+
+.successTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.successBody {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  max-width: 360px;
+  line-height: 1.75;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sideCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sideTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Contact items */
+.contactItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.contactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  text-decoration: none;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+  transition: opacity var(--ease);
+}
+
+.contactItem:last-child { border-bottom: none; }
+.contactItem:hover { opacity: 0.8; }
+
+.contactIcon {
+  width: 36px;
+  height: 36px;
+  background: var(--accent-bg);
+  border: 1px solid rgba(77,124,254,0.18);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-lt);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.contactLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 0.2rem;
+}
+
+.contactValue {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+/* Schedule card */
+.scheduleIcon {
+  font-size: 1.3rem;
+  color: var(--accent-lt);
+}
+
+.scheduleBody {
+  font-size: 0.875rem;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.scheduleBtn {
+  align-self: flex-start;
+  font-size: 0.875rem;
+}
+
+/* Response time */
+.responseTime {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text-3);
+  padding: 0.5rem 0;
+}
+
+.responseTime strong { color: var(--text-2); }
+
+.rtDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+    max-width: 640px;
+  }
+}
+
+@media (max-width: 600px) {
+  .formWrap { padding: 1.5rem; }
+  .row { grid-template-columns: 1fr; }
+  .layout { max-width: 100%; }
+}
