@@ -1,155 +1,117 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Hero — Full-viewport landing section with animated headline, CTA buttons,
-// and a floating browser-window mockup showing a stylized site preview.
+// Hero — Bold editorial layout. No pill badge. Large typographic headline
+// anchored left with a code-panel visual and metrics strip at the bottom.
 // ─────────────────────────────────────────────────────────────────────────────
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { FiArrowRight, FiCalendar, FiChevronDown } from 'react-icons/fi'
 import styles from './Hero.module.css'
+
+const METRICS = [
+  { value: 'Custom',     label: 'Every build'    },
+  { value: '<48h',       label: 'Response time'  },
+  { value: '99.9%',      label: 'Uptime target'  },
+  { value: 'Full-Stack', label: 'Capability'     },
+]
+
+const TAGS = ['React', 'Node.js', 'Render', 'PostgreSQL', 'SEO', 'UI/UX']
 
 export default function Hero() {
   return (
     <section id="hero" className={styles.hero}>
-
-      {/* Background decorations */}
       <div className={styles.gridBg} aria-hidden="true" />
-      <div className={styles.glow1} aria-hidden="true" />
-      <div className={styles.glow2} aria-hidden="true" />
+      <div className={styles.glow}   aria-hidden="true" />
 
       <div className={`${styles.inner} container`}>
 
-        {/* ── Left: Copy ── */}
+        {/* ── Left: Editorial copy ── */}
         <div className={styles.copy}>
-          {/* Badge */}
-          <div className={styles.badge}>
-            <span className={styles.badgeDot} />
-            Modern Web Solutions
+          <div className={styles.eyebrow}>
+            <span className={styles.eyebrowLine} />
+            Cooper Web Consulting
           </div>
 
-          {/* Headline */}
           <h1 className={styles.headline}>
-            Build Your Digital Presence.{' '}
-            <span className={styles.gradText}>Grow Your Business.</span>
+            Your website<br />
+            <span className={styles.gradText}>should work</span><br />
+            as hard as you do.
           </h1>
 
-          {/* Sub-headline */}
           <p className={styles.sub}>
-            Cooper Web Consulting helps businesses launch high-performance websites,
-            scale their online presence, and turn web traffic into real growth—from
-            design to deployment and beyond.
+            We design, build, and maintain high-performance web experiences
+            for businesses that take their online presence seriously.
+            From first launch to long-term growth — CWC is your technical partner.
           </p>
 
-          {/* CTAs */}
           <div className={styles.actions}>
-            <a href="#contact" className="btn-primary">
-              <FiCalendar /> Schedule a Consultation
-            </a>
-            <a href="#services" className="btn-secondary">
-              View Services <FiArrowRight />
-            </a>
-          </div>
-
-          {/* Trust signals */}
-          <div className={styles.trust}>
-            <div className={styles.trustItem}>
-              <span className={styles.trustNum}>100%</span>
-              <span className={styles.trustLabel}>Custom-Built</span>
-            </div>
-            <div className={styles.trustDivider} />
-            <div className={styles.trustItem}>
-              <span className={styles.trustNum}>Fast</span>
-              <span className={styles.trustLabel}>Delivery</span>
-            </div>
-            <div className={styles.trustDivider} />
-            <div className={styles.trustItem}>
-              <span className={styles.trustNum}>Ongoing</span>
-              <span className={styles.trustLabel}>Support</span>
-            </div>
+            <Link to="/#contact" className="btn-primary">
+              <FiCalendar size={15} /> Schedule a Consultation
+            </Link>
+            <Link to="/services" className="btn-secondary">
+              View Services <FiArrowRight size={14} />
+            </Link>
           </div>
         </div>
 
-        {/* ── Right: Browser Mockup ── */}
-        <div className={styles.mockupWrap}>
-          <div className={styles.mockup}>
-            {/* Browser chrome */}
-            <div className={styles.browserBar}>
-              <div className={styles.browserDots}>
-                <span className={styles.dot} />
-                <span className={styles.dot} />
-                <span className={styles.dot} />
-              </div>
-              <div className={styles.browserUrl}>cooperwebconsulting.com</div>
-              <div className={styles.browserRefresh} />
+        {/* ── Right: Code-style panel ── */}
+        <div className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <div className={styles.panelDots}>
+              <span className={styles.dot} />
+              <span className={styles.dot} />
+              <span className={styles.dot} />
             </div>
-
-            {/* Simulated page content */}
-            <div className={styles.pageContent}>
-              {/* Simulated nav */}
-              <div className={styles.simNav}>
-                <div className={`${styles.shimmer} ${styles.simLogo}`} />
-                <div className={styles.simNavLinks}>
-                  <div className={`${styles.shimmer} ${styles.simLink}`} />
-                  <div className={`${styles.shimmer} ${styles.simLink}`} />
-                  <div className={`${styles.shimmer} ${styles.simLink}`} />
-                </div>
-              </div>
-
-              {/* Simulated hero */}
-              <div className={styles.simHero}>
-                <div className={`${styles.shimmer} ${styles.simH1}`} />
-                <div className={`${styles.shimmer} ${styles.simH1} ${styles.simH1Short}`} />
-                <div className={`${styles.shimmer} ${styles.simP}`} />
-                <div className={`${styles.shimmer} ${styles.simP} ${styles.simPShort}`} />
-                <div className={styles.simBtns}>
-                  <div className={`${styles.simBtn} ${styles.simBtnPrimary}`} />
-                  <div className={`${styles.shimmer} ${styles.simBtn}`} />
-                </div>
-              </div>
-
-              {/* Simulated cards */}
-              <div className={styles.simCards}>
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={styles.simCard}>
-                    <div className={`${styles.shimmer} ${styles.simIcon}`} />
-                    <div className={`${styles.shimmer} ${styles.simCardTitle}`} />
-                    <div className={`${styles.shimmer} ${styles.simCardBody}`} />
-                    <div className={`${styles.shimmer} ${styles.simCardBody} ${styles.simCardBodyShort}`} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Simulated metrics bar */}
-              <div className={styles.simMetrics}>
-                {['Uptime', 'Speed', 'Growth'].map((label) => (
-                  <div key={label} className={styles.simMetric}>
-                    <span className={styles.simMetricVal}>✓</span>
-                    <span className={styles.simMetricLabel}>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <span className={styles.panelFile}>cwc.config.js</span>
           </div>
 
-          {/* Floating badges */}
-          <div className={`${styles.floatBadge} ${styles.floatBadge1}`}>
-            <span className={styles.floatIcon}>⚡</span>
-            <div>
-              <div className={styles.floatTitle}>Performance</div>
-              <div className={styles.floatSub}>99 PageSpeed score</div>
-            </div>
+          <div className={styles.codeBlock}>
+            <p className={styles.cl}><span className={styles.ck}>const</span> <span className={styles.cv}>project</span> <span className={styles.co}>=</span> <span className={styles.cp}>{'{'}</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>client</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;your business&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>stack</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;React + Node + DB&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>deploy</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;Render&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>support</span><span className={styles.co}>:</span> <span className={styles.cb}>true</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>uptime</span><span className={styles.co}>:</span> <span className={styles.cn}>&apos;99.9%&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={styles.cl}><span className={styles.cp}>{'}'}</span></p>
+            <p className={styles.clBlank}>&nbsp;</p>
+            <p className={styles.cl}><span className={styles.cc}>{'// ✓ Ready for launch'}</span></p>
+            <p className={styles.cl}><span className={styles.ck}>export default</span> <span className={styles.cv}>build</span><span className={styles.cp}>(</span><span className={styles.cv}>project</span><span className={styles.cp}>)</span></p>
+            <p className={styles.cl}><span className={styles.cursor} /></p>
           </div>
-          <div className={`${styles.floatBadge} ${styles.floatBadge2}`}>
-            <span className={styles.floatIcon}>🛡</span>
-            <div>
-              <div className={styles.floatTitle}>Secure & Reliable</div>
-              <div className={styles.floatSub}>99.9% uptime SLA</div>
-            </div>
+
+          <div className={styles.tagRow}>
+            {TAGS.map((t) => (
+              <span key={t} className={styles.techTag}>{t}</span>
+            ))}
+          </div>
+
+          <div className={styles.statusBar}>
+            <span className={styles.statusDot} />
+            All systems operational
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <a href="#about" className={styles.scrollHint} aria-label="Scroll to about">
-        <FiChevronDown size={20} />
+      {/* ── Metrics strip ── */}
+      <div className={styles.metricsStrip}>
+        <div className="container">
+          <div className={styles.metrics}>
+            {METRICS.map(({ value, label }, i) => (
+              <React.Fragment key={label}>
+                <div className={styles.metric}>
+                  <span className={styles.metricVal}>{value}</span>
+                  <span className={styles.metricLabel}>{label}</span>
+                </div>
+                {i < METRICS.length - 1 && (
+                  <div className={styles.metricDivider} aria-hidden="true" />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <a href="#about" className={styles.scrollHint} aria-label="Scroll down">
+        <FiChevronDown size={18} />
       </a>
     </section>
   )

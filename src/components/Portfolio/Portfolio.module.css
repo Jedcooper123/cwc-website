@@ -1,19 +1,16 @@
-/* ── Portfolio ───────────────────────────────────────────────────────────── */
+/* ── Portfolio ─────────────────────────────────────────────────────────── */
 .portfolio {
   background: var(--bg);
   border-top: 1px solid var(--border);
 }
 
-.header {
-  margin-bottom: 3rem;
-}
+.header { margin-bottom: 3rem; }
 
 /* ── Grid ── */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
-  margin-bottom: 2rem;
 }
 
 /* ── Card ── */
@@ -24,29 +21,59 @@
   overflow: hidden;
   transition: border-color var(--ease), transform var(--ease), box-shadow var(--ease);
 }
-
 .card:hover {
   border-color: var(--border-hover);
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.3);
 }
 
-.featured {
-  grid-column: span 2;
-}
+.featured { grid-column: span 2; }
 
 /* ── Thumbnail ── */
 .thumb {
   position: relative;
-  height: 190px;
+  height: 200px;
   overflow: hidden;
-  cursor: pointer;
+  background: var(--surface);
+}
+.featured .thumb { height: 240px; }
+
+/* Iframe preview */
+.iframe {
+  width: 200%;
+  height: 200%;
+  border: none;
+  transform: scale(0.5);
+  transform-origin: top left;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.iframeLoaded { opacity: 1; }
+
+.iframeLoader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-3);
 }
 
-.featured .thumb {
-  height: 220px;
+.loaderSpinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
+/* Placeholder thumb inner */
 .thumbInner {
   padding: 0.85rem;
   height: 100%;
@@ -54,106 +81,86 @@
   flex-direction: column;
   gap: 0.6rem;
 }
+.mockNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-/* Featured badge */
-.featuredBadge {
+/* Live badge */
+.liveBadge {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent-lt);
-  background: var(--accent-bg);
-  border: 1px solid rgba(77,124,254,0.3);
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74,222,128,0.3);
   border-radius: 100px;
   padding: 0.25rem 0.6rem;
+  z-index: 1;
+}
+.liveDot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 4px #4ade80;
 }
 
 /* Hover overlay */
 .thumbOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(8, 9, 13, 0.82);
+  background: rgba(10, 10, 10, 0.78);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  color: var(--text);
-  font-size: 0.85rem;
-  font-weight: 600;
   opacity: 0;
   transition: opacity var(--ease);
 }
+.card:hover .thumbOverlay { opacity: 1; }
 
-.card:hover .thumbOverlay {
-  opacity: 1;
-}
-
-/* Mock preview elements */
-.mockNav {
+.overlayBtn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--r-md);
+  padding: 0.6rem 1.1rem;
+  text-decoration: none;
+  transition: border-color var(--ease), color var(--ease);
 }
-.mockLogoBar {
-  width: 50px;
-  height: 8px;
-  border-radius: 4px;
-}
-.mockNavLinks {
+.overlayBtn:hover { border-color: var(--accent); color: var(--accent-lt); }
+
+.overlayComingSoon {
   display: flex;
+  align-items: center;
   gap: 0.4rem;
-}
-.mockLine {
-  width: 28px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255,255,255,0.15);
-}
-.mockHero {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.4rem 0;
-}
-.mockH {
-  height: 10px;
-  border-radius: 5px;
-  width: 85%;
-}
-.mockCards {
-  display: flex;
-  gap: 0.4rem;
-}
-.mockCard {
-  flex: 1;
-  background: rgba(255,255,255,0.06);
-  border-radius: 4px;
-  padding: 0.4rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-.mockCardTop {
-  height: 16px;
-  border-radius: 3px;
-}
-.mockCardLine {
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255,255,255,0.12);
-  width: 80%;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-3);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.55rem 1rem;
 }
 
 /* ── Info ── */
 .info {
-  padding: 1.5rem 1.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
 .meta {
@@ -165,49 +172,48 @@
 }
 
 .type {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--text-3);
 }
 
-.tags {
-  display: flex;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
+.tags { display: flex; gap: 0.3rem; flex-wrap: wrap; }
 
 .tag {
-  font-size: 0.65rem;
+  font-size: 0.63rem;
   font-weight: 500;
   color: var(--text-3);
   background: var(--border);
   border-radius: 4px;
-  padding: 0.22rem 0.55rem;
+  padding: 0.2rem 0.5rem;
 }
 
 .title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text);
 }
 
 .desc {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   color: var(--text-2);
   line-height: 1.7;
   margin: 0;
 }
 
-/* ── Placeholder note ── */
-.note {
-  font-size: 0.8rem;
-  color: var(--text-3);
-  text-align: center;
-  font-style: italic;
-  padding-top: 0.5rem;
+.siteLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--accent-lt);
+  text-decoration: none;
+  margin-top: 0.15rem;
+  transition: color var(--ease);
 }
+.siteLink:hover { color: var(--accent); }
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {

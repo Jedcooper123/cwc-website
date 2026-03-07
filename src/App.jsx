@@ -1,43 +1,58 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// App.jsx — Root component. Assembles all sections in page order.
-// To add/remove/reorder sections, simply add/remove imports and JSX here.
+// App.jsx — Root with React Router. All routes defined here.
+//
+// Routes:
+//   /                    → HomePage    (hero, about, services, process, …)
+//   /services            → ServicesPage (full services overview)
+//   /services/:serviceId → ServiceDetailPage (individual service)
+//   /portal              → PortalPage  (client login + dashboard)
+//   *                    → redirect to /
 // ─────────────────────────────────────────────────────────────────────────────
-import React from 'react'
-import Navbar       from './components/Navbar/Navbar'
-import Hero         from './components/Hero/Hero'
-import About        from './components/About/About'
-import Services     from './components/Services/Services'
-import Process      from './components/Process/Process'
-import WhyCWC       from './components/WhyCWC/WhyCWC'
-import Portfolio    from './components/Portfolio/Portfolio'
-import Pricing      from './components/Pricing/Pricing'
-import ClientPortal from './components/ClientPortal/ClientPortal'
-import Contact      from './components/Contact/Contact'
-import Footer       from './components/Footer/Footer'
+import React, { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 
-function App() {
+import Navbar            from './components/Navbar/Navbar'
+import Footer            from './components/Footer/Footer'
+
+import HomePage          from './pages/HomePage'
+import ServicesPage      from './pages/ServicesPage'
+import ServiceDetailPage from './pages/ServiceDetailPage'
+import PortalPage        from './pages/PortalPage'
+
+// Scroll to top on every route change
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
+function AppLayout() {
+  const { pathname } = useLocation()
+  // Portal has its own full-screen layout — hide the shared footer there
+  const hideFooter = pathname.startsWith('/portal')
+
   return (
     <>
-      {/* Fixed navigation */}
       <Navbar />
-
-      {/* Main content */}
+      <ScrollToTop />
       <main>
-        <Hero />
-        <About />
-        <Services />
-        <Process />
-        <WhyCWC />
-        <Portfolio />
-        <Pricing />
-        <ClientPortal />
-        <Contact />
+        <Routes>
+          <Route path="/"                    element={<HomePage />}          />
+          <Route path="/services"            element={<ServicesPage />}      />
+          <Route path="/services/:serviceId" element={<ServiceDetailPage />} />
+          <Route path="/portal"              element={<PortalPage />}        />
+          <Route path="*"                    element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
-
-      {/* Footer */}
-      <Footer />
+      {!hideFooter && <Footer />}
     </>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppLayout />
+    </BrowserRouter>
+  )
+}

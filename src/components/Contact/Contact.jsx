@@ -157,18 +157,18 @@ export default function Contact() {
             <div className={styles.sideCard}>
               <h3 className={styles.sideTitle}>Contact Information</h3>
               <div className={styles.contactItems}>
-                <a href="mailto:hello@cooperwebconsulting.com" className={styles.contactItem}>
+                <a href="mailto:jedpcooper@gmail.com" className={styles.contactItem}>
                   <div className={styles.contactIcon}><FiMail /></div>
                   <div>
                     <div className={styles.contactLabel}>Email</div>
-                    <div className={styles.contactValue}>hello@cooperwebconsulting.com</div>
+                    <div className={styles.contactValue}>jedpcooper@gmail.com</div>
                   </div>
                 </a>
-                <a href="tel:+15550000000" className={styles.contactItem}>
+                <a href="tel:+13367070245" className={styles.contactItem}>
                   <div className={styles.contactIcon}><FiPhone /></div>
                   <div>
                     <div className={styles.contactLabel}>Phone</div>
-                    <div className={styles.contactValue}>(555) 000-0000</div>
+                    <div className={styles.contactValue}>(336) 707-0245</div>
                   </div>
                 </a>
                 <a
