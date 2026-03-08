@@ -38,14 +38,24 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 
   const db   = getDb()
+
+  // ── TEMP DEBUG (remove after login is confirmed working) ──────────────────
+  const allAdmins = db.prepare("SELECT id, email, role FROM users WHERE role = 'admin'").all()
+  console.log('[CWC DEBUG] Attempt email:', JSON.stringify(email.trim()))
+  console.log('[CWC DEBUG] Admins in DB:', JSON.stringify(allAdmins))
+  console.log('[CWC DEBUG] ADMIN_EMAIL env var:', JSON.stringify(process.env.ADMIN_EMAIL || '(not set)'))
+  // ─────────────────────────────────────────────────────────────────────────
+
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.trim())
 
   if (!user) {
+    console.log('[CWC DEBUG] No user found for email:', JSON.stringify(email.trim()))
     // Use same error as wrong password to avoid email enumeration
     return res.status(401).json({ error: 'Invalid email or password.' })
   }
 
   const match = await bcrypt.compare(password, user.password_hash)
+  console.log('[CWC DEBUG] Password match:', match)
   if (!match) {
     return res.status(401).json({ error: 'Invalid email or password.' })
   }
