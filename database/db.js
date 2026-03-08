@@ -69,7 +69,22 @@ function initSchema() {
     );
   `)
 
+  migrateSchema()
   seedAdminIfNeeded()
+}
+
+// Add columns that don't exist yet (safe to run on every startup)
+function migrateSchema() {
+  const addCol = (table, column, def) => {
+    try { db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`) } catch {}
+  }
+  // Projects: which service, monthly price, and stage
+  addCol('projects', 'service_id',          'TEXT')
+  addCol('projects', 'monthly_price_cents',  'INTEGER NOT NULL DEFAULT 0')
+  addCol('projects', 'stage',               "TEXT NOT NULL DEFAULT 'discovery'")
+  // Invoices: which service and whether it's a one-time or monthly charge
+  addCol('invoices', 'service_id',    'TEXT')
+  addCol('invoices', 'invoice_type',  "TEXT NOT NULL DEFAULT 'one-time'")
 }
 
 function seedAdminIfNeeded() {

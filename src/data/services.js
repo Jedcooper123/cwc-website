@@ -92,6 +92,20 @@ export const SERVICES = [
     isAddon: true,
     color: '#22d3ee',
   },
+  {
+    // Admin-only: never shown on public site, only in the portal admin panel
+    id: 'friends',
+    title: 'Friend Project',
+    shortTitle: 'Friends',
+    tagline: 'Personal projects for friends.',
+    shortDesc: 'Custom work for people I know. Price is set per project.',
+    fullDesc: 'Personal projects for friends and family. Pricing, scope, and timeline are all flexible.',
+    whatWeDeliver: ['Whatever the project needs'],
+    goodFor: ['Friends and family'],
+    startingAt: 'Custom',
+    color: '#fb7185',
+    adminOnly: true,
+  },
 ]
 
 // Helper: find service by URL slug

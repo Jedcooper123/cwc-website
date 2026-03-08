@@ -17,7 +17,9 @@ router.use(requireAuth)
 router.get('/projects', (req, res) => {
   const db       = getDb()
   const projects = db.prepare(`
-    SELECT id, name, description, status, progress, created_at, updated_at
+    SELECT id, name, description, status, progress,
+           service_id, monthly_price_cents, stage,
+           created_at, updated_at
     FROM projects
     WHERE client_id = ?
     ORDER BY updated_at DESC
@@ -30,7 +32,9 @@ router.get('/projects', (req, res) => {
 router.get('/invoices', (req, res) => {
   const db       = getDb()
   const invoices = db.prepare(`
-    SELECT id, description, amount_cents, status, due_date, paid_at, created_at
+    SELECT id, description, amount_cents, status,
+           service_id, invoice_type,
+           due_date, paid_at, created_at
     FROM invoices
     WHERE client_id = ?
     ORDER BY created_at DESC

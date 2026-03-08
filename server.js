@@ -19,11 +19,12 @@ import path         from 'path'
 import cookieParser from 'cookie-parser'
 import { fileURLToPath } from 'url'
 
-import { getDb }      from './database/db.js'
-import authRoutes     from './routes/auth.js'
-import portalRoutes   from './routes/portal.js'
-import adminRoutes    from './routes/admin.js'
-import paymentsRoutes from './routes/payments.js'
+import { getDb }       from './database/db.js'
+import authRoutes      from './routes/auth.js'
+import portalRoutes    from './routes/portal.js'
+import adminRoutes     from './routes/admin.js'
+import paymentsRoutes  from './routes/payments.js'
+import contactRoutes   from './routes/contact.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname  = path.dirname(__filename)
@@ -51,6 +52,7 @@ app.use('/api/auth',     authRoutes)
 app.use('/api/portal',   portalRoutes)
 app.use('/api/admin',    adminRoutes)
 app.use('/api/payments', paymentsRoutes)
+app.use('/api/contact',  contactRoutes)
 
 // ── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

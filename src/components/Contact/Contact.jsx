@@ -151,13 +151,13 @@ export default function Contact() {
             <div className={styles.sideCard}>
               <h3 className={styles.sideTitle}>Contact Information</h3>
               <div className={styles.contactItems}>
-                <a href="mailto:jedpcooper@gmail.com" className={styles.contactItem}>
+                <div className={styles.contactItem}>
                   <div className={styles.contactIcon}><FiMail /></div>
                   <div>
                     <div className={styles.contactLabel}>Email</div>
                     <div className={styles.contactValue}>jedpcooper@gmail.com</div>
                   </div>
-                </a>
+                </div>
                 <a href="tel:+13367070245" className={styles.contactItem}>
                   <div className={styles.contactIcon}><FiPhone /></div>
                   <div>

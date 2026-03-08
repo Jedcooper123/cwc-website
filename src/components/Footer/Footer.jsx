@@ -55,7 +55,7 @@ export default function Footer() {
             </p>
             <div className={styles.social}>
               <a
-                href="mailto:jedpcooper@gmail.com"
+                href="#contact"
                 className={styles.socialLink}
                 aria-label="Email"
               >
@@ -108,7 +108,7 @@ export default function Footer() {
               Get in Touch <FiArrowRight />
             </a>
             <div className={styles.contact}>
-              <a href="mailto:jedpcooper@gmail.com" className={styles.contactLink}>
+              <a href="#contact" className={styles.contactLink}>
                 jedpcooper@gmail.com
               </a>
               <a href="tel:+13367070245" className={styles.contactLink}>

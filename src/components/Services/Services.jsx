@@ -44,9 +44,9 @@ export default function Services() {
           </p>
         </div>
 
-        {/* Cards grid */}
+        {/* Cards grid — filter out admin-only services (e.g. friends) */}
         <div className={styles.grid}>
-          {SERVICES.map(({ id, title, shortDesc, isAddon }, i) => (
+          {SERVICES.filter(s => !s.adminOnly).map(({ id, title, shortDesc, isAddon }, i) => (
             <Link
               key={id}
               to={`/services/${id}`}

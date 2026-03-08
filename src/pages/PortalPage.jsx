@@ -9,26 +9,36 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { loadStripe } from '@stripe/stripe-js'
 import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
+  Elements, PaymentElement, useStripe, useElements,
 } from '@stripe/react-stripe-js'
 import {
   FiLock, FiMail, FiEye, FiEyeOff, FiArrowRight,
   FiGrid, FiFileText, FiTool, FiCreditCard, FiBarChart2,
   FiCheckCircle, FiClock, FiAlertCircle, FiLogOut,
   FiDollarSign, FiRefreshCw, FiUsers, FiUserPlus,
-  FiPlusCircle, FiChevronDown, FiChevronUp,
+  FiPlusCircle, FiEdit2, FiSend, FiMessageSquare,
 } from 'react-icons/fi'
+import { SERVICES } from '../data/services'
 import styles from './PortalPage.module.css'
 
-// ── Stripe setup ──────────────────────────────────────────────────────────
+// ── Stripe setup ───────────────────────────────────────────────────────────
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
   : null
 
-// ── API helpers ────────────────────────────────────────────────────────────
+// All services including admin-only ones (friends), for use in admin forms
+const ALL_SERVICES = SERVICES
+
+// Project stages
+const STAGES = [
+  { id: 'discovery',   label: 'Discovery'   },
+  { id: 'design',      label: 'Design'      },
+  { id: 'development', label: 'Development' },
+  { id: 'review',      label: 'Review'      },
+  { id: 'launched',    label: 'Launched'    },
+]
+
+// ── API helper ─────────────────────────────────────────────────────────────
 async function apiFetch(path, opts = {}) {
   const res = await fetch(path, {
     credentials: 'same-origin',
@@ -40,7 +50,86 @@ async function apiFetch(path, opts = {}) {
   return data
 }
 
-// ── CheckoutForm — Stripe PaymentElement ──────────────────────────────────
+// ── Stage Tracker ──────────────────────────────────────────────────────────
+function StageTracker({ stage }) {
+  const currentIdx = STAGES.findIndex(s => s.id === stage)
+  return (
+    <div className={styles.stageTracker}>
+      {STAGES.map((s, i) => (
+        <React.Fragment key={s.id}>
+          <div className={[
+            styles.stageStep,
+            i <= currentIdx ? styles.stageActive : '',
+            i === currentIdx ? styles.stageCurrent : '',
+          ].filter(Boolean).join(' ')}>
+            <div className={styles.stageCircle}>
+              {i < currentIdx ? <FiCheckCircle size={11} /> : i + 1}
+            </div>
+            <span className={styles.stageLabel}>{s.label}</span>
+          </div>
+          {i < STAGES.length - 1 && (
+            <div className={`${styles.stageLine} ${i < currentIdx ? styles.stageLineActive : ''}`} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  )
+}
+
+// ── Support Form (replaces all mailto: links) ──────────────────────────────
+function SupportForm({ defaultMessage = '' }) {
+  const [form,    setForm]    = useState({ name: '', email: '', message: defaultMessage })
+  const [loading, setLoading] = useState(false)
+  const [done,    setDone]    = useState(false)
+  const [error,   setError]   = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!form.email || !form.message) { setError('Email and message are required.'); return }
+    setLoading(true); setError('')
+    try {
+      await apiFetch('/api/contact', { method: 'POST', body: JSON.stringify(form) })
+      setDone(true)
+    } catch (err) { setError(err.message) }
+    finally { setLoading(false) }
+  }
+
+  if (done) return (
+    <div className={styles.supportDone}>
+      <FiCheckCircle size={22} style={{ color: '#4ade80' }} />
+      <p>Message sent. Jed will get back to you within one business day.</p>
+    </div>
+  )
+
+  return (
+    <form className={styles.supportForm} onSubmit={handleSubmit}>
+      <div className={styles.adminRow}>
+        <div className={styles.adminField}>
+          <label>Your Name</label>
+          <input type="text" className={styles.adminInput} placeholder="Jane Smith"
+            value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} />
+        </div>
+        <div className={styles.adminField}>
+          <label>Your Email *</label>
+          <input type="email" className={styles.adminInput} placeholder="you@company.com"
+            value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))} />
+        </div>
+      </div>
+      <div className={styles.adminField}>
+        <label>Message *</label>
+        <textarea rows={4} className={styles.adminInput} style={{ resize: 'vertical' }}
+          placeholder="Describe what you need help with..."
+          value={form.message} onChange={e => setForm(f => ({...f, message: e.target.value}))} />
+      </div>
+      {error && <div className={styles.errorMsg}><FiAlertCircle size={14} /> {error}</div>}
+      <button type="submit" className="btn-primary" disabled={loading}>
+        {loading ? 'Sending...' : 'Send Message'} <FiSend size={13} />
+      </button>
+    </form>
+  )
+}
+
+// ── Checkout Form (Stripe) ─────────────────────────────────────────────────
 function CheckoutForm({ invoice, onSuccess, onCancel }) {
   const stripe   = useStripe()
   const elements = useElements()
@@ -50,8 +139,7 @@ function CheckoutForm({ invoice, onSuccess, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!stripe || !elements) return
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     const { error: stripeError } = await stripe.confirmPayment({
       elements,
       confirmParams: { return_url: window.location.href },
@@ -83,7 +171,7 @@ function CheckoutForm({ invoice, onSuccess, onCancel }) {
   )
 }
 
-// ── Invoice Card ────────────────────────────────────────────────────────────
+// ── Invoice Card ──────────────────────────────────────────────────────────
 function InvoiceCard({ invoice, onPaySuccess }) {
   const [paying,        setPaying]        = useState(false)
   const [clientSecret,  setClientSecret]  = useState(null)
@@ -104,15 +192,18 @@ function InvoiceCard({ invoice, onPaySuccess }) {
     finally { setLoadingIntent(false) }
   }
 
-  const amount = `$${(invoice.amount_cents / 100).toFixed(2)}`
-  const isPaid = invoice.status === 'paid'
-  const isVoid = invoice.status === 'void'
+  const amount      = `$${(invoice.amount_cents / 100).toFixed(2)}`
+  const isPaid      = invoice.status === 'paid'
+  const isVoid      = invoice.status === 'void'
   const statusColor = isPaid ? '#4ade80' : isVoid ? '#6b7280' : '#f97316'
+  const isMonthly   = invoice.invoice_type === 'monthly'
 
   if (paying && clientSecret) {
     return (
       <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'night' } }}>
-        <CheckoutForm invoice={invoice} onSuccess={() => { setPaying(false); onPaySuccess() }} onCancel={() => setPaying(false)} />
+        <CheckoutForm invoice={invoice}
+          onSuccess={() => { setPaying(false); onPaySuccess() }}
+          onCancel={() => setPaying(false)} />
       </Elements>
     )
   }
@@ -126,6 +217,13 @@ function InvoiceCard({ invoice, onPaySuccess }) {
         <div>
           <div className={styles.invoiceDesc}>{invoice.description}</div>
           <div className={styles.invoiceMeta}>
+            <span className={styles.invoiceTypeBadge}
+              style={{
+                background: isMonthly ? 'rgba(167,139,250,0.12)' : 'rgba(91,141,245,0.12)',
+                color:      isMonthly ? '#a78bfa' : '#5b8df5',
+              }}>
+              {isMonthly ? 'Monthly' : 'One-time'}
+            </span>
             {invoice.due_date && <span>Due: {new Date(invoice.due_date).toLocaleDateString()}</span>}
             {invoice.paid_at  && <span>Paid: {new Date(invoice.paid_at).toLocaleDateString()}</span>}
           </div>
@@ -149,19 +247,20 @@ function InvoiceCard({ invoice, onPaySuccess }) {
   )
 }
 
-// ── Admin Panel ─────────────────────────────────────────────────────────────
+// ── Admin Panel ────────────────────────────────────────────────────────────
 function AdminPanel() {
-  const [clients,      setClients]      = useState([])
-  const [loading,      setLoading]      = useState(true)
-  const [section,      setSection]      = useState('clients') // 'clients' | 'add-client' | 'add-project' | 'add-invoice'
-  const [success,      setSuccess]      = useState('')
-  const [error,        setError]        = useState('')
-  const [submitting,   setSubmitting]   = useState(false)
+  const [clients,    setClients]    = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [section,    setSection]    = useState('clients')
+  const [success,    setSuccess]    = useState('')
+  const [error,      setError]      = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [editClient, setEditClient] = useState(null)
 
-  // Forms
   const [clientForm,  setClientForm]  = useState({ name: '', email: '', company: '', password: '' })
-  const [projectForm, setProjectForm] = useState({ clientId: '', name: '', description: '', status: 'active', progress: 0 })
-  const [invoiceForm, setInvoiceForm] = useState({ clientId: '', description: '', amountDollars: '', dueDate: '' })
+  const [projectForm, setProjectForm] = useState({ clientId: '', name: '', description: '', serviceId: '', monthlyPriceDollars: '', stage: 'discovery', status: 'active' })
+  const [invoiceForm, setInvoiceForm] = useState({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '' })
+  const [editForm,    setEditForm]    = useState({ name: '', email: '', company: '' })
 
   const loadClients = useCallback(async () => {
     setLoading(true)
@@ -174,20 +273,19 @@ function AdminPanel() {
 
   useEffect(() => { loadClients() }, [loadClients])
 
-  const showMsg = (msg, isError = false) => {
-    if (isError) setError(msg); else setSuccess(msg)
-    setTimeout(() => { setSuccess(''); setError('') }, 4000)
+  const showMsg = (msg, isErr = false) => {
+    if (isErr) setError(msg); else setSuccess(msg)
+    setTimeout(() => { setSuccess(''); setError('') }, 5000)
   }
 
   const handleAddClient = async (e) => {
     e.preventDefault()
-    if (!clientForm.name || !clientForm.email || !clientForm.password) {
+    if (!clientForm.name || !clientForm.email || !clientForm.password)
       return showMsg('Name, email, and password are required.', true)
-    }
     setSubmitting(true)
     try {
       await apiFetch('/api/admin/clients', { method: 'POST', body: JSON.stringify(clientForm) })
-      showMsg(`Client "${clientForm.name}" created! Their login: ${clientForm.email} / ${clientForm.password}`)
+      showMsg(`Client "${clientForm.name}" created! Login: ${clientForm.email} / ${clientForm.password}`)
       setClientForm({ name: '', email: '', company: '', password: '' })
       setSection('clients')
       loadClients()
@@ -195,72 +293,118 @@ function AdminPanel() {
     finally { setSubmitting(false) }
   }
 
+  const handleSaveEdit = async (e) => {
+    e.preventDefault()
+    if (!editForm.name || !editForm.email) return showMsg('Name and email are required.', true)
+    setSubmitting(true)
+    try {
+      await apiFetch(`/api/admin/clients/${editClient.id}`, { method: 'PATCH', body: JSON.stringify(editForm) })
+      showMsg('Client updated.')
+      setEditClient(null)
+      loadClients()
+    } catch (err) { showMsg(err.message, true) }
+    finally { setSubmitting(false) }
+  }
+
   const handleAddProject = async (e) => {
     e.preventDefault()
-    if (!projectForm.clientId || !projectForm.name) {
+    if (!projectForm.clientId || !projectForm.name)
       return showMsg('Select a client and enter a project name.', true)
-    }
     setSubmitting(true)
     try {
       await apiFetch('/api/admin/projects', { method: 'POST', body: JSON.stringify(projectForm) })
-      showMsg('Project added successfully.')
-      setProjectForm({ clientId: '', name: '', description: '', status: 'active', progress: 0 })
+      showMsg('Project added.')
+      setProjectForm({ clientId: '', name: '', description: '', serviceId: '', monthlyPriceDollars: '', stage: 'discovery', status: 'active' })
     } catch (err) { showMsg(err.message, true) }
     finally { setSubmitting(false) }
   }
 
   const handleAddInvoice = async (e) => {
     e.preventDefault()
-    if (!invoiceForm.clientId || !invoiceForm.description || !invoiceForm.amountDollars) {
-      return showMsg('Select a client, enter a description, and enter an amount.', true)
-    }
+    if (!invoiceForm.clientId || !invoiceForm.description || !invoiceForm.amountDollars)
+      return showMsg('Client, description, and amount are required.', true)
     setSubmitting(true)
     try {
       await apiFetch('/api/admin/invoices', { method: 'POST', body: JSON.stringify(invoiceForm) })
       showMsg('Invoice created. The client will see it in their portal.')
-      setInvoiceForm({ clientId: '', description: '', amountDollars: '', dueDate: '' })
+      setInvoiceForm({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '' })
     } catch (err) { showMsg(err.message, true) }
     finally { setSubmitting(false) }
   }
 
+  const autoFillDesc = (serviceId, invoiceType) => {
+    const svc = ALL_SERVICES.find(s => s.id === serviceId)
+    if (!svc) return
+    const desc = invoiceType === 'monthly' ? `${svc.title} — Monthly Plan` : `${svc.title} — Project Build`
+    setInvoiceForm(f => ({ ...f, description: desc }))
+  }
+
   const tabs = [
-    { id: 'clients',     label: 'All Clients',    icon: <FiUsers /> },
-    { id: 'add-client',  label: 'Add Client',      icon: <FiUserPlus /> },
-    { id: 'add-project', label: 'Add Project',     icon: <FiFileText /> },
-    { id: 'add-invoice', label: 'Create Invoice',  icon: <FiDollarSign /> },
+    { id: 'clients',     label: 'All Clients',    icon: <FiUsers />      },
+    { id: 'add-client',  label: 'Add Client',     icon: <FiUserPlus />   },
+    { id: 'add-project', label: 'Add Project',    icon: <FiFileText />   },
+    { id: 'add-invoice', label: 'Create Invoice', icon: <FiDollarSign /> },
   ]
+
+  // ── Edit client overlay ──────────────────────────────────────────────────
+  if (editClient) return (
+    <div className={styles.adminPanel}>
+      <div className={styles.adminNav}>
+        <button className={styles.adminNavBtn} onClick={() => setEditClient(null)}>← Back</button>
+      </div>
+      {success && <div className={styles.successMsg}><FiCheckCircle size={14} /> {success}</div>}
+      {error   && <div className={styles.errorMsg}><FiAlertCircle size={14} /> {error}</div>}
+      <form className={styles.adminForm} onSubmit={handleSaveEdit}>
+        <p className={styles.adminFormNote}>Editing <strong>{editClient.name}</strong></p>
+        <div className={styles.adminRow}>
+          <div className={styles.adminField}>
+            <label>Full Name *</label>
+            <input type="text" className={styles.adminInput}
+              value={editForm.name} onChange={e => setEditForm(f => ({...f, name: e.target.value}))} />
+          </div>
+          <div className={styles.adminField}>
+            <label>Email *</label>
+            <input type="email" className={styles.adminInput}
+              value={editForm.email} onChange={e => setEditForm(f => ({...f, email: e.target.value}))} />
+          </div>
+        </div>
+        <div className={styles.adminField}>
+          <label>Company</label>
+          <input type="text" className={styles.adminInput} placeholder="Optional"
+            value={editForm.company} onChange={e => setEditForm(f => ({...f, company: e.target.value}))} />
+        </div>
+        <div className={styles.adminRow}>
+          <button type="submit" className="btn-primary" disabled={submitting}>
+            {submitting ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button type="button" className="btn-secondary" onClick={() => setEditClient(null)}>Cancel</button>
+        </div>
+      </form>
+    </div>
+  )
 
   return (
     <div className={styles.adminPanel}>
-      {/* Sub-navigation */}
       <div className={styles.adminNav}>
         {tabs.map(t => (
-          <button
-            key={t.id}
+          <button key={t.id}
             className={`${styles.adminNavBtn} ${section === t.id ? styles.adminNavActive : ''}`}
-            onClick={() => setSection(t.id)}
-          >
+            onClick={() => setSection(t.id)}>
             {t.icon} {t.label}
           </button>
         ))}
       </div>
 
-      {/* Status messages */}
       {success && <div className={styles.successMsg}><FiCheckCircle size={14} /> {success}</div>}
       {error   && <div className={styles.errorMsg}><FiAlertCircle size={14} /> {error}</div>}
 
       {/* ── All Clients ── */}
       {section === 'clients' && (
         <div className={styles.clientList}>
-          {loading ? (
-            <p className={styles.loadingText}>Loading clients...</p>
-          ) : clients.length === 0 ? (
-            <div className={styles.emptyState}>
-              <FiUsers size={28} />
-              <p>No clients yet. Use "Add Client" to create the first one.</p>
-            </div>
-          ) : (
-            clients.map(c => (
+          {loading ? <p className={styles.loadingText}>Loading...</p>
+            : clients.length === 0 ? (
+              <div className={styles.emptyState}><FiUsers size={28} /><p>No clients yet.</p></div>
+            ) : clients.map(c => (
               <div key={c.id} className={styles.clientCard}>
                 <div className={styles.avatar} style={{ width: 38, height: 38, fontSize: '0.9rem' }}>
                   {c.name[0].toUpperCase()}
@@ -270,9 +414,15 @@ function AdminPanel() {
                   <div className={styles.clientMeta}>{c.email}{c.company ? ` · ${c.company}` : ''}</div>
                 </div>
                 <span className={styles.clientSince}>Since {new Date(c.created_at).toLocaleDateString()}</span>
+                <button className={styles.editBtn}
+                  onClick={() => {
+                    setEditClient(c)
+                    setEditForm({ name: c.name, email: c.email, company: c.company || '' })
+                  }}>
+                  <FiEdit2 size={12} /> Edit
+                </button>
               </div>
-            ))
-          )}
+            ))}
         </div>
       )}
 
@@ -281,46 +431,30 @@ function AdminPanel() {
         <form className={styles.adminForm} onSubmit={handleAddClient}>
           <p className={styles.adminFormNote}>
             Fill this out for each new client. Send them their email and password separately.
-            They can log in at <strong>/portal</strong>.
+            They log in at <strong>/portal</strong>.
           </p>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Client Name *</label>
-              <input
-                type="text" placeholder="Jane Smith"
-                value={clientForm.name}
-                onChange={e => setClientForm(f => ({...f, name: e.target.value}))}
-                className={styles.adminInput}
-              />
+              <input type="text" placeholder="Jane Smith" className={styles.adminInput}
+                value={clientForm.name} onChange={e => setClientForm(f => ({...f, name: e.target.value}))} />
             </div>
             <div className={styles.adminField}>
               <label>Email *</label>
-              <input
-                type="email" placeholder="jane@theirbusiness.com"
-                value={clientForm.email}
-                onChange={e => setClientForm(f => ({...f, email: e.target.value}))}
-                className={styles.adminInput}
-              />
+              <input type="email" placeholder="jane@company.com" className={styles.adminInput}
+                value={clientForm.email} onChange={e => setClientForm(f => ({...f, email: e.target.value}))} />
             </div>
           </div>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
-              <label>Company / Business</label>
-              <input
-                type="text" placeholder="Their Business Name (optional)"
-                value={clientForm.company}
-                onChange={e => setClientForm(f => ({...f, company: e.target.value}))}
-                className={styles.adminInput}
-              />
+              <label>Company (optional)</label>
+              <input type="text" placeholder="Their Business" className={styles.adminInput}
+                value={clientForm.company} onChange={e => setClientForm(f => ({...f, company: e.target.value}))} />
             </div>
             <div className={styles.adminField}>
-              <label>Temporary Password *</label>
-              <input
-                type="text" placeholder="e.g. Welcome2025!"
-                value={clientForm.password}
-                onChange={e => setClientForm(f => ({...f, password: e.target.value}))}
-                className={styles.adminInput}
-              />
+              <label>Temp Password *</label>
+              <input type="text" placeholder="e.g. Welcome2025!" className={styles.adminInput}
+                value={clientForm.password} onChange={e => setClientForm(f => ({...f, password: e.target.value}))} />
             </div>
           </div>
           <button type="submit" className="btn-primary" disabled={submitting}>
@@ -332,60 +466,66 @@ function AdminPanel() {
       {/* ── Add Project ── */}
       {section === 'add-project' && (
         <form className={styles.adminForm} onSubmit={handleAddProject}>
-          <p className={styles.adminFormNote}>Add a project to a client's dashboard so they can track progress.</p>
+          <p className={styles.adminFormNote}>Add a project to a client's dashboard.</p>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Client *</label>
-              <select
+              <select className={styles.adminInput}
                 value={projectForm.clientId}
-                onChange={e => setProjectForm(f => ({...f, clientId: e.target.value}))}
-                className={styles.adminInput}
-              >
+                onChange={e => setProjectForm(f => ({...f, clientId: e.target.value}))}>
                 <option value="">Select a client...</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
               </select>
             </div>
             <div className={styles.adminField}>
+              <label>Service</label>
+              <select className={styles.adminInput}
+                value={projectForm.serviceId}
+                onChange={e => setProjectForm(f => ({...f, serviceId: e.target.value}))}>
+                <option value="">Select a service...</option>
+                {ALL_SERVICES.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className={styles.adminRow}>
+            <div className={styles.adminField}>
               <label>Project Name *</label>
-              <input
-                type="text" placeholder="e.g. Main Website Build"
+              <input type="text" placeholder="e.g. Main Website Build" className={styles.adminInput}
                 value={projectForm.name}
-                onChange={e => setProjectForm(f => ({...f, name: e.target.value}))}
-                className={styles.adminInput}
-              />
+                onChange={e => setProjectForm(f => ({...f, name: e.target.value}))} />
+            </div>
+            <div className={styles.adminField}>
+              <label>Monthly Price ($/mo)</label>
+              <input type="number" placeholder="e.g. 50.00" min="0" step="0.01" className={styles.adminInput}
+                value={projectForm.monthlyPriceDollars}
+                onChange={e => setProjectForm(f => ({...f, monthlyPriceDollars: e.target.value}))} />
             </div>
           </div>
           <div className={styles.adminField} style={{ marginBottom: '1rem' }}>
             <label>Description (optional)</label>
-            <textarea
-              rows={2} placeholder="Brief description visible to the client..."
+            <textarea rows={2} placeholder="Brief description visible to the client..."
+              className={styles.adminInput} style={{ resize: 'vertical' }}
               value={projectForm.description}
-              onChange={e => setProjectForm(f => ({...f, description: e.target.value}))}
-              className={styles.adminInput}
-              style={{ resize: 'vertical' }}
-            />
+              onChange={e => setProjectForm(f => ({...f, description: e.target.value}))} />
           </div>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
+              <label>Stage</label>
+              <select className={styles.adminInput}
+                value={projectForm.stage}
+                onChange={e => setProjectForm(f => ({...f, stage: e.target.value}))}>
+                {STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+              </select>
+            </div>
+            <div className={styles.adminField}>
               <label>Status</label>
-              <select
+              <select className={styles.adminInput}
                 value={projectForm.status}
-                onChange={e => setProjectForm(f => ({...f, status: e.target.value}))}
-                className={styles.adminInput}
-              >
+                onChange={e => setProjectForm(f => ({...f, status: e.target.value}))}>
                 <option value="active">Active</option>
                 <option value="paused">Paused</option>
                 <option value="completed">Completed</option>
               </select>
-            </div>
-            <div className={styles.adminField}>
-              <label>Progress: {projectForm.progress}%</label>
-              <input
-                type="range" min="0" max="100" step="5"
-                value={projectForm.progress}
-                onChange={e => setProjectForm(f => ({...f, progress: parseInt(e.target.value)}))}
-                className={styles.adminRange}
-              />
             </div>
           </div>
           <button type="submit" className="btn-primary" disabled={submitting}>
@@ -394,53 +534,69 @@ function AdminPanel() {
         </form>
       )}
 
-      {/* ── Add Invoice ── */}
+      {/* ── Create Invoice ── */}
       {section === 'add-invoice' && (
         <form className={styles.adminForm} onSubmit={handleAddInvoice}>
           <p className={styles.adminFormNote}>
-            Create an invoice for a client. They can pay it directly in their portal using a card.
-            You'll get paid to your Stripe account.
+            Create an invoice for a client. They pay it directly in the portal via card.
           </p>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Client *</label>
-              <select
+              <select className={styles.adminInput}
                 value={invoiceForm.clientId}
-                onChange={e => setInvoiceForm(f => ({...f, clientId: e.target.value}))}
-                className={styles.adminInput}
-              >
+                onChange={e => setInvoiceForm(f => ({...f, clientId: e.target.value}))}>
                 <option value="">Select a client...</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
               </select>
             </div>
             <div className={styles.adminField}>
+              <label>Invoice Type</label>
+              <select className={styles.adminInput}
+                value={invoiceForm.invoiceType}
+                onChange={e => {
+                  const t = e.target.value
+                  setInvoiceForm(f => ({...f, invoiceType: t}))
+                  if (invoiceForm.serviceId) autoFillDesc(invoiceForm.serviceId, t)
+                }}>
+                <option value="one-time">One-time (Web Build)</option>
+                <option value="monthly">Monthly (Plan / Maintenance)</option>
+              </select>
+            </div>
+          </div>
+          <div className={styles.adminRow}>
+            <div className={styles.adminField}>
+              <label>Service</label>
+              <select className={styles.adminInput}
+                value={invoiceForm.serviceId}
+                onChange={e => {
+                  const sid = e.target.value
+                  setInvoiceForm(f => ({...f, serviceId: sid}))
+                  autoFillDesc(sid, invoiceForm.invoiceType)
+                }}>
+                <option value="">Select a service (optional)...</option>
+                {ALL_SERVICES.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+              </select>
+            </div>
+            <div className={styles.adminField}>
               <label>Amount (USD) *</label>
-              <input
-                type="number" placeholder="350.00" min="1" step="0.01"
+              <input type="number" placeholder="350.00" min="1" step="0.01" className={styles.adminInput}
                 value={invoiceForm.amountDollars}
-                onChange={e => setInvoiceForm(f => ({...f, amountDollars: e.target.value}))}
-                className={styles.adminInput}
-              />
+                onChange={e => setInvoiceForm(f => ({...f, amountDollars: e.target.value}))} />
             </div>
           </div>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Description *</label>
-              <input
-                type="text" placeholder="e.g. Website Design & Development — Essentials Package"
+              <input type="text" placeholder="e.g. Website Design — Project Build" className={styles.adminInput}
                 value={invoiceForm.description}
-                onChange={e => setInvoiceForm(f => ({...f, description: e.target.value}))}
-                className={styles.adminInput}
-              />
+                onChange={e => setInvoiceForm(f => ({...f, description: e.target.value}))} />
             </div>
             <div className={styles.adminField}>
               <label>Due Date (optional)</label>
-              <input
-                type="date"
+              <input type="date" className={styles.adminInput}
                 value={invoiceForm.dueDate}
-                onChange={e => setInvoiceForm(f => ({...f, dueDate: e.target.value}))}
-                className={styles.adminInput}
-              />
+                onChange={e => setInvoiceForm(f => ({...f, dueDate: e.target.value}))} />
             </div>
           </div>
           <button type="submit" className="btn-primary" disabled={submitting}>
@@ -518,11 +674,11 @@ function LoginForm({ onLogin }) {
   )
 }
 
-// ── Dashboard ───────────────────────────────────────────────────────────────
+// ── Dashboard ─────────────────────────────────────────────────────────────
 function Dashboard({ user, onLogout }) {
-  const [activeTab, setActiveTab] = useState('overview')
-  const [projects,  setProjects]  = useState([])
-  const [invoices,  setInvoices]  = useState([])
+  const [activeTab,   setActiveTab]   = useState('overview')
+  const [projects,    setProjects]    = useState([])
+  const [invoices,    setInvoices]    = useState([])
   const [loadingData, setLoadingData] = useState(false)
 
   const fetchData = useCallback(async () => {
@@ -546,17 +702,21 @@ function Dashboard({ user, onLogout }) {
   }
 
   const isAdmin = user.role === 'admin'
-
   const activeProjects  = projects.filter(p => p.status === 'active')
   const pendingInvoices = invoices.filter(i => i.status === 'pending')
   const totalOwed       = pendingInvoices.reduce((s, i) => s + i.amount_cents, 0)
 
+  const getServiceName = (serviceId) => {
+    const svc = ALL_SERVICES.find(s => s.id === serviceId)
+    return svc ? (svc.shortTitle || svc.title) : null
+  }
+
   const clientTabs = [
-    { id: 'overview',  label: 'Overview',  icon: <FiGrid />       },
-    { id: 'projects',  label: 'Projects',  icon: <FiFileText />   },
-    { id: 'billing',   label: 'Billing',   icon: <FiCreditCard /> },
-    { id: 'support',   label: 'Support',   icon: <FiTool />       },
-    { id: 'reports',   label: 'Reports',   icon: <FiBarChart2 />  },
+    { id: 'overview', label: 'Overview',  icon: <FiGrid />       },
+    { id: 'projects', label: 'Projects',  icon: <FiFileText />   },
+    { id: 'billing',  label: 'Billing',   icon: <FiCreditCard /> },
+    { id: 'support',  label: 'Support',   icon: <FiTool />       },
+    { id: 'reports',  label: 'Reports',   icon: <FiBarChart2 />  },
   ]
   const adminTabs = isAdmin ? [{ id: 'manage', label: 'Manage', icon: <FiUsers /> }] : []
   const tabs = [...clientTabs, ...adminTabs]
@@ -574,20 +734,17 @@ function Dashboard({ user, onLogout }) {
             </div>
           </div>
         </div>
-
         <nav className={styles.sideNav}>
           {tabs.map(({ id, label, icon }) => (
             <button key={id}
               className={`${styles.sideNavItem} ${activeTab === id ? styles.sideNavActive : ''} ${id === 'manage' ? styles.adminNavItem : ''}`}
-              onClick={() => setActiveTab(id)}
-            >
+              onClick={() => setActiveTab(id)}>
               <span className={styles.sideNavIcon}>{icon}</span>
               {label}
               {id === 'manage' && <span className={styles.adminBadge}>Admin</span>}
             </button>
           ))}
         </nav>
-
         <div className={styles.sideBottom}>
           <div className={styles.sideUser}>
             <div className={styles.avatar}>{(user.name || user.email)[0].toUpperCase()}</div>
@@ -612,15 +769,13 @@ function Dashboard({ user, onLogout }) {
                 {activeTab === 'overview' && `Welcome back, ${user.name?.split(' ')[0] || 'there'}.`}
                 {activeTab === 'projects' && 'Track your active and completed work.'}
                 {activeTab === 'billing'  && 'View invoices and pay outstanding balances.'}
-                {activeTab === 'support'  && 'Need help? Reach out directly.'}
+                {activeTab === 'support'  && "Need something? Send a message and we'll get back to you."}
                 {activeTab === 'reports'  && 'Monthly performance and maintenance reports.'}
               </p>
             </div>
-            {activeTab !== 'manage' && (
-              <button className={styles.refreshBtn} onClick={fetchData} disabled={loadingData} title="Refresh">
-                <FiRefreshCw size={16} className={loadingData ? styles.spinning : ''} />
-              </button>
-            )}
+            <button className={styles.refreshBtn} onClick={fetchData} disabled={loadingData} title="Refresh">
+              <FiRefreshCw size={16} className={loadingData ? styles.spinning : ''} />
+            </button>
           </div>
         )}
 
@@ -629,10 +784,10 @@ function Dashboard({ user, onLogout }) {
           <div className={styles.overview}>
             <div className={styles.statGrid}>
               {[
-                { label: 'Active Projects',  value: activeProjects.length.toString(),       icon: <FiFileText />,  color: '#5b8df5' },
-                { label: 'Open Tickets',     value: '0',                                    icon: <FiTool />,      color: '#4ade80' },
-                { label: 'Pending Invoices', value: pendingInvoices.length.toString(),      icon: <FiCreditCard />, color: '#f97316' },
-                { label: 'Amount Owed',      value: `$${(totalOwed / 100).toFixed(2)}`,    icon: <FiDollarSign />, color: '#facc15' },
+                { label: 'Active Projects',  value: activeProjects.length.toString(),    icon: <FiFileText />,   color: '#5b8df5' },
+                { label: 'Open Tickets',     value: '0',                                  icon: <FiTool />,       color: '#4ade80' },
+                { label: 'Pending Invoices', value: pendingInvoices.length.toString(),    icon: <FiCreditCard />, color: '#f97316' },
+                { label: 'Amount Owed',      value: `$${(totalOwed / 100).toFixed(2)}`,  icon: <FiDollarSign />, color: '#facc15' },
               ].map(({ label, value, icon, color }) => (
                 <div key={label} className={styles.statCard}>
                   <div className={styles.statIcon} style={{ background: color+'18', color }}>{icon}</div>
@@ -646,23 +801,22 @@ function Dashboard({ user, onLogout }) {
               <div className={styles.section}>
                 <h2 className={styles.sectionTitle}>Projects</h2>
                 <div className={styles.projectList}>
-                  {projects.slice(0, 3).map(({ id, name, status, progress }) => {
-                    const color = status === 'completed' ? '#4ade80' : status === 'active' ? '#5b8df5' : '#facc15'
+                  {projects.slice(0, 3).map(p => {
+                    const color   = p.status === 'completed' ? '#4ade80' : p.status === 'active' ? '#5b8df5' : '#facc15'
+                    const svcName = getServiceName(p.service_id)
                     return (
-                      <div key={id} className={styles.projectItem}>
+                      <div key={p.id} className={styles.projectItem}>
                         <div className={styles.projectMeta}>
-                          <span className={styles.projectName}>{name}</span>
-                          <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
-                            {status === 'completed' && <FiCheckCircle size={11} />}
-                            {status === 'active'    && <FiClock size={11} />}
-                            {status === 'paused'    && <FiAlertCircle size={11} />}
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </span>
+                          <span className={styles.projectName}>{p.name}</span>
+                          <div className={styles.projectTags}>
+                            {svcName && <span className={styles.svcBadge}>{svcName}</span>}
+                            <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
+                              {p.status === 'completed' ? <FiCheckCircle size={11} /> : p.status === 'active' ? <FiClock size={11} /> : <FiAlertCircle size={11} />}
+                              {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                            </span>
+                          </div>
                         </div>
-                        <div className={styles.progressBar}>
-                          <div className={styles.progressFill} style={{ width: `${progress}%`, background: color }} />
-                        </div>
-                        <span className={styles.progressPct}>{progress}%</span>
+                        <StageTracker stage={p.stage || 'discovery'} />
                       </div>
                     )
                   })}
@@ -702,24 +856,28 @@ function Dashboard({ user, onLogout }) {
               <div className={styles.emptyState}><FiFileText size={32} /><p>No projects yet. Check back after your kickoff call.</p></div>
             ) : (
               <div className={styles.projectList}>
-                {projects.map(({ id, name, description, status, progress }) => {
-                  const color = status === 'completed' ? '#4ade80' : status === 'active' ? '#5b8df5' : '#facc15'
+                {projects.map(p => {
+                  const color   = p.status === 'completed' ? '#4ade80' : p.status === 'active' ? '#5b8df5' : '#facc15'
+                  const svcName = getServiceName(p.service_id)
                   return (
-                    <div key={id} className={`${styles.projectItem} ${styles.projectItemFull}`}>
+                    <div key={p.id} className={`${styles.projectItem} ${styles.projectItemFull}`}>
                       <div className={styles.projectMeta}>
-                        <span className={styles.projectName}>{name}</span>
-                        <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
-                          {status === 'completed' && <FiCheckCircle size={11} />}
-                          {status === 'active'    && <FiClock size={11} />}
-                          {status === 'paused'    && <FiAlertCircle size={11} />}
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </span>
+                        <span className={styles.projectName}>{p.name}</span>
+                        <div className={styles.projectTags}>
+                          {svcName && <span className={styles.svcBadge}>{svcName}</span>}
+                          <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
+                            {p.status === 'completed' ? <FiCheckCircle size={11} /> : p.status === 'active' ? <FiClock size={11} /> : <FiAlertCircle size={11} />}
+                            {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                          </span>
+                        </div>
                       </div>
-                      {description && <p className={styles.projectDesc}>{description}</p>}
-                      <div className={styles.progressBar}>
-                        <div className={styles.progressFill} style={{ width: `${progress}%`, background: color }} />
-                      </div>
-                      <span className={styles.progressPct}>{progress}% complete</span>
+                      {p.description && <p className={styles.projectDesc}>{p.description}</p>}
+                      <StageTracker stage={p.stage || 'discovery'} />
+                      {p.monthly_price_cents > 0 && (
+                        <div className={styles.monthlyPriceNote}>
+                          <FiCreditCard size={12} /> Monthly plan: ${(p.monthly_price_cents / 100).toFixed(2)}/mo
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -743,29 +901,35 @@ function Dashboard({ user, onLogout }) {
 
         {/* ── Support ── */}
         {activeTab === 'support' && (
-          <div className={styles.placeholderTab}>
-            <FiTool size={32} />
-            <h2 className={styles.placeholderTitle}>Need something?</h2>
-            <p className={styles.placeholderBody}>
-              For support requests, bug reports, or changes, just reach out directly. I typically respond within one business day.
-            </p>
-            <a href="mailto:jedpcooper@gmail.com" className="btn-primary">Email Jed <FiArrowRight size={14} /></a>
+          <div className={styles.tabContent}>
+            <div className={styles.supportCard}>
+              <FiMessageSquare size={28} className={styles.supportIcon} />
+              <h2 className={styles.placeholderTitle}>Send a Message</h2>
+              <p className={styles.placeholderBody}>
+                For support requests, bug fixes, or content changes — fill this out
+                and Jed will get back to you within one business day.
+              </p>
+              <SupportForm />
+            </div>
           </div>
         )}
 
         {/* ── Reports ── */}
         {activeTab === 'reports' && (
-          <div className={styles.placeholderTab}>
-            <FiBarChart2 size={32} />
-            <h2 className={styles.placeholderTitle}>Reports coming soon.</h2>
-            <p className={styles.placeholderBody}>
-              Monthly performance and maintenance reports will appear here. Contact CWC for an update in the meantime.
-            </p>
-            <a href="mailto:jedpcooper@gmail.com" className="btn-primary">Request a Report <FiArrowRight size={14} /></a>
+          <div className={styles.tabContent}>
+            <div className={styles.supportCard}>
+              <FiBarChart2 size={28} className={styles.supportIcon} />
+              <h2 className={styles.placeholderTitle}>Request a Report</h2>
+              <p className={styles.placeholderBody}>
+                Monthly performance and maintenance reports will appear here automatically.
+                Until then, send a message to request one.
+              </p>
+              <SupportForm defaultMessage="Hi Jed, could you send over my latest monthly report?" />
+            </div>
           </div>
         )}
 
-        {/* ── Admin: Manage (only shown to admin) ── */}
+        {/* ── Manage (Admin only) ── */}
         {activeTab === 'manage' && isAdmin && (
           <div>
             <div className={styles.mainHeader}>
@@ -782,7 +946,7 @@ function Dashboard({ user, onLogout }) {
   )
 }
 
-// ── Page Entry ─────────────────────────────────────────────────────────────
+// ── Page Entry ────────────────────────────────────────────────────────────
 export default function PortalPage() {
   const [user,    setUser]    = useState(null)
   const [loading, setLoading] = useState(true)
