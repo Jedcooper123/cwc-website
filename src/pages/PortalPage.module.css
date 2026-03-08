@@ -662,6 +662,178 @@
   line-height: 1.72;
 }
 
+/* ── Success message ── */
+.successMsg {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #4ade80;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: var(--r-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* ── Admin panel ── */
+.adminPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.adminNav {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.adminNavBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--r-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--ease);
+}
+.adminNavBtn:hover { color: var(--text); border-color: rgba(91,141,245,0.3); }
+.adminNavActive {
+  background: var(--accent-bg) !important;
+  color: var(--accent-lt) !important;
+  border-color: rgba(91,141,245,0.35) !important;
+}
+
+/* Admin sidebar nav item */
+.adminNavItem { border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 1.15rem; }
+
+.adminBadge {
+  margin-left: auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(91,141,245,0.18);
+  color: var(--accent-lt);
+  border-radius: 100px;
+  padding: 0.18rem 0.5rem;
+}
+
+.adminForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 700px;
+}
+
+.adminFormNote {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  line-height: 1.65;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+.adminRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.adminField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.adminField label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.adminInput {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  outline: none;
+  font-family: var(--font);
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+.adminInput::placeholder { color: var(--text-3); }
+.adminInput:focus {
+  border-color: rgba(91,141,245,0.5);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.adminRange {
+  width: 100%;
+  cursor: pointer;
+  accent-color: var(--accent-lt);
+  margin-top: 0.25rem;
+}
+
+/* Client list */
+.clientList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.clientCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+.clientInfo { flex: 1; min-width: 0; }
+
+.clientName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.clientMeta {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  margin-top: 0.1rem;
+}
+
+.clientSince {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.loadingText {
+  font-size: 0.875rem;
+  color: var(--text-3);
+  text-align: center;
+  padding: 2rem;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .dashboard { grid-template-columns: 1fr; }
@@ -675,4 +847,5 @@
   .invoiceRight { width: 100%; justify-content: space-between; }
   .statGrid { grid-template-columns: 1fr 1fr; }
   .main { padding: 1rem; }
+  .adminRow { grid-template-columns: 1fr; }
 }
