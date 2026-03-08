@@ -73,18 +73,22 @@ function initSchema() {
 }
 
 function seedAdminIfNeeded() {
-  const admin = db.prepare('SELECT id FROM users WHERE role = ? LIMIT 1').get('admin')
-  if (admin) return
-
   const adminEmail    = process.env.ADMIN_EMAIL    || 'jedpcooper@gmail.com'
   const adminPassword = process.env.ADMIN_PASSWORD || 'ChangeMe123!'
   const hash          = bcrypt.hashSync(adminPassword, 12)
 
-  db.prepare(`
-    INSERT INTO users (email, name, company, password_hash, role)
-    VALUES (?, ?, ?, ?, 'admin')
-  `).run(adminEmail, 'Jed Cooper', 'Cooper Web Consulting', hash)
+  const existingAdmin = db.prepare('SELECT id FROM users WHERE role = ? LIMIT 1').get('admin')
 
-  console.log(`[CWC] Admin account created: ${adminEmail}`)
-  console.log('[CWC] Set ADMIN_PASSWORD env var before first deploy!')
+  if (existingAdmin) {
+    // Always sync email + password from env vars so changes take effect on every redeploy
+    db.prepare('UPDATE users SET email = ?, password_hash = ? WHERE id = ?')
+      .run(adminEmail, hash, existingAdmin.id)
+    console.log(`[CWC] Admin credentials synced: ${adminEmail}`)
+  } else {
+    db.prepare(`
+      INSERT INTO users (email, name, company, password_hash, role)
+      VALUES (?, 'Jed Cooper', 'Cooper Web Consulting', ?, 'admin')
+    `).run(adminEmail, hash)
+    console.log(`[CWC] Admin account created: ${adminEmail}`)
+  }
 }

@@ -5,7 +5,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import {
-  FiMonitor, FiServer, FiTool, FiLayers, FiSearch, FiArrowRight,
+  FiMonitor, FiTool, FiLayers, FiSearch, FiArrowRight,
 } from 'react-icons/fi'
 import { SERVICES } from '../../data/services'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
@@ -13,18 +13,16 @@ import styles from './Services.module.css'
 
 const ICON_MAP = {
   'web-design':    <FiMonitor />,
-  'hosting':       <FiServer />,
-  'maintenance':   <FiTool />,
   'fullstack-db':  <FiLayers />,
+  'maintenance':   <FiTool />,
   'seo':           <FiSearch />,
 }
 
 const TAG_MAP = {
   'web-design':    'Core Service',
-  'hosting':       'Infrastructure',
-  'maintenance':   'Ongoing',
   'fullstack-db':  'Full Stack',
-  'seo':           'Visibility',
+  'maintenance':   'Ongoing',
+  'seo':           'Add-on',
 }
 
 export default function Services() {
@@ -48,15 +46,17 @@ export default function Services() {
 
         {/* Cards grid */}
         <div className={styles.grid}>
-          {SERVICES.map(({ id, title, shortDesc }, i) => (
+          {SERVICES.map(({ id, title, shortDesc, isAddon }, i) => (
             <Link
               key={id}
               to={`/services/${id}`}
-              className={`${styles.card} fade-up delay-${(i % 3) + 1}`}
+              className={`${styles.card} ${isAddon ? styles.cardAddon : ''} fade-up delay-${(i % 3) + 1}`}
             >
               <div className={styles.cardTop}>
                 <div className={styles.iconWrap}>{ICON_MAP[id]}</div>
-                <span className={styles.tag}>{TAG_MAP[id]}</span>
+                <span className={`${styles.tag} ${isAddon ? styles.tagAddon : ''}`}>
+                  {TAG_MAP[id]}
+                </span>
               </div>
               <h3 className={styles.cardTitle}>{title}</h3>
               <p className={styles.cardDesc}>{shortDesc}</p>

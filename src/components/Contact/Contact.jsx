@@ -11,9 +11,8 @@ import styles from './Contact.module.css'
 
 const SERVICES = [
   'Website Design & Development',
-  'Hosting Solutions',
-  'Website Maintenance',
   'Full Stack Site & Database Support',
+  'Website Maintenance',
   'SEO & Online Presence',
   'Not Sure Yet',
 ]

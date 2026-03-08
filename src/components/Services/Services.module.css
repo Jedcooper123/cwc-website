@@ -128,6 +128,23 @@
   gap: 0.55rem;
 }
 
+/* ── Add-on card (SEO) ── */
+.cardAddon {
+  border-style: dashed;
+  opacity: 0.92;
+}
+
+.cardAddon:hover {
+  border-style: dashed;
+  opacity: 1;
+}
+
+.tagAddon {
+  background: rgba(34, 211, 238, 0.12);
+  color: #22d3ee;
+  border: 1px solid rgba(34, 211, 238, 0.25);
+}
+
 /* ── Bottom CTA ── */
 .bottomCta {
   display: flex;
