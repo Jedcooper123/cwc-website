@@ -62,7 +62,7 @@ export default function Footer() {
                 <FiMail />
               </a>
               <a
-                href="https://linkedin.com/in/yourprofile"
+                href="https://www.linkedin.com/in/jed-cooper-a5816a208/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.socialLink}

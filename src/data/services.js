@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // services.js — Single source of truth for all CWC service data.
 // Used by: ServicesPage overview grid, ServiceDetailPage, Services section,
-//          Navbar dropdown (future), and Pricing suggestions.
+//          Navbar dropdown, and Pricing suggestions.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const SERVICES = [
@@ -9,11 +9,11 @@ export const SERVICES = [
     id: 'web-design',
     title: 'Website Design & Development',
     shortTitle: 'Design & Dev',
-    tagline: 'Sites that look the part and perform under pressure.',
+    tagline: 'Built for your brand. Designed for your customers.',
     shortDesc:
-      'Custom-designed, precision-built websites that reflect your brand and convert visitors into customers.',
+      'Custom-designed, handcoded websites that look the part and actually convert. No templates, no drag-and-drop, no corners cut.',
     fullDesc:
-      'We design and build websites from the ground up — no drag-and-drop builders, no recycled templates. Every pixel, every layout decision, and every line of code is made with your specific business in mind. The result is a site that looks like it belongs to you and works like it was built for your customers.',
+      'We build websites from the ground up for businesses that want to stand out. Every layout decision, color choice, and line of code is made specifically for your business. The result is a site that actually looks like it belongs to you and works like it was designed around your customers.',
     whatWeDeliver: [
       'Full custom UI/UX design tailored to your brand',
       'Responsive layouts that work on every screen size',
@@ -32,9 +32,9 @@ export const SERVICES = [
     shortTitle: 'Hosting',
     tagline: 'Fast, secure, and always on.',
     shortDesc:
-      'Managed hosting environments built for reliability — we handle the infrastructure so you can run your business.',
+      'Managed hosting environments built for reliability. We handle the infrastructure so you can run your business.',
     fullDesc:
-      'Your website can only do its job if it\'s actually up. We configure and manage secure, performant hosting environments tailored to your traffic levels and stack. Whether it\'s a static site on a CDN or a full-stack app on Render or a VPS — you get clean infrastructure without the headaches.',
+      'Your website can only do its job if it is actually up. We configure and manage secure, performant hosting environments tailored to your traffic levels and tech stack. Whether it is a static site on a CDN or a full-stack app on Render or a VPS, you get clean infrastructure without the headaches.',
     whatWeDeliver: [
       'Domain setup and DNS management',
       'SSL/TLS certificate configuration',
@@ -51,11 +51,11 @@ export const SERVICES = [
     id: 'maintenance',
     title: 'Website Maintenance',
     shortTitle: 'Maintenance',
-    tagline: 'Set it, don\'t forget it — we\'ve got it.',
+    tagline: 'Set it and forget it. We keep things running.',
     shortDesc:
       'Ongoing care plans that keep your site secure, updated, and running without you having to think about it.',
     fullDesc:
-      'A website isn\'t a one-time project — it\'s an ongoing commitment. Plugins break, content goes stale, security vulnerabilities emerge. Our maintenance plans give you a dedicated partner who handles it all on a regular cadence, so you never wake up to a broken or hacked site.',
+      'A website is not a one-time project. Plugins break, content goes stale, and security vulnerabilities emerge. Our maintenance plans give you a dedicated partner who handles it all on a regular cadence, so you never wake up to a broken or hacked site.',
     whatWeDeliver: [
       'Regular CMS, plugin, and dependency updates',
       'Security monitoring and patch management',
@@ -65,60 +65,40 @@ export const SERVICES = [
       'Proactive bug identification and fixes',
     ],
     goodFor: ['Businesses without an in-house dev', 'Sites on WordPress or CMS platforms', 'E-commerce'],
-    startingAt: '$99/mo',
+    startingAt: '$50/mo',
     color: '#facc15',
   },
   {
-    id: 'performance',
-    title: 'Performance Optimization',
-    shortTitle: 'Performance',
-    tagline: 'Every second of load time costs you customers.',
+    id: 'fullstack-db',
+    title: 'Full Stack Site & Database Support',
+    shortTitle: 'Full Stack + DB',
+    tagline: 'Frontend to database, start to finish.',
     shortDesc:
-      'Comprehensive audits and hands-on optimizations that make your site measurably faster and rank higher.',
+      'Complete full-stack development with backend logic, database design, and API integration. Built to scale as your business grows.',
     fullDesc:
-      'Page speed is a business metric. A one-second delay in load time can cut conversions by 7%. We audit your site\'s performance from top to bottom — images, code, fonts, server response, render blocking — and fix everything that\'s slowing you down.',
+      'Not every business needs just a website. When you need user accounts, data storage, custom dashboards, or third-party integrations, we handle the whole stack. From React frontends to Node backends and PostgreSQL databases, we architect and build systems that are secure, fast, and built to grow with you.',
     whatWeDeliver: [
-      'Full Lighthouse and Core Web Vitals audit',
-      'Image optimization and modern format conversion (WebP/AVIF)',
-      'JavaScript and CSS bundling, minification, and lazy loading',
-      'Server-side caching and CDN configuration',
-      'Database query optimization (full-stack sites)',
-      'Before/after performance report with PageSpeed scores',
+      'Full-stack architecture design (frontend + backend + database)',
+      'PostgreSQL or SQLite database setup and schema design',
+      'REST API development and third-party integrations',
+      'User authentication and role-based access control',
+      'Admin dashboards and data management interfaces',
+      'Deployment and environment configuration on Render or VPS',
     ],
-    goodFor: ['Slow-loading existing sites', 'E-commerce stores', 'Content-heavy sites', 'SEO-sensitive businesses'],
-    startingAt: '$200',
-    color: '#f97316',
-  },
-  {
-    id: 'strategy',
-    title: 'Business Web Strategy',
-    shortTitle: 'Strategy',
-    tagline: 'Your website should have a job description.',
-    shortDesc:
-      'We work with you to define what your web presence needs to accomplish — then build a plan to get there.',
-    fullDesc:
-      'Most business websites exist without a clear strategy. They\'re online, but they\'re not working. We sit down with you to understand your goals, your market, your competitors, and your customers — then translate that into a concrete digital roadmap that guides everything from your content to your conversion funnel.',
-    whatWeDeliver: [
-      'Business goals and website alignment workshop',
-      'Competitor and market landscape analysis',
-      'User persona and customer journey mapping',
-      'Content strategy and site architecture plan',
-      'Conversion funnel review and recommendations',
-      'Digital roadmap with prioritized action items',
-    ],
-    goodFor: ['Businesses launching their first site', 'Companies with unclear digital ROI', 'Growth-stage businesses'],
-    startingAt: '$250',
-    color: '#e879f9',
+    goodFor: ['SaaS products', 'Client portals', 'Businesses with complex data needs', 'Apps with user accounts'],
+    startingAt: '$650',
+    monthlySupport: '$75/mo',
+    color: '#a78bfa',
   },
   {
     id: 'seo',
     title: 'SEO & Online Presence',
     shortTitle: 'SEO',
-    tagline: 'Be found by the people who are already looking for you.',
+    tagline: 'Be found by the people already looking for you.',
     shortDesc:
-      'Technical SEO and on-page optimization so your site ranks for the right searches and reaches the right audience.',
+      'Technical SEO and on-page optimization so your site ranks for the right searches and reaches the right people.',
     fullDesc:
-      'Great design means nothing if nobody finds your site. We implement technical SEO from the ground up — structured data, sitemap setup, canonical tags, meta optimization, and page-level keyword alignment — so search engines understand and surface your content to the people who need it.',
+      'Great design means nothing if nobody finds your site. We implement technical SEO from the ground up, including structured data, sitemap setup, canonical tags, meta optimization, and page-level keyword alignment, so search engines understand and surface your content to the people who need it.',
     whatWeDeliver: [
       'Technical SEO audit and implementation',
       'Structured data (JSON-LD) markup',

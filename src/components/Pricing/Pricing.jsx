@@ -52,7 +52,7 @@ const PLANS = [
       '60-day post-launch support window',
     ],
     notIncluded: [],
-    maintenanceNote: 'Monthly maintenance plans starting at $99/mo',
+    maintenanceNote: 'Monthly maintenance plans starting at $50/mo',
   },
   {
     name: 'Enterprise',

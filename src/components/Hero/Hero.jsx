@@ -38,15 +38,15 @@ export default function Hero() {
           </h1>
 
           <p className={styles.sub}>
-            We design, build, and maintain high-performance web experiences
-            for businesses that take their online presence seriously.
-            From first launch to long-term growth — CWC is your technical partner.
+            Custom websites built from scratch for businesses that want to
+            stand out. Design, development, and long-term support from a
+            partner who actually cares about your results.
           </p>
 
           <div className={styles.actions}>
-            <Link to="/#contact" className="btn-primary">
-              <FiCalendar size={15} /> Schedule a Consultation
-            </Link>
+            <a href="#schedule" className="btn-primary">
+              <FiCalendar size={15} /> Book a Free Consultation
+            </a>
             <Link to="/services" className="btn-secondary">
               View Services <FiArrowRight size={14} />
             </Link>
@@ -75,7 +75,6 @@ export default function Hero() {
             <p className={styles.clBlank}>&nbsp;</p>
             <p className={styles.cl}><span className={styles.cc}>{'// ✓ Ready for launch'}</span></p>
             <p className={styles.cl}><span className={styles.ck}>export default</span> <span className={styles.cv}>build</span><span className={styles.cp}>(</span><span className={styles.cv}>project</span><span className={styles.cp}>)</span></p>
-            <p className={styles.cl}><span className={styles.cursor} /></p>
           </div>
 
           <div className={styles.tagRow}>

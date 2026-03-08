@@ -33,7 +33,7 @@ const REASONS = [
     icon: <FiClock />,
     title: 'Ongoing Support & Partnership',
     desc:
-      'We don\'t disappear after launch. Whether it\'s a content update, a new feature request, or a technical issue at 11 PM — CWC is a long-term partner, not a one-time vendor.',
+      'We don\'t disappear after launch. Content update, new feature, or something breaking on a Saturday morning, I\'m reachable and I handle it. CWC is a long-term partner, not a one-time transaction.',
   },
   {
     icon: <FiBarChart2 />,
@@ -45,7 +45,7 @@ const REASONS = [
     icon: <FiUsers />,
     title: 'Real Relationships, Not Tickets',
     desc:
-      'You work directly with the person building your site. No hand-offs, no account managers in the middle — just clear communication, honest timelines, and consistent quality.',
+      'You work directly with the person building your site. No hand-offs, no account managers, no confusion about who to call. Just clear communication, honest timelines, and work that delivers.',
   },
 ]
 
@@ -91,8 +91,8 @@ export default function WhyCWC() {
               Let's build something great together.
             </p>
           </div>
-          <a href="#contact" className="btn-primary">
-            Schedule a Free Consultation
+          <a href="#schedule" className="btn-primary">
+            Book a Free Call
           </a>
         </div>
       </div>

@@ -9,6 +9,7 @@ import Process      from '../components/Process/Process'
 import WhyCWC       from '../components/WhyCWC/WhyCWC'
 import Portfolio    from '../components/Portfolio/Portfolio'
 import Pricing      from '../components/Pricing/Pricing'
+import Scheduling   from '../components/Scheduling/Scheduling'
 import ClientPortal from '../components/ClientPortal/ClientPortal'
 import Contact      from '../components/Contact/Contact'
 
@@ -22,6 +23,7 @@ export default function HomePage() {
       <WhyCWC />
       <Portfolio />
       <Pricing />
+      <Scheduling />
       <ClientPortal />
       <Contact />
     </>

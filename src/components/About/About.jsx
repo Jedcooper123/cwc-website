@@ -36,15 +36,15 @@ export default function About() {
               <span className={styles.accent}>Make it count.</span>
             </h2>
             <p className={`section-sub fade-up delay-2 ${styles.intro}`}>
-              Cooper Web Consulting is a boutique web agency built on one principle:
-              your website should work as hard as you do. We design, develop, and
-              maintain digital experiences that are fast, polished, and built
-              specifically around the way your business operates.
+              Cooper Web Consulting is a one-person shop built on a simple idea:
+              your website should actually work for your business. Everything we design,
+              build, and maintain is fast, polished, and built around how you operate,
+              not around a template someone else already used.
             </p>
             <p className={`${styles.body} fade-up delay-3`}>
-              Whether you're launching a brand-new site, modernizing an outdated one,
-              or looking for a reliable partner to keep everything running smoothly —
-              CWC brings the technical depth and strategic thinking to get you there.
+              Whether you're launching something new, modernizing an old site,
+              or just looking for someone to keep things running without the stress,
+              CWC brings the technical depth and clear communication to get you there.
             </p>
 
             {/* Pillar list */}

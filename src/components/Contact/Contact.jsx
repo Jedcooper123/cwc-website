@@ -1,6 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Contact — Frontend-only contact form with validation state + contact sidebar.
-// Hook up to a backend (e.g. Formspree, EmailJS, or custom API) later.
+// Contact — Contact form with validation + contact sidebar.
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react'
 import {
@@ -14,10 +13,9 @@ const SERVICES = [
   'Website Design & Development',
   'Hosting Solutions',
   'Website Maintenance',
-  'Performance Optimization',
-  'Full-Stack Web Application',
-  'Business Web Strategy',
-  'Other / Not Sure Yet',
+  'Full Stack Site & Database Support',
+  'SEO & Online Presence',
+  'Not Sure Yet',
 ]
 
 export default function Contact() {
@@ -45,7 +43,7 @@ export default function Contact() {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    // TODO: wire up to backend / form service (Formspree, EmailJS, etc.)
+    // TODO: wire up to /api/contact backend route
     console.log('Form submitted:', form)
     setSubmit(true)
   }
@@ -60,21 +58,21 @@ export default function Contact() {
             Let's build something together.
           </h2>
           <p className={`section-sub fade-up delay-2`}>
-            Whether you have a clear vision or just know you need help — reach out.
-            We'll respond within one business day.
+            Have a project in mind or just want to talk through your options?
+            Send a message and I'll get back to you within one business day.
           </p>
         </div>
 
         <div className={styles.layout}>
-          {/* ── Left: Form ── */}
+          {/* Left: Form */}
           <div className={`${styles.formWrap} fade-up delay-2`}>
             {submitted ? (
               <div className={styles.successState}>
                 <FiCheckCircle className={styles.successIcon} size={40} />
                 <h3 className={styles.successTitle}>Message received!</h3>
                 <p className={styles.successBody}>
-                  Thanks for reaching out, {form.name.split(' ')[0]}. We'll review your
-                  request and follow up within one business day.
+                  Thanks for reaching out, {form.name.split(' ')[0]}. I'll review your
+                  message and follow up within one business day.
                 </p>
                 <button className="btn-secondary" onClick={() => { setSubmit(false); setForm({ name:'', email:'', company:'', service:'', message:'' }) }}>
                   Send Another Message
@@ -82,7 +80,6 @@ export default function Contact() {
               </div>
             ) : (
               <form className={styles.form} onSubmit={handleSubmit} noValidate>
-                {/* Row 1: Name + Email */}
                 <div className={styles.row}>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor="name">Full Name *</label>
@@ -106,7 +103,6 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Row 2: Company + Service */}
                 <div className={styles.row}>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor="company">Company / Business</label>
@@ -124,7 +120,7 @@ export default function Contact() {
                       className={styles.input}
                       value={form.service} onChange={handleChange}
                     >
-                      <option value="">Select a service…</option>
+                      <option value="">Select a service...</option>
                       {SERVICES.map((s) => (
                         <option key={s} value={s}>{s}</option>
                       ))}
@@ -132,13 +128,12 @@ export default function Contact() {
                   </div>
                 </div>
 
-                {/* Message */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="message">Tell Us About Your Project *</label>
                   <textarea
                     id="message" name="message"
                     rows={5}
-                    placeholder="Describe your project, goals, timeline, or anything else we should know..."
+                    placeholder="Describe your project, goals, timeline, or anything else worth knowing..."
                     className={`${styles.input} ${styles.textarea} ${errors.message ? styles.inputError : ''}`}
                     value={form.message} onChange={handleChange}
                   />
@@ -152,7 +147,7 @@ export default function Contact() {
             )}
           </div>
 
-          {/* ── Right: Contact info ── */}
+          {/* Right: Contact info */}
           <div className={`${styles.sidebar} fade-up delay-3`}>
             <div className={styles.sideCard}>
               <h3 className={styles.sideTitle}>Contact Information</h3>
@@ -172,7 +167,7 @@ export default function Contact() {
                   </div>
                 </a>
                 <a
-                  href="https://linkedin.com/in/yourprofile"
+                  href="https://www.linkedin.com/in/jed-cooper-a5816a208/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.contactItem}
@@ -180,7 +175,7 @@ export default function Contact() {
                   <div className={styles.contactIcon}><FiLinkedin /></div>
                   <div>
                     <div className={styles.contactLabel}>LinkedIn</div>
-                    <div className={styles.contactValue}>linkedin.com/in/yourprofile</div>
+                    <div className={styles.contactValue}>linkedin.com/in/jed-cooper</div>
                   </div>
                 </a>
               </div>
@@ -190,18 +185,17 @@ export default function Contact() {
               <div className={styles.scheduleIcon}><FiCalendar /></div>
               <h3 className={styles.sideTitle}>Prefer to talk first?</h3>
               <p className={styles.scheduleBody}>
-                Book a free 30-minute discovery call. No sales pitch — just an
-                honest conversation about what you're building.
+                Book a free 30-minute discovery call. No sales pitch, just an
+                honest conversation about what you're trying to build.
               </p>
-              {/* Replace href with your Calendly / Cal.com link */}
-              <a href="#contact" className={`btn-secondary ${styles.scheduleBtn}`}>
-                Schedule a Call <FiArrowRight />
+              <a href="#schedule" className={`btn-secondary ${styles.scheduleBtn}`}>
+                Book a Call <FiArrowRight />
               </a>
             </div>
 
             <div className={styles.responseTime}>
               <div className={styles.rtDot} />
-              <span>We typically respond within <strong>1 business day.</strong></span>
+              <span>Typically respond within <strong>1 business day.</strong></span>
             </div>
           </div>
         </div>

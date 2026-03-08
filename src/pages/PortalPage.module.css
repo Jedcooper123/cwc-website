@@ -5,6 +5,18 @@
   background: var(--bg);
 }
 
+/* Loading screen */
+.loadingScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 70px);
+  gap: 1rem;
+  color: var(--text-3);
+  font-size: 0.875rem;
+}
+
 /* ── Login ── */
 .loginWrap {
   display: flex;
@@ -83,14 +95,6 @@
   justify-content: space-between;
 }
 
-.forgotLink {
-  font-size: 0.75rem;
-  color: var(--accent-lt);
-  text-decoration: none;
-  transition: color var(--ease);
-}
-.forgotLink:hover { color: var(--accent); }
-
 .inputWrap {
   position: relative;
   display: flex;
@@ -165,14 +169,6 @@
   transition: color var(--ease);
 }
 .loginFooterLink:hover { color: var(--accent); }
-
-.demoNote {
-  margin-top: 1.25rem;
-  font-size: 0.75rem;
-  color: var(--text-3);
-  text-align: center;
-}
-.demoNote strong { color: var(--text-2); }
 
 /* ── Dashboard ── */
 .dashboard {
@@ -270,10 +266,13 @@
   flex-shrink: 0;
 }
 
+.sideUserInfo { overflow: hidden; }
 .sideUserEmail {
   font-size: 0.78rem;
   color: var(--text-2);
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .sideUserRole { font-size: 0.68rem; color: var(--text-3); }
 
@@ -288,6 +287,8 @@
   transition: color var(--ease), background var(--ease);
   font-family: var(--font);
   cursor: pointer;
+  background: none;
+  border: none;
 }
 .logoutBtn:hover { color: var(--text-2); background: rgba(255,255,255,0.04); }
 
@@ -315,8 +316,30 @@
 
 .mainSub { font-size: 0.875rem; color: var(--text-2); margin: 0; }
 
+/* Refresh button */
+.refreshBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-3);
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease);
+  flex-shrink: 0;
+}
+.refreshBtn:hover { color: var(--text-2); border-color: rgba(91,141,245,0.3); }
+.refreshBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spinning { animation: spin 1s linear infinite; }
+
 /* Overview */
 .overview { display: flex; flex-direction: column; gap: 2.5rem; }
+
+.tabContent { display: flex; flex-direction: column; gap: 1rem; }
 
 .statGrid {
   display: grid;
@@ -348,7 +371,7 @@
 .statVal { font-size: 1.5rem; font-weight: 800; color: var(--text); }
 .statLabel { font-size: 0.78rem; color: var(--text-3); }
 
-.section {}
+.section { display: flex; flex-direction: column; gap: 0; }
 
 .sectionTitle {
   font-size: 1rem;
@@ -375,6 +398,10 @@
   gap: 0.75rem;
 }
 
+.projectItemFull {
+  grid-template-columns: 1fr;
+}
+
 .projectMeta {
   display: flex;
   align-items: center;
@@ -383,6 +410,13 @@
 }
 
 .projectName { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+.projectDesc {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.65;
+  margin: 0;
+}
 
 .projectStatus {
   display: inline-flex;
@@ -395,6 +429,7 @@
   border: 1px solid;
   border-radius: 100px;
   padding: 0.22rem 0.6rem;
+  white-space: nowrap;
 }
 
 .progressBar {
@@ -403,6 +438,7 @@
   border-radius: 100px;
   overflow: hidden;
   flex: 1;
+  grid-column: 1 / -1;
 }
 
 .progressFill {
@@ -416,44 +452,190 @@
   font-weight: 600;
   color: var(--text-3);
   white-space: nowrap;
+  grid-column: 1 / -1;
 }
 
-/* Activity */
-.activityList {
+/* Invoices */
+.invoiceList {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
-.activityItem {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  padding: 0.75rem 1rem;
+.invoiceCard {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.activityIcon {
-  width: 32px;
-  height: 32px;
+.invoicePaid { opacity: 0.7; }
+
+.invoiceLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.invoiceIcon {
+  width: 38px;
+  height: 38px;
   border-radius: var(--r-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  background: rgba(91,141,245,0.12);
   flex-shrink: 0;
 }
 
-.activityBody {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+.invoiceDesc {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.activityText { font-size: 0.875rem; color: var(--text-2); }
-.activityTime { font-size: 0.72rem; color: var(--text-3); }
+.invoiceMeta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: 0.2rem;
+}
+
+.invoiceRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.invoiceAmount {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.invoiceStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid;
+  border-radius: 100px;
+  padding: 0.22rem 0.6rem;
+}
+
+.payBtn {
+  font-size: 0.82rem !important;
+  padding: 0.55rem 1.1rem !important;
+}
+
+.invoiceError {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* View all link */
+.viewAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-lt);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  font-family: var(--font);
+  transition: gap var(--ease);
+}
+.viewAll:hover { gap: 0.6rem; }
+
+/* Stripe checkout overlay */
+.checkoutWrap {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.checkoutCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.checkoutTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.checkoutDesc {
+  font-size: 0.875rem;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.checkoutAmount {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+
+.checkoutActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.checkoutActions .btn-secondary,
+.checkoutActions .btn-primary {
+  flex: 1;
+  justify-content: center;
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-3);
+}
+
+.emptyState p {
+  font-size: 0.9rem;
+  color: var(--text-2);
+  max-width: 400px;
+  line-height: 1.72;
+}
 
 /* Placeholder tabs */
 .placeholderTab {
@@ -464,13 +646,13 @@
   text-align: center;
   gap: 1rem;
   padding: 4rem 2rem;
+  color: var(--text-3);
 }
-
-.placeholderIcon { font-size: 2.5rem; }
 
 .placeholderTitle {
   font-size: 1.35rem;
   font-weight: 700;
+  color: var(--text);
 }
 
 .placeholderBody {
@@ -483,12 +665,14 @@
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .dashboard { grid-template-columns: 1fr; }
-  .sidebar { display: none; } /* on mobile, use burger from Navbar */
+  .sidebar { display: none; }
   .main { padding: 1.5rem; }
   .statGrid { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+  .invoiceCard { flex-direction: column; align-items: flex-start; }
+  .invoiceRight { width: 100%; justify-content: space-between; }
   .statGrid { grid-template-columns: 1fr 1fr; }
   .main { padding: 1rem; }
 }
