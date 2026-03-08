@@ -6,6 +6,7 @@ import { Router } from 'express'
 import bcrypt     from 'bcryptjs'
 import { getDb }  from '../database/db.js'
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js'
+import { sendInvoiceEmail, sendReminderEmail } from '../utils/email.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
@@ -62,6 +63,36 @@ router.get('/clients', (req, res) => {
     ORDER BY created_at DESC
   `).all()
   return res.json({ clients })
+})
+
+// ── GET /api/admin/projects ── all projects with client info ──────────────
+router.get('/projects', (req, res) => {
+  const db = getDb()
+  const projects = db.prepare(`
+    SELECT p.*,
+           u.name    AS client_name,
+           u.email   AS client_email,
+           u.company AS client_company
+    FROM projects p
+    JOIN users u ON u.id = p.client_id
+    WHERE u.role = 'client'
+    ORDER BY p.updated_at DESC
+  `).all()
+  return res.json({ projects })
+})
+
+// ── GET /api/admin/invoices ── all invoices with client info ──────────────
+router.get('/invoices', (req, res) => {
+  const db = getDb()
+  const invoices = db.prepare(`
+    SELECT i.*,
+           u.name  AS client_name,
+           u.email AS client_email
+    FROM invoices i
+    JOIN users u ON u.id = i.client_id
+    ORDER BY i.created_at DESC
+  `).all()
+  return res.json({ invoices })
 })
 
 // ── POST /api/admin/projects ──────────────────────────────────────────────
@@ -168,6 +199,66 @@ router.patch('/invoices/:id/void', (req, res) => {
   if (!invoice) return res.status(404).json({ error: 'Pending invoice not found.' })
   db.prepare("UPDATE invoices SET status = 'void' WHERE id = ?").run(req.params.id)
   return res.json({ ok: true })
+})
+
+// ── POST /api/admin/invoices/:id/notify ── email the client ──────────────
+router.post('/invoices/:id/notify', async (req, res) => {
+  const db = getDb()
+  const invoice = db.prepare(`
+    SELECT i.*, u.name AS client_name, u.email AS client_email
+    FROM invoices i
+    JOIN users u ON u.id = i.client_id
+    WHERE i.id = ?
+  `).get(req.params.id)
+
+  if (!invoice) return res.status(404).json({ error: 'Invoice not found.' })
+
+  try {
+    const result = await sendInvoiceEmail({
+      clientName:    invoice.client_name,
+      clientEmail:   invoice.client_email,
+      description:   invoice.description,
+      amountDollars: (invoice.amount_cents / 100).toFixed(2),
+      dueDate:       invoice.due_date,
+      invoiceType:   invoice.invoice_type,
+    })
+    if (!result.ok) return res.status(400).json({ error: result.reason })
+    return res.json({ ok: true })
+  } catch (err) {
+    console.error('[Email]', err.message)
+    return res.status(500).json({ error: 'Failed to send email: ' + err.message })
+  }
+})
+
+// ── POST /api/admin/clients/:id/remind ── send reminder to a client ──────
+router.post('/clients/:id/remind', async (req, res) => {
+  const db     = getDb()
+  const client = db.prepare('SELECT id, name, email FROM users WHERE id = ? AND role = ?')
+    .get(req.params.id, 'client')
+  if (!client) return res.status(404).json({ error: 'Client not found.' })
+
+  const pending = db.prepare(
+    "SELECT id, amount_cents FROM invoices WHERE client_id = ? AND status = 'pending'"
+  ).all(client.id)
+
+  if (pending.length === 0)
+    return res.status(400).json({ error: 'No pending invoices for this client.' })
+
+  const totalOwed = pending.reduce((s, i) => s + i.amount_cents, 0)
+
+  try {
+    const result = await sendReminderEmail({
+      clientName:   client.name,
+      clientEmail:  client.email,
+      pendingCount: pending.length,
+      totalOwed,
+    })
+    if (!result.ok) return res.status(400).json({ error: result.reason })
+    return res.json({ ok: true })
+  } catch (err) {
+    console.error('[Email]', err.message)
+    return res.status(500).json({ error: 'Failed to send email: ' + err.message })
+  }
 })
 
 export default router

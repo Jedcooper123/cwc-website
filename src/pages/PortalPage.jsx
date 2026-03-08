@@ -3,7 +3,7 @@
 //
 // Auth:     httpOnly cookie set by /api/auth/login (survives page refresh).
 // Payments: Stripe PaymentElement — clients pay invoices directly in the portal.
-// Admin:    Jed sees an extra "Manage" tab to create clients, projects, invoices.
+// Admin:    Jed sees extra tabs: All Projects, All Invoices, Manage (create/edit).
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
@@ -16,7 +16,7 @@ import {
   FiGrid, FiFileText, FiTool, FiCreditCard, FiBarChart2,
   FiCheckCircle, FiClock, FiAlertCircle, FiLogOut,
   FiDollarSign, FiRefreshCw, FiUsers, FiUserPlus,
-  FiPlusCircle, FiEdit2, FiSend, FiMessageSquare,
+  FiPlusCircle, FiEdit2, FiSend, FiMessageSquare, FiLayers,
 } from 'react-icons/fi'
 import { SERVICES } from '../data/services'
 import styles from './PortalPage.module.css'
@@ -249,19 +249,29 @@ function InvoiceCard({ invoice, onPaySuccess }) {
 
 // ── Admin Panel ────────────────────────────────────────────────────────────
 function AdminPanel() {
-  const [clients,    setClients]    = useState([])
-  const [loading,    setLoading]    = useState(true)
-  const [section,    setSection]    = useState('clients')
-  const [success,    setSuccess]    = useState('')
-  const [error,      setError]      = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [editClient, setEditClient] = useState(null)
+  // ── Core state ──────────────────────────────────────────────────────────
+  const [clients,     setClients]     = useState([])
+  const [loading,     setLoading]     = useState(true)
+  const [section,     setSection]     = useState('all-projects')
+  const [success,     setSuccess]     = useState('')
+  const [error,       setError]       = useState('')
+  const [submitting,  setSubmitting]  = useState(false)
+  const [editClient,  setEditClient]  = useState(null)
 
+  // ── All-projects / all-invoices state ───────────────────────────────────
+  const [allProjects,  setAllProjects]  = useState([])
+  const [allInvoices,  setAllInvoices]  = useState([])
+  const [loadingAll,   setLoadingAll]   = useState(false)
+  const [stageEdit,    setStageEdit]    = useState({})   // { [projectId]: 'design' }
+  const [sendingId,    setSendingId]    = useState(null) // invoiceId being notified
+
+  // ── Form state ──────────────────────────────────────────────────────────
   const [clientForm,  setClientForm]  = useState({ name: '', email: '', company: '', password: '' })
   const [projectForm, setProjectForm] = useState({ clientId: '', name: '', description: '', serviceId: '', monthlyPriceDollars: '', stage: 'discovery', status: 'active' })
-  const [invoiceForm, setInvoiceForm] = useState({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '' })
+  const [invoiceForm, setInvoiceForm] = useState({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '', notifyClient: true })
   const [editForm,    setEditForm]    = useState({ name: '', email: '', company: '' })
 
+  // ── Loaders ─────────────────────────────────────────────────────────────
   const loadClients = useCallback(async () => {
     setLoading(true)
     try {
@@ -271,13 +281,37 @@ function AdminPanel() {
     finally { setLoading(false) }
   }, [])
 
+  const loadAllProjects = useCallback(async () => {
+    setLoadingAll(true)
+    try {
+      const data = await apiFetch('/api/admin/projects')
+      setAllProjects(data.projects)
+    } catch (err) { showMsg(err.message, true) }
+    finally { setLoadingAll(false) }
+  }, []) // eslint-disable-line
+
+  const loadAllInvoices = useCallback(async () => {
+    setLoadingAll(true)
+    try {
+      const data = await apiFetch('/api/admin/invoices')
+      setAllInvoices(data.invoices)
+    } catch (err) { showMsg(err.message, true) }
+    finally { setLoadingAll(false) }
+  }, []) // eslint-disable-line
+
   useEffect(() => { loadClients() }, [loadClients])
+
+  useEffect(() => {
+    if (section === 'all-projects') loadAllProjects()
+    if (section === 'all-invoices') loadAllInvoices()
+  }, [section]) // eslint-disable-line
 
   const showMsg = (msg, isErr = false) => {
     if (isErr) setError(msg); else setSuccess(msg)
-    setTimeout(() => { setSuccess(''); setError('') }, 5000)
+    setTimeout(() => { setSuccess(''); setError('') }, 6000)
   }
 
+  // ── Handlers ────────────────────────────────────────────────────────────
   const handleAddClient = async (e) => {
     e.preventDefault()
     if (!clientForm.name || !clientForm.email || !clientForm.password)
@@ -325,11 +359,59 @@ function AdminPanel() {
       return showMsg('Client, description, and amount are required.', true)
     setSubmitting(true)
     try {
-      await apiFetch('/api/admin/invoices', { method: 'POST', body: JSON.stringify(invoiceForm) })
-      showMsg('Invoice created. The client will see it in their portal.')
-      setInvoiceForm({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '' })
+      const { invoiceId } = await apiFetch('/api/admin/invoices', { method: 'POST', body: JSON.stringify(invoiceForm) })
+      if (invoiceForm.notifyClient) {
+        try {
+          await apiFetch(`/api/admin/invoices/${invoiceId}/notify`, { method: 'POST' })
+          showMsg('Invoice created & client notified by email! ✓')
+        } catch {
+          showMsg('Invoice created. (Email notification failed — check EMAIL_FROM / EMAIL_PASS env vars.)')
+        }
+      } else {
+        showMsg('Invoice created. The client will see it when they log in.')
+      }
+      setInvoiceForm({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '', notifyClient: true })
     } catch (err) { showMsg(err.message, true) }
     finally { setSubmitting(false) }
+  }
+
+  const handleUpdateStage = async (projectId, stage) => {
+    try {
+      await apiFetch(`/api/admin/projects/${projectId}`, { method: 'PATCH', body: JSON.stringify({ stage }) })
+      showMsg('Stage updated.')
+      setStageEdit(s => { const n = { ...s }; delete n[projectId]; return n })
+      loadAllProjects()
+    } catch (err) { showMsg(err.message, true) }
+  }
+
+  const handleVoidInvoice = async (invoiceId) => {
+    if (!window.confirm('Void this invoice? This cannot be undone.')) return
+    try {
+      await apiFetch(`/api/admin/invoices/${invoiceId}/void`, { method: 'PATCH' })
+      showMsg('Invoice voided.')
+      loadAllInvoices()
+    } catch (err) { showMsg(err.message, true) }
+  }
+
+  const handleNotifyClient = async (invoiceId) => {
+    setSendingId(invoiceId)
+    try {
+      await apiFetch(`/api/admin/invoices/${invoiceId}/notify`, { method: 'POST' })
+      showMsg('Email sent to client!')
+    } catch (err) { showMsg(err.message, true) }
+    finally { setSendingId(null) }
+  }
+
+  const handleRemindClient = async (clientId) => {
+    try {
+      await apiFetch(`/api/admin/clients/${clientId}/remind`, { method: 'POST' })
+      showMsg('Reminder email sent!')
+    } catch (err) { showMsg(err.message, true) }
+  }
+
+  const handleQuickInvoice = (clientId) => {
+    setInvoiceForm(f => ({ ...f, clientId: String(clientId) }))
+    setSection('add-invoice')
   }
 
   const autoFillDesc = (serviceId, invoiceType) => {
@@ -339,11 +421,14 @@ function AdminPanel() {
     setInvoiceForm(f => ({ ...f, description: desc }))
   }
 
+  // ── Nav tabs ────────────────────────────────────────────────────────────
   const tabs = [
-    { id: 'clients',     label: 'All Clients',    icon: <FiUsers />      },
-    { id: 'add-client',  label: 'Add Client',     icon: <FiUserPlus />   },
-    { id: 'add-project', label: 'Add Project',    icon: <FiFileText />   },
-    { id: 'add-invoice', label: 'Create Invoice', icon: <FiDollarSign /> },
+    { id: 'all-projects', label: 'All Projects',   icon: <FiLayers />     },
+    { id: 'all-invoices', label: 'All Invoices',   icon: <FiDollarSign /> },
+    { id: 'clients',      label: 'All Clients',    icon: <FiUsers />      },
+    { id: 'add-client',   label: 'Add Client',     icon: <FiUserPlus />   },
+    { id: 'add-project',  label: 'Add Project',    icon: <FiFileText />   },
+    { id: 'add-invoice',  label: 'Create Invoice', icon: <FiPlusCircle /> },
   ]
 
   // ── Edit client overlay ──────────────────────────────────────────────────
@@ -398,6 +483,179 @@ function AdminPanel() {
       {success && <div className={styles.successMsg}><FiCheckCircle size={14} /> {success}</div>}
       {error   && <div className={styles.errorMsg}><FiAlertCircle size={14} /> {error}</div>}
 
+      {/* ── All Projects ─────────────────────────────────────────────── */}
+      {section === 'all-projects' && (
+        <div className={styles.allListSection}>
+          <div className={styles.listHeaderRow}>
+            <span className={styles.listCount}>
+              {allProjects.length} project{allProjects.length !== 1 ? 's' : ''}
+            </span>
+            <button className={styles.refreshSmallBtn} onClick={loadAllProjects} title="Refresh">
+              <FiRefreshCw size={13} className={loadingAll ? styles.spinning : ''} />
+            </button>
+          </div>
+
+          {loadingAll ? (
+            <p className={styles.loadingText}>Loading projects...</p>
+          ) : allProjects.length === 0 ? (
+            <div className={styles.emptyState}>
+              <FiLayers size={28} />
+              <p>No projects yet. Create a client and add a project to get started.</p>
+            </div>
+          ) : allProjects.map(p => {
+            const svc      = ALL_SERVICES.find(s => s.id === p.service_id)
+            const svcName  = svc ? (svc.shortTitle || svc.title) : null
+            const stageVal = stageEdit[p.id] !== undefined ? stageEdit[p.id] : p.stage
+            const isDirty  = stageEdit[p.id] !== undefined && stageEdit[p.id] !== p.stage
+            const statusColor = p.status === 'active' ? '#5b8df5' : p.status === 'completed' ? '#4ade80' : '#facc15'
+
+            return (
+              <div key={p.id} className={styles.adminProjectCard}>
+                {/* Client row */}
+                <div className={styles.adminProjectTop}>
+                  <div className={styles.adminProjectClient}>
+                    <div className={styles.avatar} style={{ width: 30, height: 30, fontSize: '0.75rem', flexShrink: 0 }}>
+                      {p.client_name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div className={styles.adminClientName}>{p.client_name}</div>
+                      <div className={styles.adminClientEmail}>{p.client_email}</div>
+                    </div>
+                  </div>
+                  <div className={styles.adminProjectBadges}>
+                    {svcName && <span className={styles.svcBadge}>{svcName}</span>}
+                    <span className={styles.projectStatus}
+                      style={{ color: statusColor, background: statusColor+'18', borderColor: statusColor+'33' }}>
+                      {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Project name */}
+                <div className={styles.adminProjectName}>{p.name}</div>
+                {p.description && <p className={styles.adminProjectDesc}>{p.description}</p>}
+
+                {/* Stage tracker */}
+                <StageTracker stage={p.stage || 'discovery'} />
+
+                {/* Monthly price */}
+                {p.monthly_price_cents > 0 && (
+                  <div className={styles.monthlyPriceNote}>
+                    <FiCreditCard size={12} /> ${(p.monthly_price_cents / 100).toFixed(2)}/mo
+                  </div>
+                )}
+
+                {/* Actions row */}
+                <div className={styles.adminProjectActions}>
+                  <div className={styles.stageSelectWrap}>
+                    <label className={styles.stageSelectLabel}>Stage:</label>
+                    <select className={styles.adminInputSm}
+                      value={stageVal}
+                      onChange={e => setStageEdit(s => ({ ...s, [p.id]: e.target.value }))}>
+                      {STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                    </select>
+                    {isDirty && (
+                      <button className={styles.stageSaveBtn}
+                        onClick={() => handleUpdateStage(p.id, stageEdit[p.id])}>
+                        Save
+                      </button>
+                    )}
+                  </div>
+                  <button className={styles.actionBtn} onClick={() => handleQuickInvoice(p.client_id)}
+                    title="Create an invoice for this client">
+                    <FiDollarSign size={13} /> Invoice
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── All Invoices ──────────────────────────────────────────────── */}
+      {section === 'all-invoices' && (
+        <div className={styles.allListSection}>
+          <div className={styles.listHeaderRow}>
+            <span className={styles.listCount}>
+              {allInvoices.length} invoice{allInvoices.length !== 1 ? 's' : ''}
+              {allInvoices.filter(i => i.status === 'pending').length > 0 && (
+                <span className={styles.pendingPill}>
+                  {allInvoices.filter(i => i.status === 'pending').length} pending
+                </span>
+              )}
+            </span>
+            <button className={styles.refreshSmallBtn} onClick={loadAllInvoices} title="Refresh">
+              <FiRefreshCw size={13} className={loadingAll ? styles.spinning : ''} />
+            </button>
+          </div>
+
+          {loadingAll ? (
+            <p className={styles.loadingText}>Loading invoices...</p>
+          ) : allInvoices.length === 0 ? (
+            <div className={styles.emptyState}>
+              <FiDollarSign size={28} />
+              <p>No invoices yet. Create one under "Create Invoice".</p>
+            </div>
+          ) : allInvoices.map(inv => {
+            const isPaid      = inv.status === 'paid'
+            const isVoid      = inv.status === 'void'
+            const statusColor = isPaid ? '#4ade80' : isVoid ? '#6b7280' : '#f97316'
+            const isMonthly   = inv.invoice_type === 'monthly'
+            return (
+              <div key={inv.id} className={`${styles.adminInvoiceRow} ${isPaid ? styles.adminInvoicePaid : ''}`}>
+                <div className={styles.adminInvoiceLeft}>
+                  <div className={styles.adminInvoiceClient}>
+                    <div className={styles.avatar} style={{ width: 26, height: 26, fontSize: '0.68rem', flexShrink: 0 }}>
+                      {inv.client_name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <span className={styles.adminClientName}>{inv.client_name}</span>
+                      <span className={styles.adminClientEmail}> · {inv.client_email}</span>
+                    </div>
+                  </div>
+                  <div className={styles.adminInvoiceDesc}>{inv.description}</div>
+                  <div className={styles.invoiceMeta}>
+                    <span className={styles.invoiceTypeBadge}
+                      style={{
+                        background: isMonthly ? 'rgba(167,139,250,0.12)' : 'rgba(91,141,245,0.12)',
+                        color:      isMonthly ? '#a78bfa' : '#5b8df5',
+                      }}>
+                      {isMonthly ? 'Monthly' : 'One-time'}
+                    </span>
+                    {inv.due_date && <span style={{ fontSize: '0.73rem', color: 'var(--text-3)' }}>Due {new Date(inv.due_date).toLocaleDateString()}</span>}
+                    {inv.paid_at  && <span style={{ fontSize: '0.73rem', color: '#4ade80' }}>Paid {new Date(inv.paid_at).toLocaleDateString()}</span>}
+                    <span style={{ fontSize: '0.73rem', color: 'var(--text-3)' }}>{new Date(inv.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                <div className={styles.adminInvoiceRight}>
+                  <div className={styles.adminInvoiceAmount}>${(inv.amount_cents / 100).toFixed(2)}</div>
+                  <span className={styles.invoiceStatus}
+                    style={{ color: statusColor, background: statusColor+'18', borderColor: statusColor+'33' }}>
+                    {isPaid ? <FiCheckCircle size={11} /> : isVoid ? <FiAlertCircle size={11} /> : <FiClock size={11} />}
+                    {isPaid ? 'Paid' : isVoid ? 'Void' : 'Pending'}
+                  </span>
+                  {!isPaid && !isVoid && (
+                    <div className={styles.adminInvoiceActions}>
+                      <button className={styles.actionBtn}
+                        onClick={() => handleNotifyClient(inv.id)}
+                        disabled={sendingId === inv.id}
+                        title="Email payment link to client">
+                        <FiSend size={12} /> {sendingId === inv.id ? '...' : 'Email'}
+                      </button>
+                      <button className={styles.actionBtnDanger}
+                        onClick={() => handleVoidInvoice(inv.id)}
+                        title="Void this invoice">
+                        Void
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       {/* ── All Clients ── */}
       {section === 'clients' && (
         <div className={styles.clientList}>
@@ -414,13 +672,20 @@ function AdminPanel() {
                   <div className={styles.clientMeta}>{c.email}{c.company ? ` · ${c.company}` : ''}</div>
                 </div>
                 <span className={styles.clientSince}>Since {new Date(c.created_at).toLocaleDateString()}</span>
-                <button className={styles.editBtn}
-                  onClick={() => {
-                    setEditClient(c)
-                    setEditForm({ name: c.name, email: c.email, company: c.company || '' })
-                  }}>
-                  <FiEdit2 size={12} /> Edit
-                </button>
+                <div className={styles.clientActions}>
+                  <button className={styles.editBtn}
+                    onClick={() => {
+                      setEditClient(c)
+                      setEditForm({ name: c.name, email: c.email, company: c.company || '' })
+                    }}>
+                    <FiEdit2 size={12} /> Edit
+                  </button>
+                  <button className={styles.remindBtn}
+                    onClick={() => handleRemindClient(c.id)}
+                    title="Send payment reminder email">
+                    <FiSend size={12} /> Remind
+                  </button>
+                </div>
               </div>
             ))}
         </div>
@@ -599,6 +864,12 @@ function AdminPanel() {
                 onChange={e => setInvoiceForm(f => ({...f, dueDate: e.target.value}))} />
             </div>
           </div>
+          <label className={styles.checkboxLabel}>
+            <input type="checkbox"
+              checked={invoiceForm.notifyClient}
+              onChange={e => setInvoiceForm(f => ({...f, notifyClient: e.target.checked}))} />
+            <span>Email invoice to client immediately after creating</span>
+          </label>
           <button type="submit" className="btn-primary" disabled={submitting}>
             {submitting ? 'Creating...' : 'Create Invoice'} <FiDollarSign size={14} />
           </button>
@@ -935,7 +1206,7 @@ function Dashboard({ user, onLogout }) {
             <div className={styles.mainHeader}>
               <div>
                 <h1 className={styles.mainTitle}>Manage</h1>
-                <p className={styles.mainSub}>Create client accounts, add projects, and send invoices.</p>
+                <p className={styles.mainSub}>View all client projects, create invoices, and manage accounts.</p>
               </div>
             </div>
             <AdminPanel />
