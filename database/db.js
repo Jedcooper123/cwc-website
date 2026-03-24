@@ -67,6 +67,20 @@ function initSchema() {
       paid_at               TEXT,
       created_at            TEXT    NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS subscriptions (
+      id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_id              INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      stripe_subscription_id TEXT    UNIQUE,
+      stripe_customer_id     TEXT,
+      plan_name              TEXT    NOT NULL DEFAULT 'Monthly Maintenance',
+      plan_price_cents       INTEGER NOT NULL DEFAULT 0,
+      status                 TEXT    NOT NULL DEFAULT 'active'
+                             CHECK(status IN ('active','past_due','cancelled','trialing','incomplete','unpaid')),
+      current_period_end     TEXT,
+      created_at             TEXT    NOT NULL DEFAULT (datetime('now')),
+      updated_at             TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
   `)
 
   migrateSchema()
@@ -85,6 +99,8 @@ function migrateSchema() {
   // Invoices: which service and whether it's a one-time or monthly charge
   addCol('invoices', 'service_id',    'TEXT')
   addCol('invoices', 'invoice_type',  "TEXT NOT NULL DEFAULT 'one-time'")
+  // Users: Stripe customer ID for billing portal access
+  addCol('users', 'stripe_customer_id', 'TEXT')
 }
 
 function seedAdminIfNeeded() {

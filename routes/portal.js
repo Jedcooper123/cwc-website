@@ -43,4 +43,24 @@ router.get('/invoices', (req, res) => {
   return res.json({ invoices })
 })
 
+// ── GET /api/portal/billing ───────────────────────────────────────────────
+// Returns the client's subscription info (plan, status, next billing date).
+router.get('/billing', (req, res) => {
+  const db           = getDb()
+  const subscription = db.prepare(`
+    SELECT id, plan_name, plan_price_cents, status,
+           stripe_subscription_id, current_period_end, created_at, updated_at
+    FROM subscriptions
+    WHERE client_id = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+  `).get(req.user.id)
+
+  // Also check if user has a Stripe customer ID for the billing portal button
+  const user = db.prepare('SELECT stripe_customer_id FROM users WHERE id = ?').get(req.user.id)
+  const hasStripeCustomer = !!user?.stripe_customer_id
+
+  return res.json({ subscription: subscription || null, hasStripeCustomer })
+})
+
 export default router

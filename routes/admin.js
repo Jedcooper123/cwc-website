@@ -6,7 +6,7 @@ import { Router } from 'express'
 import bcrypt     from 'bcryptjs'
 import { getDb }  from '../database/db.js'
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js'
-import { sendInvoiceEmail, sendReminderEmail } from '../utils/email.js'
+import { sendInvoiceEmail, sendReminderEmail, sendWelcomeEmail } from '../utils/email.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
@@ -228,6 +228,45 @@ router.post('/invoices/:id/notify', async (req, res) => {
     console.error('[Email]', err.message)
     return res.status(500).json({ error: 'Failed to send email: ' + err.message })
   }
+})
+
+// ── POST /api/admin/clients/:id/welcome ── email login info to client ─────
+// Body: { tempPassword } — the plain-text password you set for them
+router.post('/clients/:id/welcome', async (req, res) => {
+  const { tempPassword } = req.body
+  if (!tempPassword)
+    return res.status(400).json({ error: 'tempPassword is required.' })
+
+  const db     = getDb()
+  const client = db.prepare('SELECT id, name, email FROM users WHERE id = ? AND role = ?')
+    .get(req.params.id, 'client')
+  if (!client) return res.status(404).json({ error: 'Client not found.' })
+
+  try {
+    const result = await sendWelcomeEmail({
+      clientName:   client.name,
+      clientEmail:  client.email,
+      tempPassword,
+    })
+    if (!result.ok) return res.status(400).json({ error: result.reason })
+    return res.json({ ok: true })
+  } catch (err) {
+    console.error('[Email]', err.message)
+    return res.status(500).json({ error: 'Failed to send email: ' + err.message })
+  }
+})
+
+// ── GET /api/admin/clients/:id/subscription ───────────────────────────────
+router.get('/clients/:id/subscription', (req, res) => {
+  const db  = getDb()
+  const sub = db.prepare(`
+    SELECT id, plan_name, plan_price_cents, status,
+           stripe_subscription_id, stripe_customer_id,
+           current_period_end, created_at, updated_at
+    FROM subscriptions WHERE client_id = ? ORDER BY created_at DESC LIMIT 1
+  `).get(req.params.id)
+  const user = db.prepare('SELECT stripe_customer_id FROM users WHERE id = ?').get(req.params.id)
+  return res.json({ subscription: sub || null, stripeCustomerId: user?.stripe_customer_id || null })
 })
 
 // ── POST /api/admin/clients/:id/remind ── send reminder to a client ──────

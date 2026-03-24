@@ -102,6 +102,57 @@ export async function sendInvoiceEmail({
   return { ok: true }
 }
 
+// ── Send welcome / login-info email ───────────────────────────────────────
+export async function sendWelcomeEmail({
+  clientName, clientEmail, tempPassword,
+}) {
+  const transporter = getTransporter()
+  if (!transporter) {
+    console.warn('[CWC Email] EMAIL_FROM/EMAIL_PASS not set — welcome email skipped.')
+    return { ok: false, reason: 'Email not configured. Add EMAIL_FROM and EMAIL_PASS in Render env vars.' }
+  }
+
+  const portalUrl = PORTAL_URL()
+
+  const body = `
+    <p style="color:#e2e8f0;font-size:1rem;margin:0 0 8px;">Hi ${clientName},</p>
+    <p style="color:#94a3b8;font-size:0.875rem;margin:0 0 24px;line-height:1.6;">
+      Welcome to the Cooper Web Consulting client portal! Your account is ready.
+      Here are your login details — keep these somewhere safe.
+    </p>
+    <!-- Credentials block -->
+    <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:20px;margin-bottom:24px;">
+      <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td style="color:#64748b;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;padding-bottom:10px;">Login Email</td>
+          <td style="color:#e2e8f0;font-weight:600;font-size:0.9rem;padding-bottom:10px;text-align:right;">${clientEmail}</td>
+        </tr>
+        <tr>
+          <td style="color:#64748b;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;">Password</td>
+          <td style="color:#e2e8f0;font-weight:600;font-size:0.9rem;text-align:right;font-family:monospace;">${tempPassword}</td>
+        </tr>
+      </table>
+    </div>
+    <!-- CTA -->
+    <a href="${portalUrl}" style="display:inline-block;background:linear-gradient(135deg,#5b8df5,#7c3aed);color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:700;font-size:0.875rem;">
+      Sign In to Your Portal →
+    </a>
+    <p style="color:#64748b;font-size:0.78rem;margin-top:20px;line-height:1.6;">
+      Visit <a href="${portalUrl}" style="color:#5b8df5;">${portalUrl}</a> any time to view your projects,
+      track progress, and manage billing. Reply to this email if you have any questions.
+    </p>`
+
+  await transporter.sendMail({
+    from:    `"Cooper Web Consulting" <${process.env.EMAIL_FROM}>`,
+    to:      clientEmail,
+    subject: 'Your Cooper Web Consulting Portal Access',
+    html:    emailWrap(body),
+  })
+
+  console.log(`[CWC Email] Welcome email sent to ${clientEmail}`)
+  return { ok: true }
+}
+
 // ── Send payment reminder ──────────────────────────────────────────────────
 export async function sendReminderEmail({
   clientName, clientEmail, pendingCount, totalOwed,

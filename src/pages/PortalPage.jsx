@@ -2,8 +2,10 @@
 // PortalPage — Real client portal backed by Express + SQLite + JWT + Stripe.
 //
 // Auth:     httpOnly cookie set by /api/auth/login (survives page refresh).
-// Payments: Stripe PaymentElement — clients pay invoices directly in the portal.
-// Admin:    Jed sees extra tabs: All Projects, All Invoices, Manage (create/edit).
+// Payments: Stripe PaymentElement for one-time invoices.
+//           Stripe Customer Portal for subscription management.
+// Admin:    Jed sees a "Manage" tab: clients, projects, invoices, subscriptions.
+// Mobile:   Collapsible drawer sidebar + bottom tab bar on small screens.
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
@@ -17,6 +19,7 @@ import {
   FiCheckCircle, FiClock, FiAlertCircle, FiLogOut,
   FiDollarSign, FiRefreshCw, FiUsers, FiUserPlus,
   FiPlusCircle, FiEdit2, FiSend, FiMessageSquare, FiLayers,
+  FiExternalLink, FiCalendar, FiMenu, FiX, FiShield,
 } from 'react-icons/fi'
 import { SERVICES } from '../data/services'
 import styles from './PortalPage.module.css'
@@ -26,7 +29,6 @@ const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
   : null
 
-// All services including admin-only ones (friends), for use in admin forms
 const ALL_SERVICES = SERVICES
 
 // Project stages
@@ -76,9 +78,13 @@ function StageTracker({ stage }) {
   )
 }
 
-// ── Support Form (replaces all mailto: links) ──────────────────────────────
-function SupportForm({ defaultMessage = '' }) {
-  const [form,    setForm]    = useState({ name: '', email: '', message: defaultMessage })
+// ── Support Form ───────────────────────────────────────────────────────────
+function SupportForm({ defaultMessage = '', user }) {
+  const [form,    setForm]    = useState({
+    name:    user?.name    || '',
+    email:   user?.email   || '',
+    message: defaultMessage,
+  })
   const [loading, setLoading] = useState(false)
   const [done,    setDone]    = useState(false)
   const [error,   setError]   = useState('')
@@ -129,7 +135,7 @@ function SupportForm({ defaultMessage = '' }) {
   )
 }
 
-// ── Checkout Form (Stripe) ─────────────────────────────────────────────────
+// ── Checkout Form (Stripe PaymentElement) ──────────────────────────────────
 function CheckoutForm({ invoice, onSuccess, onCancel }) {
   const stripe   = useStripe()
   const elements = useElements()
@@ -171,7 +177,7 @@ function CheckoutForm({ invoice, onSuccess, onCancel }) {
   )
 }
 
-// ── Invoice Card ──────────────────────────────────────────────────────────
+// ── Invoice Card ───────────────────────────────────────────────────────────
 function InvoiceCard({ invoice, onPaySuccess }) {
   const [paying,        setPaying]        = useState(false)
   const [clientSecret,  setClientSecret]  = useState(null)
@@ -231,7 +237,8 @@ function InvoiceCard({ invoice, onPaySuccess }) {
       </div>
       <div className={styles.invoiceRight}>
         <span className={styles.invoiceAmount}>{amount}</span>
-        <span className={styles.invoiceStatus} style={{ color: statusColor, background: statusColor+'18', borderColor: statusColor+'33' }}>
+        <span className={styles.invoiceStatus}
+          style={{ color: statusColor, background: statusColor+'18', borderColor: statusColor+'33' }}>
           {isPaid && <FiCheckCircle size={11} />}
           {!isPaid && !isVoid && <FiClock size={11} />}
           {isPaid ? 'Paid' : isVoid ? 'Void' : 'Pending'}
@@ -247,9 +254,105 @@ function InvoiceCard({ invoice, onPaySuccess }) {
   )
 }
 
+// ── Subscription Plan Card (client billing tab) ────────────────────────────
+function SubscriptionCard({ subscription, hasStripeCustomer }) {
+  const [loading, setLoading] = useState(false)
+  const [error,   setError]   = useState('')
+
+  const openBillingPortal = async () => {
+    setLoading(true); setError('')
+    try {
+      const data = await apiFetch('/api/payments/billing-portal', { method: 'POST' })
+      window.location.href = data.url
+    } catch (err) { setError(err.message); setLoading(false) }
+  }
+
+  if (!subscription) {
+    return (
+      <div className={styles.subCard}>
+        <div className={styles.subCardNoplan}>
+          <FiCreditCard size={28} className={styles.subNoplanIcon} />
+          <div>
+            <div className={styles.subNoplanTitle}>No active subscription</div>
+            <div className={styles.subNoplanBody}>
+              Contact Jed to set up automatic monthly billing for your plan.
+            </div>
+          </div>
+        </div>
+        {error && <div className={styles.errorMsg} style={{marginTop:'1rem'}}><FiAlertCircle size={14}/> {error}</div>}
+      </div>
+    )
+  }
+
+  const statusColors = {
+    active:     { color: '#4ade80', label: 'Active' },
+    past_due:   { color: '#f97316', label: 'Past Due' },
+    cancelled:  { color: '#6b7280', label: 'Cancelled' },
+    trialing:   { color: '#a78bfa', label: 'Trial' },
+    incomplete: { color: '#facc15', label: 'Incomplete' },
+    unpaid:     { color: '#ef4444', label: 'Unpaid' },
+  }
+  const { color, label } = statusColors[subscription.status] || { color: '#5b8df5', label: subscription.status }
+
+  const nextBilling = subscription.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : null
+
+  const monthly = subscription.plan_price_cents > 0
+    ? `$${(subscription.plan_price_cents / 100).toFixed(2)}/mo`
+    : null
+
+  return (
+    <div className={styles.subCard}>
+      <div className={styles.subCardHeader}>
+        <div className={styles.subCardLeft}>
+          <div className={styles.subCardIcon}><FiShield size={20} /></div>
+          <div>
+            <div className={styles.subCardPlan}>{subscription.plan_name}</div>
+            <div className={styles.subCardMeta}>
+              {monthly && <span>{monthly}</span>}
+              <span
+                className={styles.subStatusBadge}
+                style={{ color, background: color+'18', borderColor: color+'33' }}
+              >
+                <span className={styles.subStatusDot} style={{ background: color }} />
+                {label}
+              </span>
+            </div>
+          </div>
+        </div>
+        {hasStripeCustomer && (
+          <button
+            className={`btn-secondary ${styles.manageBillingBtn}`}
+            onClick={openBillingPortal}
+            disabled={loading}
+          >
+            {loading ? 'Opening...' : 'Manage Billing'} {!loading && <FiExternalLink size={13} />}
+          </button>
+        )}
+      </div>
+
+      {nextBilling && subscription.status !== 'cancelled' && (
+        <div className={styles.subCardNext}>
+          <FiCalendar size={13} />
+          <span>Next billing date: <strong>{nextBilling}</strong></span>
+        </div>
+      )}
+
+      {subscription.status === 'past_due' && (
+        <div className={styles.subAlert}>
+          <FiAlertCircle size={14} />
+          <span>Your payment is past due. Click <strong>Manage Billing</strong> to update your payment method.</span>
+        </div>
+      )}
+
+      {error && <div className={styles.errorMsg} style={{marginTop:'1rem'}}><FiAlertCircle size={14}/> {error}</div>}
+    </div>
+  )
+}
+
 // ── Admin Panel ────────────────────────────────────────────────────────────
 function AdminPanel() {
-  // ── Core state ──────────────────────────────────────────────────────────
   const [clients,     setClients]     = useState([])
   const [loading,     setLoading]     = useState(true)
   const [section,     setSection]     = useState('all-projects')
@@ -257,21 +360,23 @@ function AdminPanel() {
   const [error,       setError]       = useState('')
   const [submitting,  setSubmitting]  = useState(false)
   const [editClient,  setEditClient]  = useState(null)
+  const [subForm,        setSubForm]        = useState({ clientId: '', priceId: '', planName: '', planPriceDollars: '' })
+  const [subLoading,     setSubLoading]     = useState(false)
+  const [welcomeModal,   setWelcomeModal]   = useState(null)  // client object
+  const [welcomePw,      setWelcomePw]      = useState('')
+  const [welcomeLoading, setWelcomeLoading] = useState(false)
 
-  // ── All-projects / all-invoices state ───────────────────────────────────
   const [allProjects,  setAllProjects]  = useState([])
   const [allInvoices,  setAllInvoices]  = useState([])
   const [loadingAll,   setLoadingAll]   = useState(false)
-  const [stageEdit,    setStageEdit]    = useState({})   // { [projectId]: 'design' }
-  const [sendingId,    setSendingId]    = useState(null) // invoiceId being notified
+  const [stageEdit,    setStageEdit]    = useState({})
+  const [sendingId,    setSendingId]    = useState(null)
 
-  // ── Form state ──────────────────────────────────────────────────────────
   const [clientForm,  setClientForm]  = useState({ name: '', email: '', company: '', password: '' })
   const [projectForm, setProjectForm] = useState({ clientId: '', name: '', description: '', serviceId: '', monthlyPriceDollars: '', stage: 'discovery', status: 'active' })
   const [invoiceForm, setInvoiceForm] = useState({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '', notifyClient: true })
   const [editForm,    setEditForm]    = useState({ name: '', email: '', company: '' })
 
-  // ── Loaders ─────────────────────────────────────────────────────────────
   const loadClients = useCallback(async () => {
     setLoading(true)
     try {
@@ -283,24 +388,19 @@ function AdminPanel() {
 
   const loadAllProjects = useCallback(async () => {
     setLoadingAll(true)
-    try {
-      const data = await apiFetch('/api/admin/projects')
-      setAllProjects(data.projects)
-    } catch (err) { showMsg(err.message, true) }
+    try { const data = await apiFetch('/api/admin/projects'); setAllProjects(data.projects) }
+    catch (err) { showMsg(err.message, true) }
     finally { setLoadingAll(false) }
   }, []) // eslint-disable-line
 
   const loadAllInvoices = useCallback(async () => {
     setLoadingAll(true)
-    try {
-      const data = await apiFetch('/api/admin/invoices')
-      setAllInvoices(data.invoices)
-    } catch (err) { showMsg(err.message, true) }
+    try { const data = await apiFetch('/api/admin/invoices'); setAllInvoices(data.invoices) }
+    catch (err) { showMsg(err.message, true) }
     finally { setLoadingAll(false) }
   }, []) // eslint-disable-line
 
   useEffect(() => { loadClients() }, [loadClients])
-
   useEffect(() => {
     if (section === 'all-projects') loadAllProjects()
     if (section === 'all-invoices') loadAllInvoices()
@@ -311,7 +411,7 @@ function AdminPanel() {
     setTimeout(() => { setSuccess(''); setError('') }, 6000)
   }
 
-  // ── Handlers ────────────────────────────────────────────────────────────
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAddClient = async (e) => {
     e.preventDefault()
     if (!clientForm.name || !clientForm.email || !clientForm.password)
@@ -363,16 +463,28 @@ function AdminPanel() {
       if (invoiceForm.notifyClient) {
         try {
           await apiFetch(`/api/admin/invoices/${invoiceId}/notify`, { method: 'POST' })
-          showMsg('Invoice created & client notified by email! ✓')
+          showMsg('Invoice created & client notified by email!')
         } catch {
-          showMsg('Invoice created. (Email notification failed — check EMAIL_FROM / EMAIL_PASS env vars.)')
+          showMsg('Invoice created. (Email notification failed — check EMAIL_FROM/EMAIL_PASS env vars.)')
         }
       } else {
-        showMsg('Invoice created. The client will see it when they log in.')
+        showMsg('Invoice created. Client will see it when they log in.')
       }
       setInvoiceForm({ clientId: '', serviceId: '', invoiceType: 'one-time', description: '', amountDollars: '', dueDate: '', notifyClient: true })
     } catch (err) { showMsg(err.message, true) }
     finally { setSubmitting(false) }
+  }
+
+  const handleCreateSubscription = async (e) => {
+    e.preventDefault()
+    if (!subForm.clientId || !subForm.priceId) return showMsg('Client and Stripe Price ID are required.', true)
+    setSubLoading(true)
+    try {
+      const data = await apiFetch('/api/payments/create-subscription', { method: 'POST', body: JSON.stringify(subForm) })
+      showMsg(`Subscription created! Status: ${data.status}`)
+      setSubForm({ clientId: '', priceId: '', planName: '', planPriceDollars: '' })
+    } catch (err) { showMsg(err.message, true) }
+    finally { setSubLoading(false) }
   }
 
   const handleUpdateStage = async (projectId, stage) => {
@@ -409,6 +521,21 @@ function AdminPanel() {
     } catch (err) { showMsg(err.message, true) }
   }
 
+  const handleSendWelcome = async () => {
+    if (!welcomePw.trim()) return showMsg('Enter the password you set for this client.', true)
+    setWelcomeLoading(true)
+    try {
+      await apiFetch(`/api/admin/clients/${welcomeModal.id}/welcome`, {
+        method: 'POST',
+        body: JSON.stringify({ tempPassword: welcomePw.trim() }),
+      })
+      showMsg(`Login info sent to ${welcomeModal.email}!`)
+      setWelcomeModal(null)
+      setWelcomePw('')
+    } catch (err) { showMsg(err.message, true) }
+    finally { setWelcomeLoading(false) }
+  }
+
   const handleQuickInvoice = (clientId) => {
     setInvoiceForm(f => ({ ...f, clientId: String(clientId) }))
     setSection('add-invoice')
@@ -421,17 +548,16 @@ function AdminPanel() {
     setInvoiceForm(f => ({ ...f, description: desc }))
   }
 
-  // ── Nav tabs ────────────────────────────────────────────────────────────
   const tabs = [
-    { id: 'all-projects', label: 'All Projects',   icon: <FiLayers />     },
-    { id: 'all-invoices', label: 'All Invoices',   icon: <FiDollarSign /> },
-    { id: 'clients',      label: 'All Clients',    icon: <FiUsers />      },
-    { id: 'add-client',   label: 'Add Client',     icon: <FiUserPlus />   },
-    { id: 'add-project',  label: 'Add Project',    icon: <FiFileText />   },
-    { id: 'add-invoice',  label: 'Create Invoice', icon: <FiPlusCircle /> },
+    { id: 'all-projects',  label: 'Projects',       icon: <FiLayers />      },
+    { id: 'all-invoices',  label: 'Invoices',        icon: <FiDollarSign />  },
+    { id: 'clients',       label: 'Clients',         icon: <FiUsers />       },
+    { id: 'subscriptions', label: 'Subscriptions',   icon: <FiCreditCard />  },
+    { id: 'add-client',    label: 'Add Client',      icon: <FiUserPlus />    },
+    { id: 'add-project',   label: 'Add Project',     icon: <FiFileText />    },
+    { id: 'add-invoice',   label: 'Create Invoice',  icon: <FiPlusCircle />  },
   ]
 
-  // ── Edit client overlay ──────────────────────────────────────────────────
   if (editClient) return (
     <div className={styles.adminPanel}>
       <div className={styles.adminNav}>
@@ -470,6 +596,35 @@ function AdminPanel() {
 
   return (
     <div className={styles.adminPanel}>
+
+      {/* ── Welcome / Send Login Info modal ── */}
+      {welcomeModal && (
+        <div className={styles.modalOverlay} onClick={() => { setWelcomeModal(null); setWelcomePw('') }}>
+          <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Send Login Info</h3>
+            <p className={styles.modalBody}>
+              This will email <strong>{welcomeModal.name}</strong> their portal login URL and password.
+              Enter the password you set for them below.
+            </p>
+            <div className={styles.adminField} style={{ marginBottom: '1rem' }}>
+              <label>Their Password</label>
+              <input type="text" className={styles.adminInput} placeholder="The password you set..."
+                value={welcomePw} onChange={e => setWelcomePw(e.target.value)}
+                autoFocus />
+            </div>
+            <div className={styles.adminRow}>
+              <button className="btn-primary" onClick={handleSendWelcome} disabled={welcomeLoading}>
+                {welcomeLoading ? 'Sending...' : 'Send Email'} <FiSend size={13} />
+              </button>
+              <button className="btn-secondary" onClick={() => { setWelcomeModal(null); setWelcomePw('') }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Admin sub-nav ── */}
       <div className={styles.adminNav}>
         {tabs.map(t => (
           <button key={t.id}
@@ -483,7 +638,7 @@ function AdminPanel() {
       {success && <div className={styles.successMsg}><FiCheckCircle size={14} /> {success}</div>}
       {error   && <div className={styles.errorMsg}><FiAlertCircle size={14} /> {error}</div>}
 
-      {/* ── All Projects ─────────────────────────────────────────────── */}
+      {/* ── All Projects ── */}
       {section === 'all-projects' && (
         <div className={styles.allListSection}>
           <div className={styles.listHeaderRow}>
@@ -494,14 +649,10 @@ function AdminPanel() {
               <FiRefreshCw size={13} className={loadingAll ? styles.spinning : ''} />
             </button>
           </div>
-
           {loadingAll ? (
             <p className={styles.loadingText}>Loading projects...</p>
           ) : allProjects.length === 0 ? (
-            <div className={styles.emptyState}>
-              <FiLayers size={28} />
-              <p>No projects yet. Create a client and add a project to get started.</p>
-            </div>
+            <div className={styles.emptyState}><FiLayers size={28} /><p>No projects yet.</p></div>
           ) : allProjects.map(p => {
             const svc      = ALL_SERVICES.find(s => s.id === p.service_id)
             const svcName  = svc ? (svc.shortTitle || svc.title) : null
@@ -511,7 +662,6 @@ function AdminPanel() {
 
             return (
               <div key={p.id} className={styles.adminProjectCard}>
-                {/* Client row */}
                 <div className={styles.adminProjectTop}>
                   <div className={styles.adminProjectClient}>
                     <div className={styles.avatar} style={{ width: 30, height: 30, fontSize: '0.75rem', flexShrink: 0 }}>
@@ -530,39 +680,28 @@ function AdminPanel() {
                     </span>
                   </div>
                 </div>
-
-                {/* Project name */}
                 <div className={styles.adminProjectName}>{p.name}</div>
                 {p.description && <p className={styles.adminProjectDesc}>{p.description}</p>}
-
-                {/* Stage tracker */}
                 <StageTracker stage={p.stage || 'discovery'} />
-
-                {/* Monthly price */}
                 {p.monthly_price_cents > 0 && (
                   <div className={styles.monthlyPriceNote}>
                     <FiCreditCard size={12} /> ${(p.monthly_price_cents / 100).toFixed(2)}/mo
                   </div>
                 )}
-
-                {/* Actions row */}
                 <div className={styles.adminProjectActions}>
                   <div className={styles.stageSelectWrap}>
                     <label className={styles.stageSelectLabel}>Stage:</label>
-                    <select className={styles.adminInputSm}
-                      value={stageVal}
+                    <select className={styles.adminInputSm} value={stageVal}
                       onChange={e => setStageEdit(s => ({ ...s, [p.id]: e.target.value }))}>
                       {STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
                     </select>
                     {isDirty && (
-                      <button className={styles.stageSaveBtn}
-                        onClick={() => handleUpdateStage(p.id, stageEdit[p.id])}>
+                      <button className={styles.stageSaveBtn} onClick={() => handleUpdateStage(p.id, stageEdit[p.id])}>
                         Save
                       </button>
                     )}
                   </div>
-                  <button className={styles.actionBtn} onClick={() => handleQuickInvoice(p.client_id)}
-                    title="Create an invoice for this client">
+                  <button className={styles.actionBtn} onClick={() => handleQuickInvoice(p.client_id)}>
                     <FiDollarSign size={13} /> Invoice
                   </button>
                 </div>
@@ -572,7 +711,7 @@ function AdminPanel() {
         </div>
       )}
 
-      {/* ── All Invoices ──────────────────────────────────────────────── */}
+      {/* ── All Invoices ── */}
       {section === 'all-invoices' && (
         <div className={styles.allListSection}>
           <div className={styles.listHeaderRow}>
@@ -588,17 +727,13 @@ function AdminPanel() {
               <FiRefreshCw size={13} className={loadingAll ? styles.spinning : ''} />
             </button>
           </div>
-
           {loadingAll ? (
             <p className={styles.loadingText}>Loading invoices...</p>
           ) : allInvoices.length === 0 ? (
-            <div className={styles.emptyState}>
-              <FiDollarSign size={28} />
-              <p>No invoices yet. Create one under "Create Invoice".</p>
-            </div>
+            <div className={styles.emptyState}><FiDollarSign size={28} /><p>No invoices yet.</p></div>
           ) : allInvoices.map(inv => {
-            const isPaid      = inv.status === 'paid'
-            const isVoid      = inv.status === 'void'
+            const isPaid = inv.status === 'paid'
+            const isVoid = inv.status === 'void'
             const statusColor = isPaid ? '#4ade80' : isVoid ? '#6b7280' : '#f97316'
             const isMonthly   = inv.invoice_type === 'monthly'
             return (
@@ -624,7 +759,6 @@ function AdminPanel() {
                     </span>
                     {inv.due_date && <span style={{ fontSize: '0.73rem', color: 'var(--text-3)' }}>Due {new Date(inv.due_date).toLocaleDateString()}</span>}
                     {inv.paid_at  && <span style={{ fontSize: '0.73rem', color: '#4ade80' }}>Paid {new Date(inv.paid_at).toLocaleDateString()}</span>}
-                    <span style={{ fontSize: '0.73rem', color: 'var(--text-3)' }}>{new Date(inv.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <div className={styles.adminInvoiceRight}>
@@ -638,13 +772,10 @@ function AdminPanel() {
                     <div className={styles.adminInvoiceActions}>
                       <button className={styles.actionBtn}
                         onClick={() => handleNotifyClient(inv.id)}
-                        disabled={sendingId === inv.id}
-                        title="Email payment link to client">
+                        disabled={sendingId === inv.id}>
                         <FiSend size={12} /> {sendingId === inv.id ? '...' : 'Email'}
                       </button>
-                      <button className={styles.actionBtnDanger}
-                        onClick={() => handleVoidInvoice(inv.id)}
-                        title="Void this invoice">
+                      <button className={styles.actionBtnDanger} onClick={() => handleVoidInvoice(inv.id)}>
                         Void
                       </button>
                     </div>
@@ -680,10 +811,16 @@ function AdminPanel() {
                     }}>
                     <FiEdit2 size={12} /> Edit
                   </button>
-                  <button className={styles.remindBtn}
-                    onClick={() => handleRemindClient(c.id)}
-                    title="Send payment reminder email">
+                  <button className={styles.actionBtn}
+                    onClick={() => { setWelcomeModal(c); setWelcomePw('') }}
+                    title="Email this client their login info">
+                    <FiMail size={12} /> Login Info
+                  </button>
+                  <button className={styles.remindBtn} onClick={() => handleRemindClient(c.id)}>
                     <FiSend size={12} /> Remind
+                  </button>
+                  <button className={styles.actionBtn} onClick={() => handleQuickInvoice(c.id)}>
+                    <FiDollarSign size={12} /> Invoice
                   </button>
                 </div>
               </div>
@@ -691,12 +828,58 @@ function AdminPanel() {
         </div>
       )}
 
+      {/* ── Subscriptions (admin) ── */}
+      {section === 'subscriptions' && (
+        <div className={styles.allListSection}>
+          <p className={styles.adminFormNote}>
+            Create a Stripe subscription for a client. You'll need a <strong>Price ID</strong> from
+            your <a href="https://dashboard.stripe.com/prices" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-lt)' }}>Stripe dashboard</a>.
+            This creates the Stripe customer automatically, then bills them monthly.
+          </p>
+          <form className={styles.adminForm} onSubmit={handleCreateSubscription}>
+            <div className={styles.adminRow}>
+              <div className={styles.adminField}>
+                <label>Client *</label>
+                <select className={styles.adminInput}
+                  value={subForm.clientId}
+                  onChange={e => setSubForm(f => ({...f, clientId: e.target.value}))}>
+                  <option value="">Select a client...</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
+                </select>
+              </div>
+              <div className={styles.adminField}>
+                <label>Stripe Price ID *</label>
+                <input type="text" placeholder="price_1ABC..." className={styles.adminInput}
+                  value={subForm.priceId}
+                  onChange={e => setSubForm(f => ({...f, priceId: e.target.value}))} />
+              </div>
+            </div>
+            <div className={styles.adminRow}>
+              <div className={styles.adminField}>
+                <label>Plan Display Name</label>
+                <input type="text" placeholder="e.g. Basic Maintenance" className={styles.adminInput}
+                  value={subForm.planName}
+                  onChange={e => setSubForm(f => ({...f, planName: e.target.value}))} />
+              </div>
+              <div className={styles.adminField}>
+                <label>Monthly Price (for display)</label>
+                <input type="number" placeholder="50.00" min="0" step="0.01" className={styles.adminInput}
+                  value={subForm.planPriceDollars}
+                  onChange={e => setSubForm(f => ({...f, planPriceDollars: e.target.value}))} />
+              </div>
+            </div>
+            <button type="submit" className="btn-primary" disabled={subLoading}>
+              {subLoading ? 'Creating...' : 'Create Subscription'} <FiCreditCard size={14} />
+            </button>
+          </form>
+        </div>
+      )}
+
       {/* ── Add Client ── */}
       {section === 'add-client' && (
         <form className={styles.adminForm} onSubmit={handleAddClient}>
           <p className={styles.adminFormNote}>
-            Fill this out for each new client. Send them their email and password separately.
-            They log in at <strong>/portal</strong>.
+            Fill this out for each new client. They log in at <strong>/portal</strong> with their email and temp password.
           </p>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
@@ -735,8 +918,7 @@ function AdminPanel() {
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Client *</label>
-              <select className={styles.adminInput}
-                value={projectForm.clientId}
+              <select className={styles.adminInput} value={projectForm.clientId}
                 onChange={e => setProjectForm(f => ({...f, clientId: e.target.value}))}>
                 <option value="">Select a client...</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
@@ -744,8 +926,7 @@ function AdminPanel() {
             </div>
             <div className={styles.adminField}>
               <label>Service</label>
-              <select className={styles.adminInput}
-                value={projectForm.serviceId}
+              <select className={styles.adminInput} value={projectForm.serviceId}
                 onChange={e => setProjectForm(f => ({...f, serviceId: e.target.value}))}>
                 <option value="">Select a service...</option>
                 {ALL_SERVICES.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
@@ -756,8 +937,7 @@ function AdminPanel() {
             <div className={styles.adminField}>
               <label>Project Name *</label>
               <input type="text" placeholder="e.g. Main Website Build" className={styles.adminInput}
-                value={projectForm.name}
-                onChange={e => setProjectForm(f => ({...f, name: e.target.value}))} />
+                value={projectForm.name} onChange={e => setProjectForm(f => ({...f, name: e.target.value}))} />
             </div>
             <div className={styles.adminField}>
               <label>Monthly Price ($/mo)</label>
@@ -776,16 +956,14 @@ function AdminPanel() {
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Stage</label>
-              <select className={styles.adminInput}
-                value={projectForm.stage}
+              <select className={styles.adminInput} value={projectForm.stage}
                 onChange={e => setProjectForm(f => ({...f, stage: e.target.value}))}>
                 {STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </div>
             <div className={styles.adminField}>
               <label>Status</label>
-              <select className={styles.adminInput}
-                value={projectForm.status}
+              <select className={styles.adminInput} value={projectForm.status}
                 onChange={e => setProjectForm(f => ({...f, status: e.target.value}))}>
                 <option value="active">Active</option>
                 <option value="paused">Paused</option>
@@ -803,13 +981,12 @@ function AdminPanel() {
       {section === 'add-invoice' && (
         <form className={styles.adminForm} onSubmit={handleAddInvoice}>
           <p className={styles.adminFormNote}>
-            Create an invoice for a client. They pay it directly in the portal via card.
+            Create an invoice for a client. They pay it via card directly in the portal.
           </p>
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Client *</label>
-              <select className={styles.adminInput}
-                value={invoiceForm.clientId}
+              <select className={styles.adminInput} value={invoiceForm.clientId}
                 onChange={e => setInvoiceForm(f => ({...f, clientId: e.target.value}))}>
                 <option value="">Select a client...</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
@@ -817,8 +994,7 @@ function AdminPanel() {
             </div>
             <div className={styles.adminField}>
               <label>Invoice Type</label>
-              <select className={styles.adminInput}
-                value={invoiceForm.invoiceType}
+              <select className={styles.adminInput} value={invoiceForm.invoiceType}
                 onChange={e => {
                   const t = e.target.value
                   setInvoiceForm(f => ({...f, invoiceType: t}))
@@ -832,8 +1008,7 @@ function AdminPanel() {
           <div className={styles.adminRow}>
             <div className={styles.adminField}>
               <label>Service</label>
-              <select className={styles.adminInput}
-                value={invoiceForm.serviceId}
+              <select className={styles.adminInput} value={invoiceForm.serviceId}
                 onChange={e => {
                   const sid = e.target.value
                   setInvoiceForm(f => ({...f, serviceId: sid}))
@@ -916,9 +1091,7 @@ function LoginForm({ onLogin }) {
             </div>
           </div>
           <div className={styles.field}>
-            <div className={styles.labelRow}>
-              <label className={styles.label} htmlFor="password">Password</label>
-            </div>
+            <label className={styles.label} htmlFor="password">Password</label>
             <div className={styles.inputWrap}>
               <FiLock className={styles.inputIcon} size={15} />
               <input id="password" type={showPw ? 'text' : 'password'} placeholder="••••••••"
@@ -947,20 +1120,24 @@ function LoginForm({ onLogin }) {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────
 function Dashboard({ user, onLogout }) {
-  const [activeTab,   setActiveTab]   = useState('overview')
-  const [projects,    setProjects]    = useState([])
-  const [invoices,    setInvoices]    = useState([])
-  const [loadingData, setLoadingData] = useState(false)
+  const [activeTab,    setActiveTab]    = useState('overview')
+  const [projects,     setProjects]     = useState([])
+  const [invoices,     setInvoices]     = useState([])
+  const [billing,      setBilling]      = useState({ subscription: null, hasStripeCustomer: false })
+  const [loadingData,  setLoadingData]  = useState(false)
+  const [sidebarOpen,  setSidebarOpen]  = useState(false)
 
   const fetchData = useCallback(async () => {
     setLoadingData(true)
     try {
-      const [pData, iData] = await Promise.all([
+      const [pData, iData, bData] = await Promise.all([
         apiFetch('/api/portal/projects'),
         apiFetch('/api/portal/invoices'),
+        apiFetch('/api/portal/billing'),
       ])
       setProjects(pData.projects)
       setInvoices(iData.invoices)
+      setBilling(bData)
     } catch (err) { console.error('Failed to load portal data:', err.message) }
     finally { setLoadingData(false) }
   }, [])
@@ -970,6 +1147,11 @@ function Dashboard({ user, onLogout }) {
   const handleLogout = async () => {
     try { await apiFetch('/api/auth/logout', { method: 'POST' }) } catch {}
     onLogout()
+  }
+
+  const navigate = (tab) => {
+    setActiveTab(tab)
+    setSidebarOpen(false)
   }
 
   const isAdmin = user.role === 'admin'
@@ -992,10 +1174,29 @@ function Dashboard({ user, onLogout }) {
   const adminTabs = isAdmin ? [{ id: 'manage', label: 'Manage', icon: <FiUsers /> }] : []
   const tabs = [...clientTabs, ...adminTabs]
 
+  // Tabs shown in mobile bottom bar (5 max)
+  const mobileBottomTabs = isAdmin
+    ? [clientTabs[0], clientTabs[1], clientTabs[2], clientTabs[3], adminTabs[0]]
+    : clientTabs
+
+  const tabSubtitle = {
+    overview: `Welcome back, ${user.name?.split(' ')[0] || 'there'}.`,
+    projects: 'Track your active and completed work.',
+    billing:  'Manage your plan, invoices, and payment methods.',
+    support:  "Need something? Send a message and we'll get back to you.",
+    reports:  'Monthly performance and maintenance reports.',
+    manage:   'View all client projects, create invoices, and manage accounts.',
+  }
+
   return (
     <div className={styles.dashboard}>
-      {/* Sidebar */}
-      <aside className={styles.sidebar}>
+      {/* ── Mobile overlay ── */}
+      {sidebarOpen && (
+        <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* ── Sidebar ── */}
+      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sideTop}>
           <div className={styles.sideLogoWrap}>
             <span className={styles.logoMark}>CWC</span>
@@ -1004,12 +1205,15 @@ function Dashboard({ user, onLogout }) {
               <div className={styles.sideLogoSub}>Cooper Web Consulting</div>
             </div>
           </div>
+          <button className={styles.sideCloseBtn} onClick={() => setSidebarOpen(false)}>
+            <FiX size={18} />
+          </button>
         </div>
         <nav className={styles.sideNav}>
           {tabs.map(({ id, label, icon }) => (
             <button key={id}
               className={`${styles.sideNavItem} ${activeTab === id ? styles.sideNavActive : ''} ${id === 'manage' ? styles.adminNavItem : ''}`}
-              onClick={() => setActiveTab(id)}>
+              onClick={() => navigate(id)}>
               <span className={styles.sideNavIcon}>{icon}</span>
               {label}
               {id === 'manage' && <span className={styles.adminBadge}>Admin</span>}
@@ -1030,35 +1234,33 @@ function Dashboard({ user, onLogout }) {
         </div>
       </aside>
 
-      {/* Main content */}
+      {/* ── Main content ── */}
       <main className={styles.main}>
-        {activeTab !== 'manage' && (
-          <div className={styles.mainHeader}>
+        <div className={styles.mainHeader}>
+          <div className={styles.mainHeaderLeft}>
+            {/* Hamburger for mobile */}
+            <button className={styles.menuBtn} onClick={() => setSidebarOpen(v => !v)} aria-label="Menu">
+              <FiMenu size={20} />
+            </button>
             <div>
               <h1 className={styles.mainTitle}>{tabs.find(t => t.id === activeTab)?.label}</h1>
-              <p className={styles.mainSub}>
-                {activeTab === 'overview' && `Welcome back, ${user.name?.split(' ')[0] || 'there'}.`}
-                {activeTab === 'projects' && 'Track your active and completed work.'}
-                {activeTab === 'billing'  && 'View invoices and pay outstanding balances.'}
-                {activeTab === 'support'  && "Need something? Send a message and we'll get back to you."}
-                {activeTab === 'reports'  && 'Monthly performance and maintenance reports.'}
-              </p>
+              <p className={styles.mainSub}>{tabSubtitle[activeTab]}</p>
             </div>
-            <button className={styles.refreshBtn} onClick={fetchData} disabled={loadingData} title="Refresh">
-              <FiRefreshCw size={16} className={loadingData ? styles.spinning : ''} />
-            </button>
           </div>
-        )}
+          <button className={styles.refreshBtn} onClick={fetchData} disabled={loadingData} title="Refresh">
+            <FiRefreshCw size={16} className={loadingData ? styles.spinning : ''} />
+          </button>
+        </div>
 
         {/* ── Overview ── */}
         {activeTab === 'overview' && (
           <div className={styles.overview}>
             <div className={styles.statGrid}>
               {[
-                { label: 'Active Projects',  value: activeProjects.length.toString(),    icon: <FiFileText />,   color: '#5b8df5' },
-                { label: 'Open Tickets',     value: '0',                                  icon: <FiTool />,       color: '#4ade80' },
-                { label: 'Pending Invoices', value: pendingInvoices.length.toString(),    icon: <FiCreditCard />, color: '#f97316' },
-                { label: 'Amount Owed',      value: `$${(totalOwed / 100).toFixed(2)}`,  icon: <FiDollarSign />, color: '#facc15' },
+                { label: 'Active Projects',  value: activeProjects.length.toString(),   icon: <FiFileText />,   color: '#5b8df5' },
+                { label: 'Open Tickets',     value: '0',                                 icon: <FiTool />,       color: '#4ade80' },
+                { label: 'Pending Invoices', value: pendingInvoices.length.toString(),   icon: <FiCreditCard />, color: '#f97316' },
+                { label: 'Amount Owed',      value: `$${(totalOwed/100).toFixed(2)}`,    icon: <FiDollarSign />, color: '#facc15' },
               ].map(({ label, value, icon, color }) => (
                 <div key={label} className={styles.statCard}>
                   <div className={styles.statIcon} style={{ background: color+'18', color }}>{icon}</div>
@@ -1067,6 +1269,21 @@ function Dashboard({ user, onLogout }) {
                 </div>
               ))}
             </div>
+
+            {/* Subscription status chip on overview */}
+            {billing.subscription && (
+              <div className={styles.overviewSubChip} onClick={() => navigate('billing')} role="button">
+                <FiShield size={14} />
+                <span>{billing.subscription.plan_name}</span>
+                <span className={styles.overviewSubStatus}
+                  style={{
+                    color: billing.subscription.status === 'active' ? '#4ade80' : '#f97316',
+                  }}>
+                  {billing.subscription.status === 'active' ? 'Active' : billing.subscription.status}
+                </span>
+                <FiArrowRight size={13} style={{ marginLeft: 'auto', opacity: 0.5 }} />
+              </div>
+            )}
 
             {projects.length > 0 && (
               <div className={styles.section}>
@@ -1082,7 +1299,7 @@ function Dashboard({ user, onLogout }) {
                           <div className={styles.projectTags}>
                             {svcName && <span className={styles.svcBadge}>{svcName}</span>}
                             <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
-                              {p.status === 'completed' ? <FiCheckCircle size={11} /> : p.status === 'active' ? <FiClock size={11} /> : <FiAlertCircle size={11} />}
+                              {p.status === 'completed' ? <FiCheckCircle size={11} /> : <FiClock size={11} />}
                               {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                             </span>
                           </div>
@@ -1104,14 +1321,14 @@ function Dashboard({ user, onLogout }) {
                   ))}
                 </div>
                 {pendingInvoices.length > 2 && (
-                  <button className={styles.viewAll} onClick={() => setActiveTab('billing')}>
+                  <button className={styles.viewAll} onClick={() => navigate('billing')}>
                     View all <FiArrowRight size={13} />
                   </button>
                 )}
               </div>
             )}
 
-            {projects.length === 0 && pendingInvoices.length === 0 && (
+            {projects.length === 0 && pendingInvoices.length === 0 && !billing.subscription && (
               <div className={styles.emptyState}>
                 <FiGrid size={32} />
                 <p>No active projects yet. Your dashboard will update as your project gets underway.</p>
@@ -1137,7 +1354,7 @@ function Dashboard({ user, onLogout }) {
                         <div className={styles.projectTags}>
                           {svcName && <span className={styles.svcBadge}>{svcName}</span>}
                           <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
-                            {p.status === 'completed' ? <FiCheckCircle size={11} /> : p.status === 'active' ? <FiClock size={11} /> : <FiAlertCircle size={11} />}
+                            {p.status === 'completed' ? <FiCheckCircle size={11} /> : <FiClock size={11} />}
                             {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                           </span>
                         </div>
@@ -1160,13 +1377,25 @@ function Dashboard({ user, onLogout }) {
         {/* ── Billing ── */}
         {activeTab === 'billing' && (
           <div className={styles.tabContent}>
-            {invoices.length === 0 ? (
-              <div className={styles.emptyState}><FiCreditCard size={32} /><p>No invoices yet.</p></div>
-            ) : (
-              <div className={styles.invoiceList}>
-                {invoices.map(inv => <InvoiceCard key={inv.id} invoice={inv} onPaySuccess={fetchData} />)}
-              </div>
-            )}
+            {/* Subscription card at top */}
+            <SubscriptionCard
+              subscription={billing.subscription}
+              hasStripeCustomer={billing.hasStripeCustomer}
+            />
+
+            {/* Invoice list below */}
+            <div className={styles.section} style={{ marginTop: '1.5rem' }}>
+              <h2 className={styles.sectionTitle}>Invoices</h2>
+              {invoices.length === 0 ? (
+                <div className={styles.emptyState} style={{ padding: '2rem 0' }}>
+                  <FiFileText size={28} /><p>No invoices yet.</p>
+                </div>
+              ) : (
+                <div className={styles.invoiceList}>
+                  {invoices.map(inv => <InvoiceCard key={inv.id} invoice={inv} onPaySuccess={fetchData} />)}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1180,7 +1409,7 @@ function Dashboard({ user, onLogout }) {
                 For support requests, bug fixes, or content changes — fill this out
                 and Jed will get back to you within one business day.
               </p>
-              <SupportForm />
+              <SupportForm user={user} />
             </div>
           </div>
         )}
@@ -1195,23 +1424,25 @@ function Dashboard({ user, onLogout }) {
                 Monthly performance and maintenance reports will appear here automatically.
                 Until then, send a message to request one.
               </p>
-              <SupportForm defaultMessage="Hi Jed, could you send over my latest monthly report?" />
+              <SupportForm user={user} defaultMessage="Hi Jed, could you send over my latest monthly report?" />
             </div>
           </div>
         )}
 
         {/* ── Manage (Admin only) ── */}
-        {activeTab === 'manage' && isAdmin && (
-          <div>
-            <div className={styles.mainHeader}>
-              <div>
-                <h1 className={styles.mainTitle}>Manage</h1>
-                <p className={styles.mainSub}>View all client projects, create invoices, and manage accounts.</p>
-              </div>
-            </div>
-            <AdminPanel />
-          </div>
-        )}
+        {activeTab === 'manage' && isAdmin && <AdminPanel />}
+
+        {/* ── Mobile bottom tab bar ── */}
+        <nav className={styles.mobileBottomNav}>
+          {mobileBottomTabs.map(({ id, label, icon }) => (
+            <button key={id}
+              className={`${styles.mobileNavItem} ${activeTab === id ? styles.mobileNavActive : ''}`}
+              onClick={() => navigate(id)}>
+              <span className={styles.mobileNavIcon}>{icon}</span>
+              <span className={styles.mobileNavLabel}>{label}</span>
+            </button>
+          ))}
+        </nav>
       </main>
     </div>
   )
