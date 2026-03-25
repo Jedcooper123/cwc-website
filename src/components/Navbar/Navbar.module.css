@@ -8,11 +8,11 @@
 }
 
 .header.scrolled {
-  background: rgba(10, 10, 10, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom-color: var(--border);
-  box-shadow: 0 4px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 }
 
 .nav {
@@ -31,33 +31,49 @@
   text-decoration: none;
 }
 
-/* Bigger CWC square block */
+/* Orange square mark */
 .logoMark {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--grad);
   border-radius: 10px;
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   font-weight: 900;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 4px 18px rgba(91,141,245,0.35);
+  box-shadow: 0 4px 18px rgba(249,115,22,0.3);
 }
 
-.logoName {
-  font-size: 0.88rem;
-  font-weight: 600;
+/* Two-line logo text */
+.logoText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.logoPrimary {
+  font-size: 1.05rem;
+  font-weight: 800;
   color: var(--text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.logoSub {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 @media (max-width: 560px) {
-  .logoName { display: none; }
+  .logoText { display: none; }
 }
 
 /* ── Desktop Links ── */
@@ -87,7 +103,7 @@
 
 .link:hover {
   color: var(--text);
-  background: rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.04);
 }
 
 /* ── Services Dropdown ── */
@@ -113,7 +129,7 @@
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   padding: 1rem;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12);
   z-index: 100;
   animation: dropIn 0.18s ease both;
 }
@@ -154,7 +170,7 @@
 }
 
 .dropItem:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.04);
   color: var(--text);
 }
 
@@ -205,7 +221,7 @@
 .portalLink:hover {
   color: var(--text-2);
   border-color: var(--border-hover);
-  background: rgba(255,255,255,0.04);
+  background: rgba(0,0,0,0.03);
 }
 
 .ctaBtn {
@@ -222,7 +238,7 @@
   transition: background var(--ease);
   margin-left: auto;
 }
-.toggle:hover { background: rgba(255,255,255,0.07); }
+.toggle:hover { background: rgba(0,0,0,0.05); }
 
 /* ── Mobile drawer ── */
 .drawer {

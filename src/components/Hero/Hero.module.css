@@ -13,8 +13,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
   background-size: 52px 52px;
   mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 75%);
@@ -26,7 +26,7 @@
   left: 5%;
   width: 55%;
   height: 65%;
-  background: radial-gradient(ellipse, rgba(91,141,245,0.07) 0%, transparent 65%);
+  background: radial-gradient(ellipse, rgba(249,115,22,0.06) 0%, transparent 65%);
   pointer-events: none;
 }
 
@@ -102,11 +102,11 @@
 
 /* ── Code panel (right) ── */
 .panel {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: #151515;
+  border: 1px solid #2a2a2a;
   border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: 0 8px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(91,141,245,0.06);
+  box-shadow: 0 12px 56px rgba(0,0,0,0.18), 0 0 0 1px rgba(249,115,22,0.08);
   animation: fadeUp 0.85s 0.1s ease both;
 }
 
@@ -115,8 +115,8 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.7rem 1rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: #0d0d0d;
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .panelDots { display: flex; gap: 0.35rem; }
@@ -132,7 +132,7 @@
 
 .panelFile {
   font-size: 0.72rem;
-  color: var(--text-3);
+  color: #555;
   font-weight: 500;
   flex: 1;
   text-align: center;
@@ -172,8 +172,8 @@
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--text-3);
-  background: var(--border);
+  color: #777;
+  background: #222;
   border-radius: 4px;
   padding: 0.25rem 0.6rem;
 }
@@ -184,9 +184,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #2a2a2a;
   font-size: 0.75rem;
-  color: var(--text-3);
+  color: #666;
 }
 
 .statusDot {

@@ -24,7 +24,7 @@ export const SERVICES = [
     ],
     goodFor: ['Small businesses', 'Service providers', 'Personal brands', 'Local companies'],
     startingAt: '$350',
-    color: '#5b8df5',
+    color: '#f97316',
   },
   {
     id: 'fullstack-db',

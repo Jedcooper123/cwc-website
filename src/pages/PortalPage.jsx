@@ -1199,10 +1199,10 @@ function Dashboard({ user, onLogout }) {
       <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sideTop}>
           <div className={styles.sideLogoWrap}>
-            <span className={styles.logoMark}>CWC</span>
+            <span className={styles.logoMark}>L</span>
             <div>
               <div className={styles.sideLogoTitle}>Client Portal</div>
-              <div className={styles.sideLogoSub}>Cooper Web Consulting</div>
+              <div className={styles.sideLogoSub}>Launchpad Web Consulting</div>
             </div>
           </div>
           <button className={styles.sideCloseBtn} onClick={() => setSidebarOpen(false)}>

@@ -9,6 +9,22 @@ import styles from './Portfolio.module.css'
 
 const PROJECTS = [
   {
+    title: 'QM Lawncare',
+    type: 'Lawn & Landscaping',
+    desc: 'A conversion-focused website for a local lawn care company — designed to filter out tire-kickers and generate quote requests from serious customers.',
+    tags: ['Service Business', 'Lead Gen', 'Mobile-First'],
+    url: 'https://qm-lawncare.onrender.com/',
+    accentColor: '#4ade80',
+  },
+  {
+    title: 'Willy B Grill',
+    type: 'Food & Restaurant',
+    desc: 'A clean, appetizing website for a BBQ grill business — showcasing the menu, hours, and location with a strong call-to-action to drive foot traffic and orders.',
+    tags: ['Restaurant', 'Custom Design', 'Render'],
+    url: 'https://willy-b-grill-website-1.onrender.com/',
+    accentColor: '#f97316',
+  },
+  {
     title: 'Zander Keller Photography',
     type: 'Photography & Creative',
     desc: 'A full custom website for a professional photographer built for visual impact, fast load times, and a smooth gallery experience on every device.',
@@ -22,7 +38,7 @@ const PROJECTS = [
     desc: 'A clean, modern portfolio site built to make a strong first impression. Showcases projects, skills, and professional background.',
     tags: ['Portfolio', 'GitHub Pages', 'Responsive'],
     url: 'https://jedcooper123.github.io/Professional-Portfolio/',
-    accentColor: '#4d7cfe',
+    accentColor: '#fb923c',
   },
 ]
 
@@ -83,10 +99,10 @@ export default function Portfolio() {
       <div className="container">
         <div className={styles.header}>
           <p className="section-label fade-up">Our Work</p>
-          <h2 className="section-title fade-up delay-1">Sites we have shipped.</h2>
+          <h2 className="section-title fade-up delay-1">Real sites. Real businesses.</h2>
           <p className={`section-sub fade-up delay-2`}>
-            Every project is built from scratch with your goals at the center.
-            No templates, no shortcuts.
+            Every project is built from scratch, designed to convert visitors
+            into qualified leads. No templates, no shortcuts.
           </p>
         </div>
 

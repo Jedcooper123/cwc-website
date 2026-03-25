@@ -52,13 +52,14 @@ export default function Contact() {
       <div className="container">
         {/* Header */}
         <div className={styles.header}>
-          <p className="section-label fade-up">Get In Touch</p>
+          <p className="section-label fade-up">Get Better Leads</p>
           <h2 className="section-title fade-up delay-1">
-            Let's build something together.
+            Ready to only talk to serious customers?
           </h2>
           <p className={`section-sub fade-up delay-2`}>
-            Have a project in mind or just want to talk through your options?
-            Send a message and I'll get back to you within one business day.
+            Tell us about your business and what you're dealing with. We'll figure
+            out exactly what it takes to filter out the time-wasters and put real
+            customers in front of you.
           </p>
         </div>
 

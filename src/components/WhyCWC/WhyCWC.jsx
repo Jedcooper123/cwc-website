@@ -12,40 +12,40 @@ import styles from './WhyCWC.module.css'
 
 const REASONS = [
   {
-    icon: <FiShield />,
-    title: 'Reliability You Can Count On',
+    icon: <FiBarChart2 />,
+    title: 'We Focus on Outcomes, Not Design',
     desc:
-      'Every site we build is engineered for stability. From secure hosting environments to proactive monitoring and fast incident response — we treat uptime as a business requirement, not an afterthought.',
+      'Most agencies celebrate how a site looks. We measure success by how many qualified leads it brings you. Every layout decision, every form, every page is built to filter and convert — not just impress.',
   },
   {
-    icon: <FiStar />,
-    title: 'Design That Builds Trust',
+    icon: <FiShield />,
+    title: 'Built-In Lead Qualification',
     desc:
-      'First impressions are permanent. We craft websites with the visual sophistication that signals credibility, professionalism, and attention to detail — because your brand deserves more than average.',
+      'Our sites are designed to pre-qualify visitors before they ever contact you. That means fewer tire-kickers, fewer low-budget calls, and more time spent closing real jobs with serious customers.',
   },
   {
     icon: <FiLayers />,
-    title: 'Built to Scale',
+    title: 'Systems, Not Just Websites',
     desc:
-      'Your business will grow. Your website should too. Every CWC project is structured with clean, organized code and modular architecture, making it easy to add features as your needs evolve.',
+      'We don\'t hand you a pretty page and walk away. We build a tool — a lead system that works 24/7, filters bad-fit inquiries, and delivers better customers straight to your inbox or phone.',
   },
   {
     icon: <FiClock />,
-    title: 'Ongoing Support & Partnership',
+    title: 'Respect for Your Time',
     desc:
-      'We don\'t disappear after launch. Content update, new feature, or something breaking on a Saturday morning, I\'m reachable and I handle it. CWC is a long-term partner, not a one-time transaction.',
+      'You\'re a business owner — not a marketing manager. We handle everything and make it simple. No jargon, no long calls about color palettes. Just results that show up in your schedule.',
   },
   {
-    icon: <FiBarChart2 />,
-    title: 'Growth-Oriented Thinking',
+    icon: <FiStar />,
+    title: 'Built for Blue-Collar Businesses',
     desc:
-      'We measure success the same way you do — in leads, conversions, and revenue. Every decision, from layout to page speed, is made with your business outcomes at the center.',
+      'HVAC, roofing, plumbing, landscaping, contracting — we understand how service businesses operate. We speak your language and build around your workflow, not the other way around.',
   },
   {
     icon: <FiUsers />,
-    title: 'Real Relationships, Not Tickets',
+    title: 'Direct. No Hand-Offs.',
     desc:
-      'You work directly with the person building your site. No hand-offs, no account managers, no confusion about who to call. Just clear communication, honest timelines, and work that delivers.',
+      'You work directly with the person building your site. No account managers, no agency hand-offs. Clear communication, honest timelines, and a partner who\'s invested in your results.',
   },
 ]
 
@@ -57,13 +57,14 @@ export default function WhyCWC() {
       <div className="container">
         {/* Header */}
         <div className={styles.header}>
-          <p className="section-label fade-up">Why Choose CWC</p>
+          <p className="section-label fade-up">Why Launchpad</p>
           <h2 className="section-title fade-up delay-1">
-            The difference is in the details.
+            We don't just build websites.<br />We build lead machines.
           </h2>
           <p className={`section-sub fade-up delay-2`}>
-            Plenty of agencies can build a website. Fewer can build a website
-            that actually moves your business forward. Here's what sets CWC apart.
+            Most web agencies focus on design or traffic. We focus on outcomes.
+            Our approach is built around filtering and qualifying leads before
+            they ever reach you.
           </p>
         </div>
 
@@ -85,14 +86,14 @@ export default function WhyCWC() {
         <div className={`${styles.banner} fade-up delay-2`}>
           <div className={styles.bannerContent}>
             <h3 className={styles.bannerTitle}>
-              Ready to work with a partner who's invested in your success?
+              Ready to stop wasting time on the wrong customers?
             </h3>
             <p className={styles.bannerSub}>
-              Let's build something great together.
+              Let's build a system that only brings you serious leads.
             </p>
           </div>
-          <a href="#schedule" className="btn-primary">
-            Book a Free Call
+          <a href="#contact" className="btn-primary">
+            Get Better Leads
           </a>
         </div>
       </div>

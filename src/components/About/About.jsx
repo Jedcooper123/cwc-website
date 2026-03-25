@@ -7,17 +7,17 @@ import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './About.module.css'
 
 const PILLARS = [
-  'Built around your business goals, not generic templates',
-  'Clean, maintainable code that scales with you',
-  'Dedicated support from initial concept to long-term growth',
-  'Modern stack — fast, secure, and future-ready',
+  'Websites designed to filter out low-budget inquiries',
+  'Only serious, ready-to-buy customers reach you',
+  'Stop chasing the wrong jobs — close more of the right ones',
+  'Systems built for service businesses, not generic templates',
 ]
 
 const STATS = [
-  { value: '100%', label: 'Custom Solutions',   desc: 'No cookie-cutter templates'  },
-  { value: '<48h', label: 'Response Time',       desc: 'On every support request'    },
-  { value: '99.9%',label: 'Uptime Standard',    desc: 'For all hosted projects'      },
-  { value: '5★',   label: 'Client Satisfaction',desc: 'Consistent across every build'},
+  { value: '100%', label: 'Custom Built',        desc: 'No templates, no shortcuts'  },
+  { value: 'Less',  label: 'Wasted Calls',       desc: 'Fewer low-budget inquiries'  },
+  { value: 'More',  label: 'Qualified Leads',    desc: 'Customers ready to move'     },
+  { value: '5★',   label: 'Client Results',      desc: 'Consistent across every build'},
 ]
 
 export default function About() {
@@ -30,21 +30,21 @@ export default function About() {
 
           {/* ── Left: Text content ── */}
           <div className={styles.content}>
-            <p className="section-label fade-up">About CWC</p>
+            <p className="section-label fade-up">Our Mission</p>
             <h2 className="section-title fade-up delay-1">
-              Your web presence is your first impression.{' '}
-              <span className={styles.accent}>Make it count.</span>
+              We build websites that don't just look good —{' '}
+              <span className={styles.accent}>they work.</span>
             </h2>
             <p className={`section-sub fade-up delay-2 ${styles.intro}`}>
-              Cooper Web Consulting is a one-person shop built on a simple idea:
-              your website should actually work for your business. Everything we design,
-              build, and maintain is fast, polished, and built around how you operate,
-              not around a template someone else already used.
+              We help service-based businesses grow by building websites that eliminate
+              wasted time, reduce bad leads, and create systems that bring in real
+              customers who are ready to move forward.
             </p>
             <p className={`${styles.body} fade-up delay-3`}>
-              Whether you're launching something new, modernizing an old site,
-              or just looking for someone to keep things running without the stress,
-              CWC brings the technical depth and clear communication to get you there.
+              Whether you run HVAC, roofing, plumbing, landscaping, or any other
+              service business — your website should be working as hard as you do.
+              That means filtering out tire-kickers and putting serious customers
+              in front of you.
             </p>
 
             {/* Pillar list */}
@@ -57,8 +57,8 @@ export default function About() {
               ))}
             </ul>
 
-            <a href="#services" className={`btn-primary fade-up delay-4 ${styles.cta}`}>
-              Explore Our Services <FiArrowRight />
+            <a href="#contact" className={`btn-primary fade-up delay-4 ${styles.cta}`}>
+              Get Better Leads <FiArrowRight />
             </a>
           </div>
 

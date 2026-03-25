@@ -51,7 +51,7 @@ const STEPS = [
     title: 'Ongoing Support',
     headline: 'We stay in your corner.',
     desc:
-      'Your relationship with CWC doesn\'t end at launch. We provide ongoing maintenance, performance monitoring, content updates, and strategic guidance as your business evolves.',
+      'Your relationship with Launchpad doesn\'t end at launch. We provide ongoing maintenance, performance monitoring, content updates, and strategic guidance as your business evolves.',
     deliverables: ['Monthly maintenance plans', 'Priority bug fixes & updates', 'Growth & optimization consulting'],
   },
 ]

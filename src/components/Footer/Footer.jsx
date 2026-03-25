@@ -12,7 +12,7 @@ const NAV_COLS = [
       { label: 'About',          href: '#about'    },
       { label: 'Services',       href: '#services' },
       { label: 'Process',        href: '#process'  },
-      { label: 'Why CWC',        href: '#why-cwc'  },
+      { label: 'Why Launchpad',   href: '#why-cwc'  },
     ],
   },
   {
@@ -47,11 +47,12 @@ export default function Footer() {
           {/* Brand column */}
           <div className={styles.brand}>
             <a href="#hero" className={styles.logo}>
-              <span className={styles.logoMark}>CWC</span>
+              <span className={styles.logoMark}>Launchpad</span>
             </a>
             <p className={styles.tagline}>
-              Cooper Web Consulting helps businesses build, grow, and maintain
-              a modern web presence — from first launch to long-term success.
+              Launchpad Web Consulting builds lead qualification systems for
+              service businesses — so you spend less time on bad leads and more
+              time closing the right ones.
             </p>
             <div className={styles.social}>
               <a
@@ -99,13 +100,13 @@ export default function Footer() {
 
           {/* CTA column */}
           <div className={styles.ctaCol}>
-            <h4 className={styles.navHeading}>Start a Project</h4>
+            <h4 className={styles.navHeading}>Get Better Leads</h4>
             <p className={styles.ctaBody}>
-              Ready to launch, improve, or grow your web presence?
-              Let's talk.
+              Ready to stop wasting time on the wrong customers?
+              Let's build your lead system.
             </p>
             <a href="#contact" className={`btn-primary ${styles.ctaBtn}`}>
-              Get in Touch <FiArrowRight />
+              Get Better Leads <FiArrowRight />
             </a>
             <div className={styles.contact}>
               <a href="#contact" className={styles.contactLink}>
@@ -121,7 +122,7 @@ export default function Footer() {
         {/* ── Bottom: Legal ── */}
         <div className={styles.bottom}>
           <span className={styles.copy}>
-            © {YEAR} Cooper Web Consulting. All rights reserved.
+            © {YEAR} Launchpad Web Consulting. All rights reserved.
           </span>
           <div className={styles.legal}>
             <a href="#" className={styles.legalLink}>Privacy Policy</a>

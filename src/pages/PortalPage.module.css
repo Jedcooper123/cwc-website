@@ -57,7 +57,7 @@
   font-weight: 900;
   letter-spacing: 0.05em;
   color: #fff;
-  box-shadow: 0 4px 18px rgba(91,141,245,0.35);
+  box-shadow: 0 4px 18px rgba(249,115,22,0.35);
 }
 
 .loginTitle {
@@ -123,7 +123,7 @@
 }
 .input::placeholder { color: var(--text-3); }
 .input:focus {
-  border-color: rgba(91,141,245,0.5);
+  border-color: rgba(249,115,22,0.5);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
@@ -327,7 +327,7 @@
   transition: color var(--ease), border-color var(--ease);
   flex-shrink: 0;
 }
-.refreshBtn:hover { color: var(--text-2); border-color: rgba(91,141,245,0.3); }
+.refreshBtn:hover { color: var(--text-2); border-color: rgba(249,115,22,0.3); }
 .refreshBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @keyframes spin {
@@ -490,7 +490,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(91,141,245,0.12);
+  background: rgba(249,115,22,0.12);
   flex-shrink: 0;
 }
 
@@ -713,11 +713,11 @@
   font-family: var(--font);
   transition: all var(--ease);
 }
-.adminNavBtn:hover { color: var(--text); border-color: rgba(91,141,245,0.3); }
+.adminNavBtn:hover { color: var(--text); border-color: rgba(249,115,22,0.3); }
 .adminNavActive {
   background: var(--accent-bg) !important;
   color: var(--accent-lt) !important;
-  border-color: rgba(91,141,245,0.35) !important;
+  border-color: rgba(249,115,22,0.35) !important;
 }
 
 /* Admin sidebar nav item */
@@ -729,7 +729,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  background: rgba(91,141,245,0.18);
+  background: rgba(249,115,22,0.18);
   color: var(--accent-lt);
   border-radius: 100px;
   padding: 0.18rem 0.5rem;
@@ -786,7 +786,7 @@
 }
 .adminInput::placeholder { color: var(--text-3); }
 .adminInput:focus {
-  border-color: rgba(91,141,245,0.5);
+  border-color: rgba(249,115,22,0.5);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
@@ -907,7 +907,7 @@
   transition: color var(--ease), border-color var(--ease);
   flex-shrink: 0;
 }
-.menuBtn:hover { color: var(--text); border-color: rgba(91,141,245,0.4); }
+.menuBtn:hover { color: var(--text); border-color: rgba(249,115,22,0.4); }
 
 /* ── Main header left (hamburger + title together) ── */
 .mainHeaderLeft {
@@ -957,7 +957,7 @@
   width: 44px;
   height: 44px;
   background: var(--accent-bg);
-  border: 1px solid rgba(91,141,245,0.2);
+  border: 1px solid rgba(249,115,22,0.2);
   border-radius: var(--r-md);
   display: flex;
   align-items: center;
@@ -1407,7 +1407,7 @@
   display: flex;
   align-items: center;
 }
-.refreshSmallBtn:hover { color: var(--text-2); border-color: rgba(91,141,245,0.3); }
+.refreshSmallBtn:hover { color: var(--text-2); border-color: rgba(249,115,22,0.3); }
 
 /* ── Admin Project Card ─────────────────────────────────────────────────── */
 .adminProjectCard {
@@ -1420,7 +1420,7 @@
   gap: 0.5rem;
   transition: border-color var(--ease);
 }
-.adminProjectCard:hover { border-color: rgba(91,141,245,0.2); }
+.adminProjectCard:hover { border-color: rgba(249,115,22,0.2); }
 
 .adminProjectTop {
   display: flex;
@@ -1508,7 +1508,7 @@
   transition: border-color var(--ease);
   min-width: 120px;
 }
-.adminInputSm:focus { border-color: rgba(91,141,245,0.5); }
+.adminInputSm:focus { border-color: rgba(249,115,22,0.5); }
 
 .stageSaveBtn {
   background: var(--accent);
@@ -1533,14 +1533,14 @@
   font-weight: 600;
   color: var(--accent-lt);
   background: var(--accent-bg);
-  border: 1px solid rgba(91,141,245,0.25);
+  border: 1px solid rgba(249,115,22,0.25);
   border-radius: var(--r-sm);
   padding: 0.42rem 0.85rem;
   cursor: pointer;
   font-family: var(--font);
   transition: all var(--ease);
 }
-.actionBtn:hover { background: rgba(91,141,245,0.15); border-color: rgba(91,141,245,0.4); }
+.actionBtn:hover { background: rgba(249,115,22,0.15); border-color: rgba(249,115,22,0.4); }
 .actionBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .actionBtnDanger {
@@ -1572,7 +1572,7 @@
   flex-wrap: wrap;
   transition: border-color var(--ease);
 }
-.adminInvoiceRow:hover { border-color: rgba(91,141,245,0.18); }
+.adminInvoiceRow:hover { border-color: rgba(249,115,22,0.18); }
 .adminInvoicePaid { opacity: 0.65; }
 
 .adminInvoiceLeft {
@@ -1640,9 +1640,9 @@
   flex-shrink: 0;
 }
 .remindBtn:hover {
-  background: rgba(91,141,245,0.1);
+  background: rgba(249,115,22,0.1);
   color: var(--accent-lt);
-  border-color: rgba(91,141,245,0.3);
+  border-color: rgba(249,115,22,0.3);
 }
 
 /* ── Invoice notify checkbox ────────────────────────────────────────────── */

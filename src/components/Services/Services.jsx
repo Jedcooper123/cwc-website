@@ -33,14 +33,14 @@ export default function Services() {
       <div className="container">
         {/* Header */}
         <div className={styles.header}>
-          <p className="section-label fade-up">What We Do</p>
+          <p className="section-label fade-up">What We Build</p>
           <h2 className="section-title fade-up delay-1">
-            Everything your business needs<br />
-            to thrive online.
+            Tools that qualify your leads<br />
+            and grow your business.
           </h2>
           <p className={`section-sub fade-up delay-2 ${styles.sub}`}>
-            From your first launch to long-term growth, CWC covers the full
-            range of web services, tailored to your business and built to last.
+            Every service we offer is designed with one goal: get you better customers.
+            We don't just build websites — we build systems that do the filtering for you.
           </p>
         </div>
 
@@ -71,9 +71,9 @@ export default function Services() {
 
         {/* Bottom CTA */}
         <div className={`${styles.bottomCta} fade-up delay-2`}>
-          <p>Not sure which services fit your situation?</p>
-          <a href="#schedule" className="btn-primary">
-            Book a Free Call <FiArrowRight />
+          <p>Not sure where to start? Let's figure out what will move the needle for you.</p>
+          <a href="#contact" className="btn-primary">
+            Get Better Leads <FiArrowRight />
           </a>
         </div>
       </div>

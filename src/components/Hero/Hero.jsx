@@ -8,13 +8,13 @@ import { FiArrowRight, FiCalendar, FiChevronDown } from 'react-icons/fi'
 import styles from './Hero.module.css'
 
 const METRICS = [
-  { value: 'Custom',     label: 'Every build'    },
+  { value: 'Qualified',  label: 'Leads only'     },
   { value: '<48h',       label: 'Response time'  },
-  { value: '99.9%',      label: 'Uptime target'  },
+  { value: 'Zero',       label: 'Wasted calls'   },
   { value: 'Full-Stack', label: 'Capability'     },
 ]
 
-const TAGS = ['React', 'Node.js', 'Render', 'PostgreSQL', 'SEO', 'UI/UX']
+const TAGS = ['HVAC', 'Roofing', 'Plumbing', 'Landscaping', 'Contractors', 'Local Services']
 
 export default function Hero() {
   return (
@@ -28,28 +28,27 @@ export default function Hero() {
         <div className={styles.copy}>
           <div className={styles.eyebrow}>
             <span className={styles.eyebrowLine} />
-            Cooper Web Consulting
+            Launchpad Web Consulting
           </div>
 
           <h1 className={styles.headline}>
-            Your website<br />
-            <span className={styles.gradText}>should work</span><br />
-            as hard as you do.
+            Stop Wasting Time<br />
+            <span className={styles.gradText}>on Bad Leads.</span>
           </h1>
 
           <p className={styles.sub}>
-            Custom websites built from scratch for businesses that want to
-            stand out. Design, development, and long-term support from a
-            partner who actually cares about your results.
+            We build websites that pre-qualify your leads — so you only talk
+            to serious customers who are ready to move forward. No more chasing
+            low-budget inquiries or picking up pointless calls.
           </p>
 
           <div className={styles.actions}>
-            <a href="#schedule" className="btn-primary">
-              <FiCalendar size={15} /> Book a Free Consultation
+            <a href="#contact" className="btn-primary">
+              Get Better Leads <FiArrowRight size={15} />
             </a>
-            <Link to="/services" className="btn-secondary">
-              View Services <FiArrowRight size={14} />
-            </Link>
+            <a href="#schedule" className="btn-secondary">
+              <FiCalendar size={14} /> Book a Call
+            </a>
           </div>
         </div>
 
@@ -61,20 +60,20 @@ export default function Hero() {
               <span className={styles.dot} />
               <span className={styles.dot} />
             </div>
-            <span className={styles.panelFile}>cwc.config.js</span>
+            <span className={styles.panelFile}>leads.config.js</span>
           </div>
 
           <div className={styles.codeBlock}>
-            <p className={styles.cl}><span className={styles.ck}>const</span> <span className={styles.cv}>project</span> <span className={styles.co}>=</span> <span className={styles.cp}>{'{'}</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>client</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;your business&apos;</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>stack</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;React + Node + DB&apos;</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>deploy</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;Render&apos;</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>support</span><span className={styles.co}>:</span> <span className={styles.cb}>true</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>uptime</span><span className={styles.co}>:</span> <span className={styles.cn}>&apos;99.9%&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={styles.cl}><span className={styles.ck}>const</span> <span className={styles.cv}>leadSystem</span> <span className={styles.co}>=</span> <span className={styles.cp}>{'{'}</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>filter</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;low-budget inquiries&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>qualify</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;serious customers only&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>target</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;service businesses&apos;</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>wasted_calls</span><span className={styles.co}>:</span> <span className={styles.cb}>false</span><span className={styles.cp}>,</span></p>
+            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>better_leads</span><span className={styles.co}>:</span> <span className={styles.cb}>true</span><span className={styles.cp}>,</span></p>
             <p className={styles.cl}><span className={styles.cp}>{'}'}</span></p>
             <p className={styles.clBlank}>&nbsp;</p>
-            <p className={styles.cl}><span className={styles.cc}>{'// ✓ Ready for launch'}</span></p>
-            <p className={styles.cl}><span className={styles.ck}>export default</span> <span className={styles.cv}>build</span><span className={styles.cp}>(</span><span className={styles.cv}>project</span><span className={styles.cp}>)</span></p>
+            <p className={styles.cl}><span className={styles.cc}>{'// ✓ Only serious leads get through'}</span></p>
+            <p className={styles.cl}><span className={styles.ck}>export default</span> <span className={styles.cv}>qualify</span><span className={styles.cp}>(</span><span className={styles.cv}>leadSystem</span><span className={styles.cp}>)</span></p>
           </div>
 
           <div className={styles.tagRow}>
@@ -85,7 +84,7 @@ export default function Hero() {
 
           <div className={styles.statusBar}>
             <span className={styles.statusDot} />
-            All systems operational
+            Lead qualification system active
           </div>
         </div>
       </div>

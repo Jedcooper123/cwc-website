@@ -34,16 +34,16 @@ export default function ClientPortal() {
               In Development
             </div>
             <h2 className={`section-title fade-up delay-1`}>
-              The CWC Client Platform is coming.
+              The Launchpad Client Platform is coming.
             </h2>
             <p className={`${styles.body} fade-up delay-2`}>
-              We're building more than just websites. The CWC platform will give
+              We're building more than just websites. The Launchpad platform will give
               every client a dedicated workspace — a single destination to manage
               your web presence, communicate with our team, and track the health of
               your digital investment.
             </p>
             <p className={`${styles.body} fade-up delay-3`}>
-              This isn't a "coming soon" placeholder. It's a preview of where CWC is
+              This isn't a "coming soon" placeholder. It's a preview of where Launchpad is
               heading as we grow into a full-service digital services company.
               Clients who join us now will be first in line when the platform launches.
             </p>

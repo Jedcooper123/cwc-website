@@ -1,37 +1,36 @@
 /* =============================================================================
-   Cooper Web Consulting — Global Stylesheet
+   Launchpad Web Consulting — Global Stylesheet
    CSS custom properties, resets, typography, and shared utility classes.
    ============================================================================= */
 
 /* ── Custom Properties ──────────────────────────────────────────────────────── */
 :root {
-  /* ── Pure Grayscale Backgrounds ── */
-  --bg:          #0a0a0a;   /* near-black */
-  --surface:     #111111;   /* dark surface */
-  --card:        #181818;   /* card bg */
-  --card-hover:  #1e1e1e;   /* card hover */
+  /* ── Light Theme Backgrounds ── */
+  --bg:          #ffffff;   /* white */
+  --surface:     #f7f7f7;   /* light surface */
+  --card:        #ffffff;   /* card bg */
+  --card-hover:  #fafafa;   /* card hover */
 
-  /* ── Grayscale Borders ── */
-  --border:      #242424;
-  --border-hover:#333333;
+  /* ── Borders ── */
+  --border:      #e8e8e8;
+  --border-hover:#cccccc;
 
-  /* ── Grayscale Text ── */
-  --text:        #f0f0f0;   /* near-white primary */
-  --text-2:      #909090;   /* secondary */
-  --text-3:      #555555;   /* muted */
+  /* ── Text ── */
+  --text:        #0a0a0a;   /* near-black primary */
+  --text-2:      #4a4a4a;   /* secondary */
+  --text-3:      #888888;   /* muted */
 
-  /* ── Accent: Refined Slate-Blue ── */
-  /* One accent color only — used sparingly for CTAs, highlights, icons */
-  --accent:      #5b8df5;
-  --accent-lt:   #7ea8ff;
-  --accent-bg:   rgba(91, 141, 245, 0.09);
-  --accent-glow: rgba(91, 141, 245, 0.2);
+  /* ── Accent: Orange ── */
+  --accent:      #f97316;
+  --accent-lt:   #fb923c;
+  --accent-bg:   rgba(249, 115, 22, 0.08);
+  --accent-glow: rgba(249, 115, 22, 0.25);
 
-  /* ── Gradient (accent shades only) ── */
-  --grad:        linear-gradient(135deg, #5b8df5 0%, #8b6ff5 100%);
+  /* ── Gradient (orange → red) ── */
+  --grad:        linear-gradient(135deg, #f97316 0%, #ef4444 100%);
 
-  /* ── Typography: Geist → Inter → system-ui ── */
-  --font:        'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* ── Typography: Helvetica Neue → Arial → system-ui ── */
+  --font:        'Helvetica Neue', 'Helvetica', 'Arial', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Layout */
   --max-w:       1200px;
@@ -222,7 +221,7 @@ input, textarea, select {
 
 /* ── Scrollbar ──────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar               { width: 5px; }
-::-webkit-scrollbar-track         { background: var(--bg); }
+::-webkit-scrollbar-track         { background: var(--surface); }
 ::-webkit-scrollbar-thumb         { background: var(--border-hover); border-radius: 100px; }
 ::-webkit-scrollbar-thumb:hover   { background: var(--accent); }
 

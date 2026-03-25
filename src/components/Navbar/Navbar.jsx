@@ -69,8 +69,11 @@ export default function Navbar() {
 
         {/* ── Logo ── */}
         <Link to="/" className={styles.logo}>
-          <span className={styles.logoMark}>CWC</span>
-          <span className={styles.logoName}>Cooper Web Consulting</span>
+          <span className={styles.logoMark}>L</span>
+          <div className={styles.logoText}>
+            <span className={styles.logoPrimary}>Launchpad</span>
+            <span className={styles.logoSub}>Web Consulting</span>
+          </div>
         </Link>
 
         {/* ── Desktop Links ── */}
@@ -139,7 +142,7 @@ export default function Navbar() {
             className={`btn-primary ${styles.ctaBtn}`}
             onClick={(e) => handleAnchorLink(e, '/#contact')}
           >
-            Get Started <FiArrowRight size={14} />
+            Get Better Leads <FiArrowRight size={14} />
           </Link>
         </div>
 
@@ -190,7 +193,7 @@ export default function Navbar() {
             style={{ justifyContent: 'center', fontSize: '0.875rem' }}
             onClick={(e) => handleAnchorLink(e, '/#contact')}
           >
-            Get Started <FiArrowRight />
+            Get Better Leads <FiArrowRight />
           </Link>
         </div>
       </div>
