@@ -40,6 +40,15 @@ const STAGES = [
   { id: 'launched',    label: 'Launched'    },
 ]
 
+// Progress percentage per stage (for the visual bar)
+const STAGE_PROGRESS = {
+  discovery:   10,
+  design:      30,
+  development: 60,
+  review:      85,
+  launched:    100,
+}
+
 // ── API helper ─────────────────────────────────────────────────────────────
 async function apiFetch(path, opts = {}) {
   const res = await fetch(path, {
@@ -206,7 +215,7 @@ function InvoiceCard({ invoice, onPaySuccess }) {
 
   if (paying && clientSecret) {
     return (
-      <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'night' } }}>
+      <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: '#f97316', borderRadius: '10px', fontFamily: 'Helvetica Neue, Arial, sans-serif' } } }}>
         <CheckoutForm invoice={invoice}
           onSuccess={() => { setPaying(false); onPaySuccess() }}
           onCancel={() => setPaying(false)} />
@@ -560,9 +569,7 @@ function AdminPanel() {
 
   if (editClient) return (
     <div className={styles.adminPanel}>
-      <div className={styles.adminNav}>
-        <button className={styles.adminNavBtn} onClick={() => setEditClient(null)}>← Back</button>
-      </div>
+      <button className={styles.adminBackBtn} onClick={() => setEditClient(null)}>← Back to Clients</button>
       {success && <div className={styles.successMsg}><FiCheckCircle size={14} /> {success}</div>}
       {error   && <div className={styles.errorMsg}><FiAlertCircle size={14} /> {error}</div>}
       <form className={styles.adminForm} onSubmit={handleSaveEdit}>
@@ -658,7 +665,7 @@ function AdminPanel() {
             const svcName  = svc ? (svc.shortTitle || svc.title) : null
             const stageVal = stageEdit[p.id] !== undefined ? stageEdit[p.id] : p.stage
             const isDirty  = stageEdit[p.id] !== undefined && stageEdit[p.id] !== p.stage
-            const statusColor = p.status === 'active' ? '#5b8df5' : p.status === 'completed' ? '#4ade80' : '#facc15'
+            const statusColor = p.status === 'active' ? '#6366f1' : p.status === 'completed' ? '#10b981' : '#f59e0b'
 
             return (
               <div key={p.id} className={styles.adminProjectCard}>
@@ -1077,9 +1084,9 @@ function LoginForm({ onLogin }) {
   return (
     <div className={styles.loginWrap}>
       <div className={styles.loginCard}>
-        <div className={styles.loginLogo}><span className={styles.logoMark}>CWC</span></div>
+        <div className={styles.loginLogo}><span className={styles.logoMark}>L</span></div>
         <h1 className={styles.loginTitle}>Client Portal</h1>
-        <p className={styles.loginSub}>Sign in to view your projects and billing.</p>
+        <p className={styles.loginSub}>Sign in to view your projects, invoices, and billing.</p>
 
         <form className={styles.loginForm} onSubmit={handleSubmit} noValidate>
           <div className={styles.field}>
@@ -1110,8 +1117,8 @@ function LoginForm({ onLogin }) {
         </form>
 
         <p className={styles.loginFooter}>
-          Not a CWC client yet?{' '}
-          <Link to="/#contact" className={styles.loginFooterLink}>Get in touch</Link>
+          Not a Launchpad client yet?{' '}
+          <Link to="/contact" className={styles.loginFooterLink}>Get in touch →</Link>
         </p>
       </div>
     </div>
@@ -1255,15 +1262,30 @@ function Dashboard({ user, onLogout }) {
         {/* ── Overview ── */}
         {activeTab === 'overview' && (
           <div className={styles.overview}>
+            {/* Welcome banner */}
+            <div className={styles.welcomeBanner}>
+              <div>
+                <p className={styles.welcomeName}>
+                  Welcome back, <span className={styles.welcomeOrangeText}>{user.name?.split(' ')[0] || 'there'}</span>.
+                </p>
+                <p className={styles.welcomeSub}>
+                  {activeProjects.length > 0
+                    ? `You have ${activeProjects.length} active project${activeProjects.length > 1 ? 's' : ''} in progress.`
+                    : 'Your dashboard is ready — projects will appear here when work begins.'}
+                </p>
+              </div>
+              <span className={styles.logoMark} style={{ flexShrink: 0 }}>L</span>
+            </div>
+
             <div className={styles.statGrid}>
               {[
-                { label: 'Active Projects',  value: activeProjects.length.toString(),   icon: <FiFileText />,   color: '#5b8df5' },
-                { label: 'Open Tickets',     value: '0',                                 icon: <FiTool />,       color: '#4ade80' },
+                { label: 'Active Projects',  value: activeProjects.length.toString(),   icon: <FiFileText />,   color: '#6366f1' },
+                { label: 'Open Tickets',     value: '0',                                 icon: <FiTool />,       color: '#10b981' },
                 { label: 'Pending Invoices', value: pendingInvoices.length.toString(),   icon: <FiCreditCard />, color: '#f97316' },
-                { label: 'Amount Owed',      value: `$${(totalOwed/100).toFixed(2)}`,    icon: <FiDollarSign />, color: '#facc15' },
+                { label: 'Amount Owed',      value: `$${(totalOwed/100).toFixed(2)}`,    icon: <FiDollarSign />, color: '#f59e0b' },
               ].map(({ label, value, icon, color }) => (
                 <div key={label} className={styles.statCard}>
-                  <div className={styles.statIcon} style={{ background: color+'18', color }}>{icon}</div>
+                  <div className={styles.statIcon} style={{ background: color+'15', color }}>{icon}</div>
                   <div className={styles.statVal}>{value}</div>
                   <div className={styles.statLabel}>{label}</div>
                 </div>
@@ -1287,22 +1309,34 @@ function Dashboard({ user, onLogout }) {
 
             {projects.length > 0 && (
               <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Projects</h2>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>Projects</h2>
+                  <button className={styles.viewAll} onClick={() => navigate('projects')}>
+                    View all <FiArrowRight size={12} />
+                  </button>
+                </div>
                 <div className={styles.projectList}>
                   {projects.slice(0, 3).map(p => {
-                    const color   = p.status === 'completed' ? '#4ade80' : p.status === 'active' ? '#5b8df5' : '#facc15'
+                    const color   = p.status === 'completed' ? '#10b981' : p.status === 'active' ? '#6366f1' : '#f59e0b'
                     const svcName = getServiceName(p.service_id)
+                    const pct     = p.status === 'completed' ? 100 : (STAGE_PROGRESS[p.stage] || 10)
                     return (
                       <div key={p.id} className={styles.projectItem}>
                         <div className={styles.projectMeta}>
                           <span className={styles.projectName}>{p.name}</span>
                           <div className={styles.projectTags}>
                             {svcName && <span className={styles.svcBadge}>{svcName}</span>}
-                            <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
+                            <span className={styles.projectStatus} style={{ color, background: color+'15', borderColor: color+'30' }}>
                               {p.status === 'completed' ? <FiCheckCircle size={11} /> : <FiClock size={11} />}
                               {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                             </span>
                           </div>
+                        </div>
+                        <div className={styles.projectProgressRow}>
+                          <div className={styles.progressBar}>
+                            <div className={styles.progressFill} style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className={styles.progressPct}>{pct}%</span>
                         </div>
                         <StageTracker stage={p.stage || 'discovery'} />
                       </div>
@@ -1314,24 +1348,24 @@ function Dashboard({ user, onLogout }) {
 
             {pendingInvoices.length > 0 && (
               <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Outstanding Invoices</h2>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>Outstanding Invoices</h2>
+                  <button className={styles.viewAll} onClick={() => navigate('billing')}>
+                    View all <FiArrowRight size={12} />
+                  </button>
+                </div>
                 <div className={styles.invoiceList}>
                   {pendingInvoices.slice(0, 2).map(inv => (
                     <InvoiceCard key={inv.id} invoice={inv} onPaySuccess={fetchData} />
                   ))}
                 </div>
-                {pendingInvoices.length > 2 && (
-                  <button className={styles.viewAll} onClick={() => navigate('billing')}>
-                    View all <FiArrowRight size={13} />
-                  </button>
-                )}
               </div>
             )}
 
             {projects.length === 0 && pendingInvoices.length === 0 && !billing.subscription && (
               <div className={styles.emptyState}>
                 <FiGrid size={32} />
-                <p>No active projects yet. Your dashboard will update as your project gets underway.</p>
+                <p>Your dashboard will populate once your project begins. Reach out if you have any questions.</p>
               </div>
             )}
           </div>
@@ -1341,25 +1375,35 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'projects' && (
           <div className={styles.tabContent}>
             {projects.length === 0 ? (
-              <div className={styles.emptyState}><FiFileText size={32} /><p>No projects yet. Check back after your kickoff call.</p></div>
+              <div className={styles.emptyState}>
+                <FiFileText size={32} />
+                <p>No projects yet. Your project tracker will populate once your work begins.</p>
+              </div>
             ) : (
               <div className={styles.projectList}>
                 {projects.map(p => {
-                  const color   = p.status === 'completed' ? '#4ade80' : p.status === 'active' ? '#5b8df5' : '#facc15'
+                  const color   = p.status === 'completed' ? '#10b981' : p.status === 'active' ? '#6366f1' : '#f59e0b'
                   const svcName = getServiceName(p.service_id)
+                  const pct     = p.status === 'completed' ? 100 : (STAGE_PROGRESS[p.stage] || 10)
                   return (
                     <div key={p.id} className={`${styles.projectItem} ${styles.projectItemFull}`}>
                       <div className={styles.projectMeta}>
                         <span className={styles.projectName}>{p.name}</span>
                         <div className={styles.projectTags}>
                           {svcName && <span className={styles.svcBadge}>{svcName}</span>}
-                          <span className={styles.projectStatus} style={{ color, background: color+'18', borderColor: color+'33' }}>
+                          <span className={styles.projectStatus} style={{ color, background: color+'15', borderColor: color+'30' }}>
                             {p.status === 'completed' ? <FiCheckCircle size={11} /> : <FiClock size={11} />}
                             {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                           </span>
                         </div>
                       </div>
                       {p.description && <p className={styles.projectDesc}>{p.description}</p>}
+                      <div className={styles.projectProgressRow}>
+                        <div className={styles.progressBar}>
+                          <div className={styles.progressFill} style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className={styles.progressPct}>{pct}%</span>
+                      </div>
                       <StageTracker stage={p.stage || 'discovery'} />
                       {p.monthly_price_cents > 0 && (
                         <div className={styles.monthlyPriceNote}>
@@ -1385,10 +1429,24 @@ function Dashboard({ user, onLogout }) {
 
             {/* Invoice list below */}
             <div className={styles.section} style={{ marginTop: '1.5rem' }}>
-              <h2 className={styles.sectionTitle}>Invoices</h2>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>
+                  Invoices {invoices.length > 0 && `(${invoices.length})`}
+                </h2>
+                {invoices.filter(i => i.status === 'pending').length > 0 && (
+                  <span style={{
+                    fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em',
+                    textTransform: 'uppercase', background: 'rgba(249,115,22,0.1)',
+                    color: '#f97316', border: '1px solid rgba(249,115,22,0.2)',
+                    borderRadius: '100px', padding: '0.2rem 0.6rem',
+                  }}>
+                    {invoices.filter(i => i.status === 'pending').length} pending
+                  </span>
+                )}
+              </div>
               {invoices.length === 0 ? (
-                <div className={styles.emptyState} style={{ padding: '2rem 0' }}>
-                  <FiFileText size={28} /><p>No invoices yet.</p>
+                <div className={styles.emptyState}>
+                  <FiFileText size={28} /><p>No invoices yet. Invoices will appear here when created.</p>
                 </div>
               ) : (
                 <div className={styles.invoiceList}>
@@ -1403,11 +1461,11 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'support' && (
           <div className={styles.tabContent}>
             <div className={styles.supportCard}>
-              <FiMessageSquare size={28} className={styles.supportIcon} />
-              <h2 className={styles.placeholderTitle}>Send a Message</h2>
+              <FiMessageSquare size={26} className={styles.supportIcon} />
+              <h2 className={styles.placeholderTitle}>Send a Support Request</h2>
               <p className={styles.placeholderBody}>
-                For support requests, bug fixes, or content changes — fill this out
-                and Jed will get back to you within one business day.
+                Need a content change, have a bug, or just want to check in?
+                Send a message and Jed will respond within one business day.
               </p>
               <SupportForm user={user} />
             </div>
@@ -1418,11 +1476,11 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'reports' && (
           <div className={styles.tabContent}>
             <div className={styles.supportCard}>
-              <FiBarChart2 size={28} className={styles.supportIcon} />
+              <FiBarChart2 size={26} className={styles.supportIcon} />
               <h2 className={styles.placeholderTitle}>Request a Report</h2>
               <p className={styles.placeholderBody}>
-                Monthly performance and maintenance reports will appear here automatically.
-                Until then, send a message to request one.
+                Monthly performance reports will appear here automatically as your project
+                matures. You can also request one manually at any time.
               </p>
               <SupportForm user={user} defaultMessage="Hi Jed, could you send over my latest monthly report?" />
             </div>
@@ -1464,8 +1522,9 @@ export default function PortalPage() {
     return (
       <div className={styles.portalRoot}>
         <div className={styles.loadingScreen}>
-          <span className={styles.logoMark}>CWC</span>
-          <p>Loading...</p>
+          <span className={styles.logoMark}>L</span>
+          <div className={styles.loadingSpinner} />
+          <p className={styles.loadingText}>Loading your portal…</p>
         </div>
       </div>
     )

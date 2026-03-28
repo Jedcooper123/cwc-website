@@ -18,9 +18,9 @@ const PROJECTS = [
   },
   {
     title: 'Willy B Grill',
-    type: 'Food & Restaurant',
-    desc: 'A clean, appetizing website for a BBQ grill business — showcasing the menu, hours, and location with a strong call-to-action to drive foot traffic and orders.',
-    tags: ['Restaurant', 'Custom Design', 'Render'],
+    type: 'Food Truck',
+    desc: 'A clean, appetizing website for a burger food truck — showcasing the menu, location, and hours with a strong call-to-action to drive foot traffic and orders.',
+    tags: ['Food Truck', 'Custom Design', 'Render'],
     url: 'https://willy-b-grill-website-1.onrender.com/',
     accentColor: '#f97316',
   },

@@ -47,7 +47,7 @@ export default function Scheduling() {
         <div className={`${styles.embedWrap} fade-up delay-2`}>
           <div
             className="calendly-inline-widget"
-            data-url={`${CALENDLY_URL}?hide_gdpr_banner=1&background_color=111111&text_color=f5f5f5&primary_color=5b8df5`}
+            data-url={`${CALENDLY_URL}?hide_gdpr_banner=1&background_color=ffffff&text_color=0a0a0a&primary_color=f97316`}
             style={{ minWidth: '320px', height: '700px' }}
           />
         </div>

@@ -8,10 +8,10 @@ import { FiMenu, FiX, FiArrowRight, FiChevronDown, FiLock } from 'react-icons/fi
 import styles from './Navbar.module.css'
 
 const PRIMARY_LINKS = [
-  { label: 'About',     to: '/#about'    },
-  { label: 'Process',   to: '/#process'  },
-  { label: 'Portfolio', to: '/#portfolio'},
-  { label: 'Pricing',   to: '/#pricing'  },
+  { label: 'About',    to: '/#about'   },
+  { label: 'Our Work', to: '/work'     },
+  { label: 'Pricing',  to: '/pricing'  },
+  { label: 'Contact',  to: '/contact'  },
 ]
 
 const SERVICE_LINKS = [
@@ -138,9 +138,8 @@ export default function Navbar() {
             <FiLock size={13} /> Client Portal
           </Link>
           <Link
-            to="/#contact"
+            to="/contact"
             className={`btn-primary ${styles.ctaBtn}`}
-            onClick={(e) => handleAnchorLink(e, '/#contact')}
           >
             Get Better Leads <FiArrowRight size={14} />
           </Link>
@@ -188,10 +187,9 @@ export default function Navbar() {
             <FiLock size={13} /> Client Portal
           </Link>
           <Link
-            to="/#contact"
+            to="/contact"
             className="btn-primary"
             style={{ justifyContent: 'center', fontSize: '0.875rem' }}
-            onClick={(e) => handleAnchorLink(e, '/#contact')}
           >
             Get Better Leads <FiArrowRight />
           </Link>

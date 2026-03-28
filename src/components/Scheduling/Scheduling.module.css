@@ -15,11 +15,11 @@
 
 /* Calendly embed wrapper */
 .embedWrap {
-  background: #111111;
+  background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   max-width: 900px;
   margin: 0 auto;
 }

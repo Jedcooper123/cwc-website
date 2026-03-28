@@ -12,69 +12,51 @@ const PLANS = [
     name: 'Essentials',
     price: '$350',
     priceNote: 'one-time',
-    tagline: 'A clean, professional online presence — built fast, built right.',
-    desc: 'Perfect for service-based businesses, local companies, and freelancers who need a polished, high-converting website without the enterprise price tag.',
+    tagline: 'A clean, professional website — built fast, built right.',
+    desc: 'Perfect for service businesses, local companies, and freelancers who need a polished, high-converting site without the enterprise price tag.',
     popular: false,
     cta: 'Get Started',
     features: [
       'Up to 5 fully custom pages',
-      'Mobile-responsive design',
+      'Mobile-responsive & performance optimized',
       'Contact form & Google Maps integration',
-      'Basic SEO setup & meta configuration',
-      'Google Analytics integration',
-      'Fast load times (performance optimized)',
-      '2 rounds of design revisions',
+      'SEO setup & Google Analytics',
       '30-day post-launch support',
-    ],
-    notIncluded: [
-      'Backend / database functionality',
-      'Client portal or login system',
     ],
   },
   {
     name: 'Professional',
     price: '$500',
-    priceNote: 'starting at + maintenance',
-    tagline: 'A full-featured web solution with the foundation to grow.',
-    desc: 'For growing businesses that need more than a brochure site — dynamic features, backend integrations, and a monthly care plan that keeps everything running smoothly.',
+    priceNote: 'starting at',
+    tagline: 'A full-featured site with everything your business needs.',
+    desc: 'For businesses that need more than a brochure site — backend logic, custom flows, and ongoing support to keep everything running.',
     popular: true,
     cta: 'Most Popular — Get Started',
     features: [
       'Everything in Essentials',
-      'Full-stack development (frontend + backend)',
-      'CMS integration for easy content management',
-      'Custom forms, booking, or inquiry flows',
-      'Database-backed dynamic content',
+      'Full-stack: frontend + backend + database',
+      'Custom booking, forms, or inquiry flows',
       'Advanced SEO & structured data',
-      'Performance & security hardening',
       'Monthly maintenance plans available',
-      'Priority email & chat support',
-      '60-day post-launch support window',
+      '60-day post-launch support',
     ],
-    notIncluded: [],
-    maintenanceNote: 'Monthly maintenance plans starting at $50/mo',
+    maintenanceNote: 'Maintenance plans from $50/mo',
   },
   {
     name: 'Enterprise',
     price: '$999',
     priceNote: 'starting at',
-    tagline: 'Custom-engineered digital infrastructure for serious growth.',
-    desc: 'For companies with complex requirements — custom integrations, multi-role user systems, advanced data workflows, and a dedicated web presence built to match your ambitions.',
+    tagline: 'Custom-engineered for serious growth.',
+    desc: 'For businesses with complex needs — custom integrations, multi-user systems, and a dedicated partner invested in your long-term results.',
     popular: false,
-    cta: 'Let\'s Talk',
+    cta: "Let's Talk",
     features: [
       'Everything in Professional',
-      'Custom architecture & database design',
-      'Multi-user roles & authentication system',
-      'Third-party API & software integrations',
-      'E-commerce or payment processing',
-      'Advanced analytics & reporting dashboards',
-      'Scalable cloud deployment',
-      'Dedicated project management',
-      'Quarterly strategy & growth reviews',
-      'Ongoing retainer & support available',
+      'Custom architecture & API integrations',
+      'Multi-user roles & authentication',
+      'E-commerce & payment processing',
+      'Dedicated retainer & strategy reviews',
     ],
-    notIncluded: [],
   },
 ]
 
@@ -91,15 +73,14 @@ export default function Pricing() {
             Transparent pricing.<br />No hidden surprises.
           </h2>
           <p className={`section-sub fade-up delay-2`}>
-            Every business is different — these plans are starting points.
-            We'll scope your project together and make sure you're getting
-            exactly what you need at a price that makes sense.
+            Every business is different — these are starting points. We'll scope
+            your project together and make sure the price matches the work.
           </p>
         </div>
 
         {/* Cards */}
         <div className={styles.grid}>
-          {PLANS.map(({ name, price, priceNote, tagline, desc, popular, cta, features, notIncluded, maintenanceNote }, i) => (
+          {PLANS.map(({ name, price, priceNote, tagline, desc, popular, cta, features, maintenanceNote }, i) => (
             <div
               key={name}
               className={`${styles.card} ${popular ? styles.popular : ''} fade-up delay-${i + 1}`}
@@ -140,17 +121,6 @@ export default function Pricing() {
                 ))}
               </ul>
 
-              {/* Not included */}
-              {notIncluded.length > 0 && (
-                <ul className={styles.notIncluded}>
-                  {notIncluded.map((f) => (
-                    <li key={f} className={styles.notFeature}>
-                      <span className={styles.dashIcon}>—</span>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           ))}
         </div>
