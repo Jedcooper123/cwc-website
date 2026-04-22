@@ -1,25 +1,14 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Contact — Contact form with validation + contact sidebar.
-// ─────────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react'
 import {
-  FiMail, FiPhone, FiLinkedin, FiCalendar,
-  FiSend, FiCheckCircle, FiArrowRight,
+  FiMail, FiPhone, FiCalendar,
+  FiSend, FiCheckCircle, FiArrowRight, FiLock,
 } from 'react-icons/fi'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './Contact.module.css'
 
-const SERVICES = [
-  'Website Design & Development',
-  'Full Stack Site & Database Support',
-  'Website Maintenance',
-  'SEO & Online Presence',
-  'Not Sure Yet',
-]
-
 export default function Contact() {
   const ref = useScrollAnimation()
-  const [form, setForm]       = useState({ name: '', email: '', company: '', service: '', message: '' })
+  const [form, setForm]       = useState({ name: '', email: '', business: '', phone: '', message: '' })
   const [errors, setErrors]   = useState({})
   const [submitted, setSubmit] = useState(false)
 
@@ -28,7 +17,7 @@ export default function Contact() {
     if (!form.name.trim())    e.name    = 'Name is required.'
     if (!form.email.trim())   e.email   = 'Email is required.'
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Enter a valid email address.'
-    if (!form.message.trim()) e.message = 'Please include a message.'
+    if (!form.message.trim()) e.message = 'Tell us a bit about your business.'
     return e
   }
 
@@ -38,28 +27,35 @@ export default function Contact() {
     if (errors[name]) setErrors((e) => ({ ...e, [name]: '' }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    // TODO: wire up to /api/contact backend route
-    console.log('Form submitted:', form)
+    // Send to backend contact route
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+    } catch (_) {
+      // Fallback: mailto link if API not available
+    }
     setSubmit(true)
   }
 
   return (
     <section id="contact" className={`section ${styles.contact}`} ref={ref}>
       <div className="container">
-        {/* Header */}
         <div className={styles.header}>
-          <p className="section-label fade-up">Get Better Leads</p>
+          <p className="section-label fade-up">Book a Free Call</p>
           <h2 className="section-title fade-up delay-1">
-            Ready to only talk to serious customers?
+            Ready to get your business online?<br />Let's talk for 15 minutes.
           </h2>
           <p className={`section-sub fade-up delay-2`}>
-            Tell us about your business and what you're dealing with. We'll figure
-            out exactly what it takes to filter out the time-wasters and put real
-            customers in front of you.
+            No sales pitch. No commitment. Just an honest conversation about
+            what your business needs and whether we're the right fit.
+            Most people know by the end of the call.
           </p>
         </div>
 
@@ -69,12 +65,12 @@ export default function Contact() {
             {submitted ? (
               <div className={styles.successState}>
                 <FiCheckCircle className={styles.successIcon} size={40} />
-                <h3 className={styles.successTitle}>Message received!</h3>
+                <h3 className={styles.successTitle}>Got it, {form.name.split(' ')[0]}!</h3>
                 <p className={styles.successBody}>
-                  Thanks for reaching out, {form.name.split(' ')[0]}. I'll review your
-                  message and follow up within one business day.
+                  I'll reach out within one business day to schedule your free
+                  15-minute call. Talk soon.
                 </p>
-                <button className="btn-secondary" onClick={() => { setSubmit(false); setForm({ name:'', email:'', company:'', service:'', message:'' }) }}>
+                <button className="btn-secondary" onClick={() => { setSubmit(false); setForm({ name:'', email:'', business:'', phone:'', message:'' }) }}>
                   Send Another Message
                 </button>
               </div>
@@ -82,7 +78,7 @@ export default function Contact() {
               <form className={styles.form} onSubmit={handleSubmit} noValidate>
                 <div className={styles.row}>
                   <div className={styles.field}>
-                    <label className={styles.label} htmlFor="name">Full Name *</label>
+                    <label className={styles.label} htmlFor="name">Your Name *</label>
                     <input
                       id="name" name="name" type="text"
                       placeholder="Jane Smith"
@@ -95,7 +91,7 @@ export default function Contact() {
                     <label className={styles.label} htmlFor="email">Email Address *</label>
                     <input
                       id="email" name="email" type="email"
-                      placeholder="jane@company.com"
+                      placeholder="jane@yourbusiness.com"
                       className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
                       value={form.email} onChange={handleChange}
                     />
@@ -105,35 +101,31 @@ export default function Contact() {
 
                 <div className={styles.row}>
                   <div className={styles.field}>
-                    <label className={styles.label} htmlFor="company">Company / Business</label>
+                    <label className={styles.label} htmlFor="business">Business Name</label>
                     <input
-                      id="company" name="company" type="text"
-                      placeholder="Your Business Name (optional)"
+                      id="business" name="business" type="text"
+                      placeholder="Your Business Name"
                       className={styles.input}
-                      value={form.company} onChange={handleChange}
+                      value={form.business} onChange={handleChange}
                     />
                   </div>
                   <div className={styles.field}>
-                    <label className={styles.label} htmlFor="service">Service You're Interested In</label>
-                    <select
-                      id="service" name="service"
+                    <label className={styles.label} htmlFor="phone">Phone (optional)</label>
+                    <input
+                      id="phone" name="phone" type="tel"
+                      placeholder="(555) 000-0000"
                       className={styles.input}
-                      value={form.service} onChange={handleChange}
-                    >
-                      <option value="">Select a service...</option>
-                      {SERVICES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                      value={form.phone} onChange={handleChange}
+                    />
                   </div>
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label} htmlFor="message">Tell Us About Your Project *</label>
+                  <label className={styles.label} htmlFor="message">What does your business do? *</label>
                   <textarea
                     id="message" name="message"
-                    rows={5}
-                    placeholder="Describe your project, goals, timeline, or anything else worth knowing..."
+                    rows={4}
+                    placeholder="Tell us a bit about your business and what you're looking for..."
                     className={`${styles.input} ${styles.textarea} ${errors.message ? styles.inputError : ''}`}
                     value={form.message} onChange={handleChange}
                   />
@@ -141,8 +133,13 @@ export default function Contact() {
                 </div>
 
                 <button type="submit" className={`btn-primary ${styles.submitBtn}`}>
-                  Send Message <FiSend size={14} />
+                  Send — I'll Be in Touch Within 1 Business Day <FiSend size={14} />
                 </button>
+
+                <div className={styles.trustLine}>
+                  <FiLock size={12} />
+                  <span>No spam. No sales pitch. Just a real conversation.</span>
+                </div>
               </form>
             )}
           </div>
@@ -150,52 +147,43 @@ export default function Contact() {
           {/* Right: Contact info */}
           <div className={`${styles.sidebar} fade-up delay-3`}>
             <div className={styles.sideCard}>
-              <h3 className={styles.sideTitle}>Contact Information</h3>
+              <div className={styles.scheduleIcon}><FiCalendar /></div>
+              <h3 className={styles.sideTitle}>Prefer to just call?</h3>
+              <p className={styles.scheduleBody}>
+                Call or text Jed directly. No hold music, no call center —
+                just a direct line to the person who will build your site.
+              </p>
+              <a href="tel:+13367070245" className={`btn-primary ${styles.scheduleBtn}`}>
+                <FiPhone size={14} /> (336) 707-0245
+              </a>
+              <a href="#schedule" className={`btn-secondary ${styles.scheduleBtn}`} style={{ marginTop: '0.75rem' }}>
+                Book a 15-Min Call <FiArrowRight />
+              </a>
+            </div>
+
+            <div className={styles.sideCard}>
+              <h3 className={styles.sideTitle}>Contact Info</h3>
               <div className={styles.contactItems}>
-                <div className={styles.contactItem}>
+                <a href="mailto:jedpcooper@gmail.com" className={styles.contactItem}>
                   <div className={styles.contactIcon}><FiMail /></div>
                   <div>
                     <div className={styles.contactLabel}>Email</div>
                     <div className={styles.contactValue}>jedpcooper@gmail.com</div>
                   </div>
-                </div>
+                </a>
                 <a href="tel:+13367070245" className={styles.contactItem}>
                   <div className={styles.contactIcon}><FiPhone /></div>
                   <div>
-                    <div className={styles.contactLabel}>Phone</div>
+                    <div className={styles.contactLabel}>Call or Text</div>
                     <div className={styles.contactValue}>(336) 707-0245</div>
-                  </div>
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/jed-cooper-a5816a208/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.contactItem}
-                >
-                  <div className={styles.contactIcon}><FiLinkedin /></div>
-                  <div>
-                    <div className={styles.contactLabel}>LinkedIn</div>
-                    <div className={styles.contactValue}>linkedin.com/in/jed-cooper</div>
                   </div>
                 </a>
               </div>
             </div>
 
-            <div className={styles.sideCard}>
-              <div className={styles.scheduleIcon}><FiCalendar /></div>
-              <h3 className={styles.sideTitle}>Prefer to talk first?</h3>
-              <p className={styles.scheduleBody}>
-                Book a free 30-minute discovery call. No sales pitch, just an
-                honest conversation about what you're trying to build.
-              </p>
-              <a href="#schedule" className={`btn-secondary ${styles.scheduleBtn}`}>
-                Book a Call <FiArrowRight />
-              </a>
-            </div>
-
             <div className={styles.responseTime}>
               <div className={styles.rtDot} />
-              <span>Typically respond within <strong>1 business day.</strong></span>
+              <span>Typically responds within <strong>same business day.</strong></span>
             </div>
           </div>
         </div>

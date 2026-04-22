@@ -1,23 +1,21 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// About — Overview of Cooper Web Consulting's mission, approach, and stats.
-// ─────────────────────────────────────────────────────────────────────────────
 import React from 'react'
 import { FiCheckCircle, FiArrowRight } from 'react-icons/fi'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './About.module.css'
 
 const PILLARS = [
-  'Websites designed to filter out low-budget inquiries',
-  'Only serious, ready-to-buy customers reach you',
-  'Stop chasing the wrong jobs — close more of the right ones',
-  'Systems built for service businesses, not generic templates',
+  'Professional design built around your business and brand',
+  'Mobile-friendly and fast — looks great on every phone and screen',
+  'We write the copy, build the pages, and handle all the tech',
+  'One flat monthly rate — no surprises, no hidden fees',
+  'Site goes live in 2 weeks or less',
 ]
 
 const STATS = [
-  { value: '100%', label: 'Custom Built',        desc: 'No templates, no shortcuts'  },
-  { value: 'Less',  label: 'Wasted Calls',       desc: 'Fewer low-budget inquiries'  },
-  { value: 'More',  label: 'Qualified Leads',    desc: 'Customers ready to move'     },
-  { value: '5★',   label: 'Client Results',      desc: 'Consistent across every build'},
+  { value: '$0',    label: 'Upfront Cost',   desc: 'No payment until your site is ready' },
+  { value: '2 wks', label: 'To Launch',      desc: 'From first call to live website'      },
+  { value: '$85',   label: 'Per Month',      desc: 'Everything included, no surprises'    },
+  { value: '5★',    label: 'Client Results', desc: 'Consistent across every build'        },
 ]
 
 export default function About() {
@@ -30,24 +28,23 @@ export default function About() {
 
           {/* ── Left: Text content ── */}
           <div className={styles.content}>
-            <p className="section-label fade-up">Our Mission</p>
+            <p className="section-label fade-up">Built for NC Small Businesses</p>
             <h2 className="section-title fade-up delay-1">
-              We build websites that don't just look good —{' '}
-              <span className={styles.accent}>they work.</span>
+              You don't need to know anything<br />
+              <span className={styles.accent}>about websites. That's our job.</span>
             </h2>
             <p className={`section-sub fade-up delay-2 ${styles.intro}`}>
-              We help service-based businesses grow by building websites that eliminate
-              wasted time, reduce bad leads, and create systems that bring in real
-              customers who are ready to move forward.
+              Most small business owners don't have time to learn web design,
+              deal with hosting companies, or figure out why their site broke.
+              That's exactly why Launchpad exists.
             </p>
             <p className={`${styles.body} fade-up delay-3`}>
-              Whether you run HVAC, roofing, plumbing, landscaping, or any other
-              service business — your website should be working as hard as you do.
-              That means filtering out tire-kickers and putting serious customers
-              in front of you.
+              We build your site, put it online, and keep it running — all for
+              $85 a month. We work with restaurants, contractors, salons, healthcare
+              providers, photographers, and small businesses of all kinds across
+              North Carolina. You focus on your business. We handle the website.
             </p>
 
-            {/* Pillar list */}
             <ul className={`${styles.pillars} fade-up delay-3`}>
               {PILLARS.map((p) => (
                 <li key={p} className={styles.pillar}>
@@ -58,7 +55,7 @@ export default function About() {
             </ul>
 
             <a href="#contact" className={`btn-primary fade-up delay-4 ${styles.cta}`}>
-              Get Better Leads <FiArrowRight />
+              Book a Free 15-Minute Call <FiArrowRight />
             </a>
           </div>
 

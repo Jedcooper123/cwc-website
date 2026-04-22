@@ -1,20 +1,21 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Hero — Bold editorial layout. No pill badge. Large typographic headline
-// anchored left with a code-panel visual and metrics strip at the bottom.
-// ─────────────────────────────────────────────────────────────────────────────
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { FiArrowRight, FiCalendar, FiChevronDown } from 'react-icons/fi'
+import { FiArrowRight, FiCalendar, FiChevronDown, FiCheck } from 'react-icons/fi'
 import styles from './Hero.module.css'
 
 const METRICS = [
-  { value: 'Qualified',  label: 'Leads only'     },
-  { value: '<48h',       label: 'Response time'  },
-  { value: 'Zero',       label: 'Wasted calls'   },
-  { value: 'Full-Stack', label: 'Capability'     },
+  { value: '$0',      label: 'To get started'   },
+  { value: '$85/mo',  label: 'Flat monthly rate' },
+  { value: '2 weeks', label: 'To go live'        },
+  { value: 'Cancel',  label: 'Anytime, no fees'  },
 ]
 
-const TAGS = ['HVAC', 'Roofing', 'Plumbing', 'Landscaping', 'Contractors', 'Local Services']
+const TRUST_ITEMS = [
+  '$0 to start — no upfront cost',
+  'Site live in 2 weeks or less',
+  'We handle design, hosting, updates',
+  'No contracts — cancel anytime',
+  'Less than $3/day',
+]
 
 export default function Hero() {
   return (
@@ -24,7 +25,7 @@ export default function Hero() {
 
       <div className={`${styles.inner} container`}>
 
-        {/* ── Left: Editorial copy ── */}
+        {/* ── Left: Copy ── */}
         <div className={styles.copy}>
           <div className={styles.eyebrow}>
             <span className={styles.eyebrowLine} />
@@ -32,27 +33,29 @@ export default function Hero() {
           </div>
 
           <h1 className={styles.headline}>
-            Stop Wasting Time<br />
-            <span className={styles.gradText}>on Bad Leads.</span>
+            Your Competitors<br />
+            Have a Website.<br />
+            <span className={styles.gradText}>Do You?</span>
           </h1>
 
           <p className={styles.sub}>
-            We build websites that pre-qualify your leads — so you only talk
-            to serious customers who are ready to move forward. No more chasing
-            low-budget inquiries or picking up pointless calls.
+            Every day without a website is a day customers choose someone else.
+            We build professional websites for NC small businesses —{' '}
+            <strong>$0 upfront, $85/month.</strong> We handle everything.
+            No contracts, no tech stress.
           </p>
 
           <div className={styles.actions}>
             <a href="#contact" className="btn-primary">
-              Get Better Leads <FiArrowRight size={15} />
+              Book a Free 15-Minute Call <FiArrowRight size={15} />
             </a>
-            <a href="#schedule" className="btn-secondary">
-              <FiCalendar size={14} /> Book a Call
+            <a href="#portfolio" className="btn-secondary">
+              See Our Work
             </a>
           </div>
         </div>
 
-        {/* ── Right: Code-style panel ── */}
+        {/* ── Right: Trust card ── */}
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div className={styles.panelDots}>
@@ -60,31 +63,26 @@ export default function Hero() {
               <span className={styles.dot} />
               <span className={styles.dot} />
             </div>
-            <span className={styles.panelFile}>leads.config.js</span>
+            <span className={styles.panelFile}>What You Get</span>
           </div>
 
-          <div className={styles.codeBlock}>
-            <p className={styles.cl}><span className={styles.ck}>const</span> <span className={styles.cv}>leadSystem</span> <span className={styles.co}>=</span> <span className={styles.cp}>{'{'}</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>filter</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;low-budget inquiries&apos;</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>qualify</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;serious customers only&apos;</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>target</span><span className={styles.co}>:</span> <span className={styles.cs}>&apos;service businesses&apos;</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>wasted_calls</span><span className={styles.co}>:</span> <span className={styles.cb}>false</span><span className={styles.cp}>,</span></p>
-            <p className={`${styles.cl} ${styles.ci}`}><span className={styles.ck}>better_leads</span><span className={styles.co}>:</span> <span className={styles.cb}>true</span><span className={styles.cp}>,</span></p>
-            <p className={styles.cl}><span className={styles.cp}>{'}'}</span></p>
-            <p className={styles.clBlank}>&nbsp;</p>
-            <p className={styles.cl}><span className={styles.cc}>{'// ✓ Only serious leads get through'}</span></p>
-            <p className={styles.cl}><span className={styles.ck}>export default</span> <span className={styles.cv}>qualify</span><span className={styles.cp}>(</span><span className={styles.cv}>leadSystem</span><span className={styles.cp}>)</span></p>
-          </div>
-
-          <div className={styles.tagRow}>
-            {TAGS.map((t) => (
-              <span key={t} className={styles.techTag}>{t}</span>
+          <div className={styles.trustList}>
+            {TRUST_ITEMS.map((item) => (
+              <div key={item} className={styles.trustItem}>
+                <FiCheck className={styles.trustCheck} size={16} />
+                <span>{item}</span>
+              </div>
             ))}
+          </div>
+
+          <div className={styles.guarantee}>
+            <span className={styles.guaranteeBadge}>2-Week Guarantee</span>
+            <p>If your site isn't live in 2 weeks, your first month is free.</p>
           </div>
 
           <div className={styles.statusBar}>
             <span className={styles.statusDot} />
-            Lead qualification system active
+            Accepting new clients — NC small businesses
           </div>
         </div>
       </div>

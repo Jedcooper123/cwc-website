@@ -1,29 +1,40 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Services — Service cards sourced from services.js. Each card is fully
-// clickable and links to the service detail page.
-// ─────────────────────────────────────────────────────────────────────────────
 import React from 'react'
-import { Link } from 'react-router-dom'
-import {
-  FiMonitor, FiTool, FiLayers, FiSearch, FiArrowRight,
-} from 'react-icons/fi'
-import { SERVICES } from '../../data/services'
+import { FiMonitor, FiServer, FiTool, FiSearch, FiEdit, FiArrowRight } from 'react-icons/fi'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './Services.module.css'
 
-const ICON_MAP = {
-  'web-design':    <FiMonitor />,
-  'fullstack-db':  <FiLayers />,
-  'maintenance':   <FiTool />,
-  'seo':           <FiSearch />,
-}
-
-const TAG_MAP = {
-  'web-design':    'Core Service',
-  'fullstack-db':  'Full Stack',
-  'maintenance':   'Ongoing',
-  'seo':           'Add-on',
-}
+const INCLUDED = [
+  {
+    icon: <FiMonitor />,
+    title: 'Custom Website Design',
+    desc: 'Built for your business. Not a template. Not a drag-and-drop builder. Your brand, your services, your look.',
+  },
+  {
+    icon: <FiServer />,
+    title: 'Hosting & Security',
+    desc: 'Your site lives on a fast, secure server. SSL certificate included. No extra hosting bills.',
+  },
+  {
+    icon: <FiMonitor size={16} style={{ transform: 'rotate(90deg)' }} />,
+    title: 'Mobile Optimization',
+    desc: 'Looks great on every phone, tablet, and desktop. Over 60% of your customers will visit from a phone.',
+  },
+  {
+    icon: <FiTool />,
+    title: 'Monthly Maintenance',
+    desc: 'We keep your site updated, fast, and working. If something breaks, we fix it — no extra charge.',
+  },
+  {
+    icon: <FiEdit />,
+    title: 'Content Updates',
+    desc: 'Need to change your hours, add a photo, update a price? Just send us a message. We handle it.',
+  },
+  {
+    icon: <FiSearch />,
+    title: 'SEO Basics',
+    desc: "We set up the fundamentals so Google can find you — title tags, meta descriptions, local SEO, sitemap.",
+  },
+]
 
 export default function Services() {
   const ref = useScrollAnimation()
@@ -31,49 +42,38 @@ export default function Services() {
   return (
     <section id="services" className={`section ${styles.services}`} ref={ref}>
       <div className="container">
-        {/* Header */}
         <div className={styles.header}>
-          <p className="section-label fade-up">What We Build</p>
+          <p className="section-label fade-up">What's Included</p>
           <h2 className="section-title fade-up delay-1">
-            Tools that qualify your leads<br />
-            and grow your business.
+            One plan. Everything included.<br />
+            <span style={{ color: 'var(--accent)' }}>$85/month.</span>
           </h2>
           <p className={`section-sub fade-up delay-2 ${styles.sub}`}>
-            Every service we offer is designed with one goal: get you better customers.
-            We don't just build websites — we build systems that do the filtering for you.
+            No tiers. No à la carte. No surprise bills.
+            Your $85/month covers everything it takes to have a
+            professional website up and running.
           </p>
         </div>
 
-        {/* Cards grid — filter out admin-only services (e.g. friends) */}
         <div className={styles.grid}>
-          {SERVICES.filter(s => !s.adminOnly).map(({ id, title, shortDesc, isAddon }, i) => (
-            <Link
-              key={id}
-              to={`/services/${id}`}
-              className={`${styles.card} ${isAddon ? styles.cardAddon : ''} fade-up delay-${(i % 3) + 1}`}
+          {INCLUDED.map(({ icon, title, desc }, i) => (
+            <div
+              key={title}
+              className={`${styles.card} fade-up delay-${(i % 3) + 1}`}
             >
               <div className={styles.cardTop}>
-                <div className={styles.iconWrap}>{ICON_MAP[id]}</div>
-                <span className={`${styles.tag} ${isAddon ? styles.tagAddon : ''}`}>
-                  {TAG_MAP[id]}
-                </span>
+                <div className={styles.iconWrap}>{icon}</div>
               </div>
               <h3 className={styles.cardTitle}>{title}</h3>
-              <p className={styles.cardDesc}>{shortDesc}</p>
-              <div className={styles.cardFooter}>
-                <span className={styles.learnMore}>
-                  Learn more <FiArrowRight size={13} />
-                </span>
-              </div>
-            </Link>
+              <p className={styles.cardDesc}>{desc}</p>
+            </div>
           ))}
         </div>
 
-        {/* Bottom CTA */}
         <div className={`${styles.bottomCta} fade-up delay-2`}>
-          <p>Not sure where to start? Let's figure out what will move the needle for you.</p>
+          <p>$0 upfront. $85/month. Everything above included. Cancel anytime.</p>
           <a href="#contact" className="btn-primary">
-            Get Better Leads <FiArrowRight />
+            Book a Free 15-Minute Call <FiArrowRight />
           </a>
         </div>
       </div>

@@ -1,9 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Process — Step-by-step engagement model showing the 5-phase CWC workflow.
-// ─────────────────────────────────────────────────────────────────────────────
 import React, { useState } from 'react'
 import {
-  FiSearch, FiPenTool, FiCode, FiSend, FiHeadphones,
+  FiPhone, FiCode, FiCheckSquare, FiZap,
 } from 'react-icons/fi'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './Process.module.css'
@@ -11,48 +8,39 @@ import styles from './Process.module.css'
 const STEPS = [
   {
     step: '01',
-    icon: <FiSearch />,
-    title: 'Discovery',
-    headline: 'We start by listening.',
+    icon: <FiPhone />,
+    title: 'Free Call',
+    headline: 'We listen first.',
     desc:
-      'Every successful project begins with understanding your business — your goals, your audience, your competition, and your current pain points. We ask the right questions so nothing important gets missed.',
-    deliverables: ['Goals & objectives brief', 'Competitor analysis', 'Technical requirements'],
+      'Tell us about your business — what you do, who your customers are, what you need. We\'ll ask a few quick questions and tell you exactly what we\'ll build. No pitch, no pressure, no commitment.',
+    deliverables: ['Clear scope of your site', 'Timeline confirmed', 'Next steps outlined'],
   },
   {
     step: '02',
-    icon: <FiPenTool />,
-    title: 'Design',
-    headline: 'Form follows function.',
+    icon: <FiCode />,
+    title: 'We Build It',
+    headline: 'You don\'t have to do anything.',
     desc:
-      'We translate your brand and business requirements into a clean, purposeful design. Every layout decision is made with your users in mind — intuitive navigation, clear messaging, and a visual identity that builds trust.',
-    deliverables: ['Wireframes & mockups', 'Brand alignment review', 'Mobile-first responsive layouts'],
+      'We design and build your site from scratch — using your brand, your photos (or stock if needed), and your services. We write the copy, set up hosting, and handle all the technical work. You\'ll get a preview link when it\'s ready.',
+    deliverables: ['Complete custom website', 'Mobile-optimized design', 'Preview link to review'],
   },
   {
     step: '03',
-    icon: <FiCode />,
-    title: 'Development',
-    headline: 'Precision-built, not pieced together.',
+    icon: <FiCheckSquare />,
+    title: 'You Approve',
+    headline: 'One round of revisions, no extra charge.',
     desc:
-      'Your site is engineered from the ground up using modern, maintainable code. No bloated page builders or outdated frameworks — just clean, performant, scalable web technology.',
-    deliverables: ['Clean, documented codebase', 'Performance & accessibility standards', 'Cross-browser testing'],
+      'Review your site and tell us what to change. We\'ll make adjustments until you\'re happy. This usually takes 2–3 days. We don\'t move to launch until you give the green light.',
+    deliverables: ['Revisions completed', 'Final approval', 'Domain and hosting confirmed'],
   },
   {
     step: '04',
-    icon: <FiSend />,
-    title: 'Launch',
-    headline: 'Go live with confidence.',
+    icon: <FiZap />,
+    title: 'Goes Live',
+    headline: 'Launched in 2 weeks or less.',
     desc:
-      'We handle the final checks, domain setup, SSL configuration, and deployment. When we flip the switch, everything is production-ready — fast, secure, and indexed properly from day one.',
-    deliverables: ['Full pre-launch QA', 'SEO & analytics setup', 'Domain & hosting configuration'],
-  },
-  {
-    step: '05',
-    icon: <FiHeadphones />,
-    title: 'Ongoing Support',
-    headline: 'We stay in your corner.',
-    desc:
-      'Your relationship with Launchpad doesn\'t end at launch. We provide ongoing maintenance, performance monitoring, content updates, and strategic guidance as your business evolves.',
-    deliverables: ['Monthly maintenance plans', 'Priority bug fixes & updates', 'Growth & optimization consulting'],
+      'We point your domain, flip the switch, and your site is live. Then we handle all ongoing maintenance — updates, security, content changes — so you never have to think about it again.',
+    deliverables: ['Site live and indexed', 'SSL and security active', 'Ongoing monthly support begins'],
   },
 ]
 
@@ -63,20 +51,18 @@ export default function Process() {
   return (
     <section id="process" className={`section ${styles.process}`} ref={ref}>
       <div className="container">
-        {/* Header */}
         <div className={styles.header}>
-          <p className="section-label fade-up">How We Work</p>
+          <p className="section-label fade-up">How It Works</p>
           <h2 className="section-title fade-up delay-1">
-            A clear process. Zero guesswork.
+            From "I need a website"<br />to live in 2 weeks.
           </h2>
           <p className={`section-sub fade-up delay-2 ${styles.sub}`}>
-            From first conversation to long-term support, you'll always know
-            exactly where your project stands and what comes next.
+            No long discovery phases. No back-and-forth for months.
+            We keep it simple, move fast, and get your site live.
           </p>
         </div>
 
         <div className={`${styles.layout} fade-up delay-2`}>
-          {/* Step list */}
           <div className={styles.stepList}>
             {STEPS.map(({ step, icon, title }, i) => (
               <button
@@ -92,7 +78,6 @@ export default function Process() {
             ))}
           </div>
 
-          {/* Detail panel */}
           <div className={styles.detail}>
             {STEPS.map(({ step, icon, title, headline, desc, deliverables }, i) => (
               <div
@@ -101,12 +86,12 @@ export default function Process() {
                 aria-hidden={active !== i}
               >
                 <div className={styles.panelIcon}>{icon}</div>
-                <div className={styles.panelStep}>Phase {step}</div>
+                <div className={styles.panelStep}>Step {step}</div>
                 <h3 className={styles.panelTitle}>{title}</h3>
                 <p className={styles.panelHeadline}>{headline}</p>
                 <p className={styles.panelDesc}>{desc}</p>
                 <div className={styles.deliverables}>
-                  <p className={styles.delivLabel}>What you'll receive:</p>
+                  <p className={styles.delivLabel}>What you'll get:</p>
                   <ul className={styles.delivList}>
                     {deliverables.map((d) => (
                       <li key={d} className={styles.delivItem}>
@@ -119,6 +104,11 @@ export default function Process() {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className={`${styles.guaranteeBanner} fade-up delay-3`}>
+          <strong>⏱ 2-Week Launch Guarantee</strong>
+          <p>If your site isn't live within 2 weeks of our first call, your first month is free. No exceptions.</p>
         </div>
       </div>
     </section>

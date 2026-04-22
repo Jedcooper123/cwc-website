@@ -1,51 +1,47 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// WhyCWC — Differentiators section highlighting reliability, modern design,
-// scalability, support, and business-growth focus.
-// ─────────────────────────────────────────────────────────────────────────────
 import React from 'react'
 import {
-  FiShield, FiLayers, FiBarChart2, FiClock,
-  FiUsers, FiStar,
+  FiDollarSign, FiZap, FiXCircle, FiTool,
+  FiStar, FiUser,
 } from 'react-icons/fi'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './WhyCWC.module.css'
 
 const REASONS = [
   {
-    icon: <FiBarChart2 />,
-    title: 'We Focus on Outcomes, Not Design',
+    icon: <FiDollarSign />,
+    title: '$0 to Get Started',
     desc:
-      'Most agencies celebrate how a site looks. We measure success by how many qualified leads it brings you. Every layout decision, every form, every page is built to filter and convert — not just impress.',
+      'Most web agencies want $1,000–$5,000 upfront before they touch anything. We don\'t. You pay nothing until we\'re ready to go — then $85/month. That\'s it.',
   },
   {
-    icon: <FiShield />,
-    title: 'Built-In Lead Qualification',
+    icon: <FiZap />,
+    title: 'Site Live in 2 Weeks',
     desc:
-      'Our sites are designed to pre-qualify visitors before they ever contact you. That means fewer tire-kickers, fewer low-budget calls, and more time spent closing real jobs with serious customers.',
+      'We don\'t drag projects out for months. From first call to live website is two weeks or less. We\'ve done it dozens of times and we stand behind it with a guarantee.',
   },
   {
-    icon: <FiLayers />,
-    title: 'Systems, Not Just Websites',
+    icon: <FiXCircle />,
+    title: 'Cancel Anytime',
     desc:
-      'We don\'t hand you a pretty page and walk away. We build a tool — a lead system that works 24/7, filters bad-fit inquiries, and delivers better customers straight to your inbox or phone.',
+      'No long-term contracts. No cancellation fees. If you ever want to stop, just say so. We hand over everything — your files, your domain, all of it. No strings attached.',
   },
   {
-    icon: <FiClock />,
-    title: 'Respect for Your Time',
+    icon: <FiTool />,
+    title: 'We Handle Everything',
     desc:
-      'You\'re a business owner — not a marketing manager. We handle everything and make it simple. No jargon, no long calls about color palettes. Just results that show up in your schedule.',
+      'Design, hosting, security updates, content changes — you don\'t have to touch any of it. If something breaks at 2am, that\'s our problem, not yours.',
   },
   {
     icon: <FiStar />,
-    title: 'Built for Blue-Collar Businesses',
+    title: 'Built for Your Business',
     desc:
-      'HVAC, roofing, plumbing, landscaping, contracting — we understand how service businesses operate. We speak your language and build around your workflow, not the other way around.',
+      'This isn\'t a template with your name swapped in. We build around your brand, your services, and your customers. It looks like it belongs to you because it does.',
   },
   {
-    icon: <FiUsers />,
-    title: 'Direct. No Hand-Offs.',
+    icon: <FiUser />,
+    title: 'Real Person, Direct Contact',
     desc:
-      'You work directly with the person building your site. No account managers, no agency hand-offs. Clear communication, honest timelines, and a partner who\'s invested in your results.',
+      'You work directly with Jed — not an account manager, not a ticket system. One person who knows your site, answers your messages, and is invested in your results.',
   },
 ]
 
@@ -55,20 +51,18 @@ export default function WhyCWC() {
   return (
     <section id="why-cwc" className={`section ${styles.section}`} ref={ref}>
       <div className="container">
-        {/* Header */}
         <div className={styles.header}>
           <p className="section-label fade-up">Why Launchpad</p>
           <h2 className="section-title fade-up delay-1">
-            We don't just build websites.<br />We build lead machines.
+            No upfront cost. No contracts.<br />No tech headaches.
           </h2>
           <p className={`section-sub fade-up delay-2`}>
-            Most web agencies focus on design or traffic. We focus on outcomes.
-            Our approach is built around filtering and qualifying leads before
-            they ever reach you.
+            We built Launchpad for small business owners who know they need
+            a website but don't want to deal with the hassle — or pay
+            thousands of dollars to get one.
           </p>
         </div>
 
-        {/* Grid */}
         <div className={styles.grid}>
           {REASONS.map(({ icon, title, desc }, i) => (
             <div
@@ -82,18 +76,17 @@ export default function WhyCWC() {
           ))}
         </div>
 
-        {/* CTA Banner */}
         <div className={`${styles.banner} fade-up delay-2`}>
           <div className={styles.bannerContent}>
             <h3 className={styles.bannerTitle}>
-              Ready to stop wasting time on the wrong customers?
+              Every day without a website is a day customers choose your competitor.
             </h3>
             <p className={styles.bannerSub}>
-              Let's build a system that only brings you serious leads.
+              Let's fix that in 2 weeks — for less than $3/day.
             </p>
           </div>
           <a href="#contact" className="btn-primary">
-            Get Better Leads
+            Book a Free 15-Minute Call
           </a>
         </div>
       </div>
