@@ -204,6 +204,53 @@
   50%       { opacity: 0.5; }
 }
 
+/* ── Trust list (What You Get panel) ── */
+.trustList {
+  padding: 1.25rem 1.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: #d1d5db;
+  font-weight: 500;
+}
+
+.trustCheck {
+  color: #4ade80;
+  flex-shrink: 0;
+}
+
+.guarantee {
+  margin: 0.5rem 1.5rem 1rem;
+  padding: 0.85rem 1rem;
+  background: rgba(249,115,22,0.08);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 8px;
+}
+
+.guaranteeBadge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-lt, #f97316);
+  margin-bottom: 0.3rem;
+}
+
+.guarantee p {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* ── Metrics strip ── */
 .metricsStrip {
   position: relative;

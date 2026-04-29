@@ -33,14 +33,15 @@ export default function Hero() {
           </div>
 
           <h1 className={styles.headline}>
-            Your Competitors<br />
-            Have a Website.<br />
-            <span className={styles.gradText}>Do You?</span>
+            A Website That<br />
+            Actually Brings You<br />
+            <span className={styles.gradText}>More Business.</span>
           </h1>
 
           <p className={styles.sub}>
-            Every day without a website is a day customers choose someone else.
-            We build professional websites for NC small businesses —{' '}
+            Whether you have no site or one that isn't working — we build
+            professional websites for NC small businesses that turn visitors
+            into calls, reservations, and leads.{' '}
             <strong>$0 upfront, $85/month.</strong> We handle everything.
             No contracts, no tech stress.
           </p>
@@ -49,7 +50,7 @@ export default function Hero() {
             <a href="#contact" className="btn-primary">
               Book a Free 15-Minute Call <FiArrowRight size={15} />
             </a>
-            <a href="#portfolio" className="btn-secondary">
+            <a href="/work" className="btn-secondary">
               See Our Work
             </a>
           </div>

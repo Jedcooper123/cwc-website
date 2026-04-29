@@ -20,17 +20,6 @@ export default function Pricing() {
   return (
     <section id="pricing" className={`section ${styles.pricing}`} ref={ref}>
       <div className="container">
-        <div className={styles.header}>
-          <p className="section-label fade-up">Simple Pricing</p>
-          <h2 className="section-title fade-up delay-1">
-            One plan. No surprises.
-          </h2>
-          <p className={`section-sub fade-up delay-2`}>
-            We don't do tiers, upsells, or complicated packages.
-            One flat rate covers everything your business needs online.
-          </p>
-        </div>
-
         <div className={styles.singleCardWrap}>
           <div className={`${styles.card} ${styles.popular} fade-up delay-1`}>
             <div className={styles.popularBadge}>Everything Included</div>

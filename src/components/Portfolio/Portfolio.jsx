@@ -97,15 +97,6 @@ export default function Portfolio() {
   return (
     <section id="portfolio" className={`section ${styles.portfolio}`} ref={ref}>
       <div className="container">
-        <div className={styles.header}>
-          <p className="section-label fade-up">Our Work</p>
-          <h2 className="section-title fade-up delay-1">Real sites. Real businesses.</h2>
-          <p className={`section-sub fade-up delay-2`}>
-            Every project is built from scratch, designed to convert visitors
-            into qualified leads. No templates, no shortcuts.
-          </p>
-        </div>
-
         <div className={styles.grid}>
           {PROJECTS.map((project, i) => (
             <div key={project.title} className={`fade-up delay-${i + 1}`}>
