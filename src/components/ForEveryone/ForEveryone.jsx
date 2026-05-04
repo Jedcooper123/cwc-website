@@ -44,7 +44,7 @@ const TYPES = [
   },
   {
     icon: <FiGlobe />,
-    label: 'Any NC Small Business',
+    label: 'Any Small Business',
     examples: 'If you need a web presence, we build it',
   },
 ]
@@ -58,7 +58,7 @@ export default function ForEveryone() {
         <div className={styles.header}>
           <p className="section-label fade-up">Who We Build For</p>
           <h2 className="section-title fade-up delay-1">
-            If you run a small business in NC,<br />we built this for you.
+            If you run a small business anywhere in the US,<br />we built this for you.
           </h2>
           <p className={`section-sub fade-up delay-2`}>
             You don't need to be tech-savvy. You don't need a big budget.

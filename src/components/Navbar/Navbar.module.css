@@ -31,7 +31,6 @@
   text-decoration: none;
 }
 
-/* Orange square mark */
 .logoMark {
   width: 42px;
   height: 42px;
@@ -48,7 +47,6 @@
   box-shadow: 0 4px 18px rgba(249,115,22,0.3);
 }
 
-/* Two-line logo text */
 .logoText {
   display: flex;
   flex-direction: column;
@@ -82,6 +80,9 @@
   align-items: center;
   gap: 0.15rem;
   margin-left: auto;
+  list-style: none;
+  padding: 0;
+  margin-right: 0;
 }
 
 .link {
@@ -105,97 +106,6 @@
   color: var(--text);
   background: rgba(0,0,0,0.04);
 }
-
-/* ── Services Dropdown ── */
-.dropWrap {
-  position: relative;
-}
-
-.dropTrigger { user-select: none; }
-
-.chevron {
-  transition: transform var(--ease);
-  flex-shrink: 0;
-}
-.chevronOpen { transform: rotate(180deg); }
-
-.dropMenu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 330px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 1rem;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.12);
-  z-index: 100;
-  animation: dropIn 0.18s ease both;
-}
-
-@keyframes dropIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.dropHeader {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  margin-bottom: 0.6rem;
-  padding: 0 0.5rem;
-}
-
-.dropGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.2rem;
-}
-
-.dropItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.35rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-2);
-  padding: 0.55rem 0.65rem;
-  border-radius: var(--r-sm);
-  transition: background var(--ease), color var(--ease);
-  text-decoration: none;
-}
-
-.dropItem:hover {
-  background: rgba(0,0,0,0.04);
-  color: var(--text);
-}
-
-.dropArrow {
-  opacity: 0;
-  transition: opacity var(--ease);
-  flex-shrink: 0;
-}
-.dropItem:hover .dropArrow {
-  opacity: 1;
-  color: var(--accent-lt);
-}
-
-.dropAll {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--accent-lt);
-  padding: 0.65rem 0.65rem 0;
-  margin-top: 0.5rem;
-  border-top: 1px solid var(--border);
-  text-decoration: none;
-  transition: color var(--ease);
-}
-.dropAll:hover { color: var(--accent); }
 
 /* ── Right actions ── */
 .rightActions {
@@ -240,10 +150,18 @@
 }
 .toggle:hover { background: rgba(0,0,0,0.05); }
 
-/* ── Mobile drawer ── */
+/* ── Mobile drawer ──
+   z-index: 999 keeps it below the header (1000) so the header
+   always sits on top, but above the backdrop (998).
+   height: calc(100svh - 70px) uses the small viewport height unit
+   so it fills the visible screen correctly even when the mobile
+   browser's address bar is visible. */
 .drawer {
   position: fixed;
-  top: 70px; left: 0; right: 0; bottom: 0;
+  top: 70px;
+  left: 0;
+  right: 0;
+  height: calc(100svh - 70px);
   background: var(--surface);
   border-top: 1px solid var(--border);
   padding: 1.5rem var(--px) 2.5rem;
@@ -254,6 +172,8 @@
   opacity: 0;
   transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease;
   overflow-y: auto;
+  z-index: 999;
+  -webkit-overflow-scrolling: touch;
 }
 .drawerOpen { transform: translateX(0); opacity: 1; }
 
@@ -282,7 +202,6 @@
   transition: color var(--ease);
 }
 .drawerLink:hover { color: var(--text); }
-.drawerLinkAccent { color: var(--accent-lt) !important; }
 
 .drawerCtas {
   display: flex;
@@ -295,8 +214,8 @@
   position: fixed;
   inset: 0;
   top: 70px;
-  background: rgba(0,0,0,0.65);
-  z-index: -1;
+  background: rgba(0,0,0,0.55);
+  z-index: 998;
 }
 
 /* ── Responsive breakpoint ── */

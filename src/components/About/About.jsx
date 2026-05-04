@@ -8,7 +8,7 @@ const PILLARS = [
   'Mobile-friendly and fast — looks great on every phone and screen',
   'We write the copy, build the pages, and handle all the tech',
   'One flat monthly rate — no surprises, no hidden fees',
-  'Site goes live in 2 weeks or less',
+  'Site goes live in 2 weeks or less, guaranteed',
 ]
 
 const STATS = [
@@ -28,7 +28,7 @@ export default function About() {
 
           {/* ── Left: Text content ── */}
           <div className={styles.content}>
-            <p className="section-label fade-up">Built for NC Small Businesses</p>
+            <p className="section-label fade-up">Built for Small Businesses</p>
             <h2 className="section-title fade-up delay-1">
               You don't need to know anything<br />
               <span className={styles.accent}>about websites. That's our job.</span>
@@ -42,7 +42,7 @@ export default function About() {
               We build your site, put it online, and keep it running — all for
               $85 a month. We work with restaurants, contractors, salons, healthcare
               providers, photographers, and small businesses of all kinds across
-              North Carolina. You focus on your business. We handle the website.
+              the country. You focus on your business. We handle the website.
             </p>
 
             <ul className={`${styles.pillars} fade-up delay-3`}>
@@ -59,18 +59,32 @@ export default function About() {
             </a>
           </div>
 
-          {/* ── Right: Stats grid ── */}
-          <div className={styles.statsGrid}>
-            {STATS.map(({ value, label, desc }, i) => (
-              <div
-                key={label}
-                className={`${styles.statCard} fade-up delay-${i + 2}`}
-              >
-                <div className={styles.statVal}>{value}</div>
-                <div className={styles.statLabel}>{label}</div>
-                <div className={styles.statDesc}>{desc}</div>
+          {/* ── Right: Photo + Stats ── */}
+          <div className={styles.visual}>
+            {/* Photo card */}
+            <div className={`${styles.photoCard} fade-up delay-2`}>
+              <img
+                src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?auto=format&fit=crop&w=700&q=80"
+                alt="Small business website on laptop"
+                className={styles.photo}
+                loading="lazy"
+              />
+              <div className={styles.photoBadge}>
+                <span className={styles.badgeDot} />
+                Your site. Live in 2 weeks.
               </div>
-            ))}
+            </div>
+
+            {/* Stats grid */}
+            <div className={`${styles.statsGrid} fade-up delay-3`}>
+              {STATS.map(({ value, label, desc }) => (
+                <div key={label} className={styles.statCard}>
+                  <div className={styles.statVal}>{value}</div>
+                  <div className={styles.statLabel}>{label}</div>
+                  <div className={styles.statDesc}>{desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,84 @@
+/* ── CTA Banner — full-width bold visual break ─────────────────────────────── */
+.banner {
+  background: var(--grad);
+  padding: 3rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle dot grid overlay */
+.banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+}
+
+.zapIcon {
+  color: rgba(255,255,255,0.85);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.headline {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.4;
+  margin: 0 0 0.3rem;
+}
+
+.sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.75rem;
+  background: #fff;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: var(--r-md);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+  .inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .cta { align-self: flex-start; }
+}

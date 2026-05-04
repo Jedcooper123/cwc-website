@@ -40,8 +40,8 @@ export default function Hero() {
 
           <p className={styles.sub}>
             Whether you have no site or one that isn't working — we build
-            professional websites for NC small businesses that turn visitors
-            into calls, reservations, and leads.{' '}
+            professional websites for small businesses across the US that turn
+            visitors into calls, reservations, and leads.{' '}
             <strong>$0 upfront, $85/month.</strong> We handle everything.
             No contracts, no tech stress.
           </p>
@@ -83,7 +83,7 @@ export default function Hero() {
 
           <div className={styles.statusBar}>
             <span className={styles.statusDot} />
-            Accepting new clients — NC small businesses
+            Accepting new clients — small businesses nationwide
           </div>
         </div>
       </div>
