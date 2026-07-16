@@ -35,9 +35,9 @@ export default function ServicesPage() {
             <span className={styles.gradText}>and why it matters.</span>
           </h1>
           <p className={styles.pageSub}>
-            From a first website to a full-stack platform — CWC delivers every
-            layer of modern web development. Choose what fits, or let us scope
-            the right combination for your goals.
+            From a first website to a full-stack platform — Launchpad delivers
+            every layer of modern web development. Choose what fits, or let us
+            scope the right combination for your goals.
           </p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function ServicesPage() {
       <section className={`section ${styles.serviceSection}`}>
         <div className="container">
           <div className={styles.grid}>
-            {SERVICES.map(({ id, title, tagline, shortDesc, whatWeDeliver, goodFor, startingAt, color }) => (
+            {SERVICES.map(({ id, title, tagline, shortDesc, whatWeDeliver, goodFor, startingAt, monthlySupport, color }) => (
               <div key={id} className={styles.card}>
                 <div className={styles.cardTop}>
                   <div
@@ -57,7 +57,9 @@ export default function ServicesPage() {
                   </div>
                   <div className={styles.startingAt}>
                     <span className={styles.startingAtLabel}>Starting at</span>
-                    <span className={styles.startingAtVal}>{startingAt}</span>
+                    <span className={styles.startingAtVal}>
+                      {startingAt}{monthlySupport ? ` + ${monthlySupport}` : ''}
+                    </span>
                   </div>
                 </div>
 

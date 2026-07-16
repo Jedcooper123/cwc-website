@@ -9,9 +9,9 @@ import styles from './WhyCWC.module.css'
 const REASONS = [
   {
     icon: <FiDollarSign />,
-    title: '$0 to Get Started',
+    title: 'Straightforward Pricing',
     desc:
-      'Most web agencies want $1,000–$5,000 upfront before they touch anything. We don\'t. You pay nothing until we\'re ready to go — then $85/month. That\'s it.',
+      'Most web agencies want $1,000–$5,000 upfront. We don\'t. A Front-End site is $350 to build + $35/month. A Full Stack site with ordering or scheduling built in is $499 + $50/month. That\'s it.',
   },
   {
     icon: <FiZap />,
@@ -54,7 +54,7 @@ export default function WhyCWC() {
         <div className={styles.header}>
           <p className="section-label fade-up">Why Launchpad</p>
           <h2 className="section-title fade-up delay-1">
-            No upfront cost. No contracts.<br />No tech headaches.
+            Flat pricing. No contracts.<br />No tech headaches.
           </h2>
           <p className={`section-sub fade-up delay-2`}>
             We built Launchpad for small business owners who know they need

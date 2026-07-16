@@ -10,11 +10,13 @@ export default function PricingPage() {
         <div className="container">
           <p className="section-label">Simple Pricing</p>
           <h1 className={styles.pageTitle}>
-            One plan. No surprises.
+            Two plans. No surprises.
           </h1>
           <p className={styles.pageSub}>
-            $0 upfront. $85/month. We build it, host it, and maintain it.
-            No contracts, no hidden fees, cancel anytime.
+            Front-End sites start at $350 to build, then $35/month. Full
+            Stack sites — with ordering, scheduling, and custom backends —
+            start at $499 to build, then $50/month. No contracts, no hidden
+            fees, cancel anytime.
           </p>
         </div>
       </div>

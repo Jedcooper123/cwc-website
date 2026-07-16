@@ -7,6 +7,7 @@ import bcrypt     from 'bcryptjs'
 import { getDb }  from '../database/db.js'
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js'
 import { sendInvoiceEmail, sendReminderEmail, sendWelcomeEmail } from '../utils/email.js'
+import { getStripe } from './payments.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
@@ -52,6 +53,36 @@ router.patch('/clients/:id', (req, res) => {
       return res.status(409).json({ error: 'That email is already in use.' })
     return res.status(500).json({ error: 'Server error.' })
   }
+})
+
+// ── DELETE /api/admin/clients/:id ────────────────────────────────────────
+// Deletes the client and cascades their projects, invoices, and subscription
+// rows (ON DELETE CASCADE). Cancels any live Stripe subscription first so
+// they stop being billed.
+router.delete('/clients/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const db     = getDb()
+  const client = db.prepare('SELECT id, stripe_customer_id FROM users WHERE id = ? AND role = ?').get(id, 'client')
+  if (!client) return res.status(404).json({ error: 'Client not found.' })
+
+  const activeSubs = db.prepare(`
+    SELECT stripe_subscription_id FROM subscriptions
+    WHERE client_id = ? AND stripe_subscription_id IS NOT NULL AND status NOT IN ('cancelled')
+  `).all(id)
+
+  if (activeSubs.length > 0) {
+    try {
+      const stripe = getStripe()
+      for (const sub of activeSubs) {
+        await stripe.subscriptions.cancel(sub.stripe_subscription_id).catch(() => {})
+      }
+    } catch (err) {
+      console.error('[Stripe] Failed to cancel subscription(s) during client delete:', err.message)
+    }
+  }
+
+  db.prepare('DELETE FROM users WHERE id = ?').run(id)
+  return res.json({ ok: true })
 })
 
 // ── GET /api/admin/clients ────────────────────────────────────────────────
@@ -164,6 +195,16 @@ router.patch('/projects/:id', (req, res) => {
   return res.json({ ok: true })
 })
 
+// ── DELETE /api/admin/projects/:id ────────────────────────────────────────
+router.delete('/projects/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const db      = getDb()
+  const project = db.prepare('SELECT id FROM projects WHERE id = ?').get(id)
+  if (!project) return res.status(404).json({ error: 'Project not found.' })
+  db.prepare('DELETE FROM projects WHERE id = ?').run(id)
+  return res.json({ ok: true })
+})
+
 // ── POST /api/admin/invoices ──────────────────────────────────────────────
 // Body: { clientId, description, amountDollars, serviceId?, invoiceType?, dueDate? }
 router.post('/invoices', (req, res) => {
@@ -267,6 +308,77 @@ router.get('/clients/:id/subscription', (req, res) => {
   `).get(req.params.id)
   const user = db.prepare('SELECT stripe_customer_id FROM users WHERE id = ?').get(req.params.id)
   return res.json({ subscription: sub || null, stripeCustomerId: user?.stripe_customer_id || null })
+})
+
+// ── GET /api/admin/subscriptions ── all subscriptions with client info ────
+router.get('/subscriptions', (req, res) => {
+  const db = getDb()
+  const subscriptions = db.prepare(`
+    SELECT s.*, u.name AS client_name, u.email AS client_email
+    FROM subscriptions s
+    JOIN users u ON u.id = s.client_id
+    ORDER BY s.updated_at DESC
+  `).all()
+  return res.json({ subscriptions })
+})
+
+// ── POST /api/admin/clients/:id/sync-stripe ── pull live status from Stripe ─
+// Reconciles local subscription/invoice status directly against Stripe, in
+// case a webhook event was missed (server downtime, webhook not configured
+// yet, etc). The webhook keeps things current in real time; this is the
+// manual backstop.
+router.post('/clients/:id/sync-stripe', async (req, res) => {
+  const db     = getDb()
+  const client = db.prepare('SELECT id, stripe_customer_id FROM users WHERE id = ? AND role = ?')
+    .get(req.params.id, 'client')
+  if (!client) return res.status(404).json({ error: 'Client not found.' })
+  if (!client.stripe_customer_id)
+    return res.status(400).json({ error: 'This client has no Stripe customer yet.' })
+
+  try {
+    const stripe = getStripe()
+
+    // 1. Reconcile subscriptions
+    const subs = await stripe.subscriptions.list({ customer: client.stripe_customer_id, limit: 10 })
+    for (const sub of subs.data) {
+      const periodEnd = sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toISOString()
+        : null
+      const existing = db.prepare('SELECT id FROM subscriptions WHERE stripe_subscription_id = ?').get(sub.id)
+      if (existing) {
+        db.prepare(`
+          UPDATE subscriptions
+          SET status = ?, current_period_end = ?, updated_at = datetime('now')
+          WHERE stripe_subscription_id = ?
+        `).run(sub.status, periodEnd, sub.id)
+      } else {
+        db.prepare(`
+          INSERT INTO subscriptions
+            (client_id, stripe_subscription_id, stripe_customer_id, status, current_period_end)
+          VALUES (?, ?, ?, ?, ?)
+        `).run(client.id, sub.id, client.stripe_customer_id, sub.status, periodEnd)
+      }
+    }
+
+    // 2. Reconcile any pending one-time invoices tied to a payment intent
+    const pendingInvoices = db.prepare(`
+      SELECT id, stripe_payment_intent FROM invoices
+      WHERE client_id = ? AND status = 'pending' AND stripe_payment_intent IS NOT NULL
+    `).all(client.id)
+    let invoicesSynced = 0
+    for (const inv of pendingInvoices) {
+      const intent = await stripe.paymentIntents.retrieve(inv.stripe_payment_intent)
+      if (intent.status === 'succeeded') {
+        db.prepare(`UPDATE invoices SET status = 'paid', paid_at = datetime('now') WHERE id = ?`).run(inv.id)
+        invoicesSynced++
+      }
+    }
+
+    return res.json({ ok: true, subscriptionsSynced: subs.data.length, invoicesSynced })
+  } catch (err) {
+    console.error('[Stripe sync]', err.message)
+    return res.status(500).json({ error: 'Could not sync with Stripe: ' + err.message })
+  }
 })
 
 // ── POST /api/admin/clients/:id/remind ── send reminder to a client ──────

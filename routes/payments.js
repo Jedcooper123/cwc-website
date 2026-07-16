@@ -19,7 +19,7 @@ import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js'
 
 const router = Router()
 
-function getStripe() {
+export function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('STRIPE_SECRET_KEY environment variable is not set.')
   return new Stripe(key, { apiVersion: '2024-04-10' })

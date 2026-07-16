@@ -5,8 +5,12 @@ import styles from './FAQ.module.css'
 
 const FAQS = [
   {
-    q: 'What does $85/month include?',
-    a: 'Everything. Custom website design, hosting, SSL security, monthly maintenance, content updates when you need them, and SEO basics. We handle all of it. You just run your business.',
+    q: 'What\'s the difference between the two plans?',
+    a: 'A Front-End Site ($350 to build, $35/month) is a custom-designed website that shows off your business — pages, photos, hours, and a contact form. A Full Stack Site ($499 to build, $50/month) includes everything in Front-End plus a real backend: online ordering, appointment or quote scheduling, customer accounts, or an admin dashboard. If your site just needs to look great, go Front-End. If it needs to actually take orders or bookings, go Full Stack.',
+  },
+  {
+    q: 'What does the monthly fee include?',
+    a: 'Everything after launch. Hosting, SSL security, monthly maintenance, content updates when you need them, and SEO basics. We handle all of it. You just run your business.',
   },
   {
     q: 'Do I own my website?',

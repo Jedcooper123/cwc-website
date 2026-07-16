@@ -19,7 +19,7 @@ import {
   FiCheckCircle, FiClock, FiAlertCircle, FiLogOut,
   FiDollarSign, FiRefreshCw, FiUsers, FiUserPlus,
   FiPlusCircle, FiEdit2, FiSend, FiMessageSquare, FiLayers,
-  FiExternalLink, FiCalendar, FiMenu, FiX, FiShield,
+  FiExternalLink, FiCalendar, FiMenu, FiX, FiShield, FiTrash2,
 } from 'react-icons/fi'
 import { SERVICES } from '../data/services'
 import styles from './PortalPage.module.css'
@@ -377,9 +377,12 @@ function AdminPanel() {
 
   const [allProjects,  setAllProjects]  = useState([])
   const [allInvoices,  setAllInvoices]  = useState([])
+  const [allSubs,      setAllSubs]      = useState([])
   const [loadingAll,   setLoadingAll]   = useState(false)
   const [stageEdit,    setStageEdit]    = useState({})
   const [sendingId,    setSendingId]    = useState(null)
+  const [deletingId,   setDeletingId]   = useState(null)
+  const [syncingId,    setSyncingId]    = useState(null)
 
   const [clientForm,  setClientForm]  = useState({ name: '', email: '', company: '', password: '' })
   const [projectForm, setProjectForm] = useState({ clientId: '', name: '', description: '', serviceId: '', monthlyPriceDollars: '', stage: 'discovery', status: 'active' })
@@ -409,10 +412,18 @@ function AdminPanel() {
     finally { setLoadingAll(false) }
   }, []) // eslint-disable-line
 
+  const loadAllSubs = useCallback(async () => {
+    setLoadingAll(true)
+    try { const data = await apiFetch('/api/admin/subscriptions'); setAllSubs(data.subscriptions) }
+    catch (err) { showMsg(err.message, true) }
+    finally { setLoadingAll(false) }
+  }, []) // eslint-disable-line
+
   useEffect(() => { loadClients() }, [loadClients])
   useEffect(() => {
-    if (section === 'all-projects') loadAllProjects()
-    if (section === 'all-invoices') loadAllInvoices()
+    if (section === 'all-projects')  loadAllProjects()
+    if (section === 'all-invoices')  loadAllInvoices()
+    if (section === 'subscriptions') loadAllSubs()
   }, [section]) // eslint-disable-line
 
   const showMsg = (msg, isErr = false) => {
@@ -492,6 +503,7 @@ function AdminPanel() {
       const data = await apiFetch('/api/payments/create-subscription', { method: 'POST', body: JSON.stringify(subForm) })
       showMsg(`Subscription created! Status: ${data.status}`)
       setSubForm({ clientId: '', priceId: '', planName: '', planPriceDollars: '' })
+      loadAllSubs()
     } catch (err) { showMsg(err.message, true) }
     finally { setSubLoading(false) }
   }
@@ -503,6 +515,40 @@ function AdminPanel() {
       setStageEdit(s => { const n = { ...s }; delete n[projectId]; return n })
       loadAllProjects()
     } catch (err) { showMsg(err.message, true) }
+  }
+
+  const handleDeleteProject = async (project) => {
+    if (!window.confirm(`Delete "${project.name}" for ${project.client_name}? This cannot be undone.`)) return
+    setDeletingId(project.id)
+    try {
+      await apiFetch(`/api/admin/projects/${project.id}`, { method: 'DELETE' })
+      showMsg('Project deleted.')
+      loadAllProjects()
+    } catch (err) { showMsg(err.message, true) }
+    finally { setDeletingId(null) }
+  }
+
+  const handleDeleteClient = async (client) => {
+    if (!window.confirm(
+      `Delete ${client.name} (${client.email})? This permanently removes their account, projects, invoices, and subscription records. This cannot be undone.`
+    )) return
+    setDeletingId(client.id)
+    try {
+      await apiFetch(`/api/admin/clients/${client.id}`, { method: 'DELETE' })
+      showMsg('Client deleted.')
+      loadClients()
+    } catch (err) { showMsg(err.message, true) }
+    finally { setDeletingId(null) }
+  }
+
+  const handleSyncStripe = async (clientId) => {
+    setSyncingId(clientId)
+    try {
+      const data = await apiFetch(`/api/admin/clients/${clientId}/sync-stripe`, { method: 'POST' })
+      showMsg(`Synced with Stripe — ${data.subscriptionsSynced} subscription(s), ${data.invoicesSynced} invoice(s) updated.`)
+      loadAllSubs()
+    } catch (err) { showMsg(err.message, true) }
+    finally { setSyncingId(null) }
   }
 
   const handleVoidInvoice = async (invoiceId) => {
@@ -711,6 +757,11 @@ function AdminPanel() {
                   <button className={styles.actionBtn} onClick={() => handleQuickInvoice(p.client_id)}>
                     <FiDollarSign size={13} /> Invoice
                   </button>
+                  <button className={styles.actionBtnDanger}
+                    onClick={() => handleDeleteProject(p)}
+                    disabled={deletingId === p.id}>
+                    <FiTrash2 size={12} /> {deletingId === p.id ? 'Deleting...' : 'Delete'}
+                  </button>
                 </div>
               </div>
             )
@@ -829,6 +880,11 @@ function AdminPanel() {
                   <button className={styles.actionBtn} onClick={() => handleQuickInvoice(c.id)}>
                     <FiDollarSign size={12} /> Invoice
                   </button>
+                  <button className={styles.actionBtnDanger}
+                    onClick={() => handleDeleteClient(c)}
+                    disabled={deletingId === c.id}>
+                    <FiTrash2 size={12} /> {deletingId === c.id ? 'Deleting...' : 'Delete'}
+                  </button>
                 </div>
               </div>
             ))}
@@ -838,6 +894,57 @@ function AdminPanel() {
       {/* ── Subscriptions (admin) ── */}
       {section === 'subscriptions' && (
         <div className={styles.allListSection}>
+          <div className={styles.listHeaderRow}>
+            <span className={styles.listCount}>
+              {allSubs.length} subscription{allSubs.length !== 1 ? 's' : ''}
+            </span>
+            <button className={styles.refreshSmallBtn} onClick={loadAllSubs} title="Refresh">
+              <FiRefreshCw size={13} className={loadingAll ? styles.spinning : ''} />
+            </button>
+          </div>
+
+          {loadingAll ? (
+            <p className={styles.loadingText}>Loading subscriptions...</p>
+          ) : allSubs.length === 0 ? (
+            <div className={styles.emptyState}><FiCreditCard size={28} /><p>No subscriptions yet.</p></div>
+          ) : (
+            <div className={styles.clientList} style={{ marginBottom: '2rem' }}>
+              {allSubs.map(s => {
+                const statusColors = {
+                  active: '#4ade80', past_due: '#f97316', cancelled: '#6b7280',
+                  trialing: '#a78bfa', incomplete: '#facc15', unpaid: '#ef4444',
+                }
+                const color = statusColors[s.status] || '#5b8df5'
+                return (
+                  <div key={s.id} className={styles.clientCard}>
+                    <div className={styles.avatar} style={{ width: 38, height: 38, fontSize: '0.9rem' }}>
+                      {s.client_name[0].toUpperCase()}
+                    </div>
+                    <div className={styles.clientInfo}>
+                      <div className={styles.clientName}>{s.client_name}</div>
+                      <div className={styles.clientMeta}>
+                        {s.plan_name}{s.plan_price_cents > 0 ? ` · $${(s.plan_price_cents / 100).toFixed(2)}/mo` : ''}
+                      </div>
+                    </div>
+                    <span className={styles.projectStatus}
+                      style={{ color, background: color+'18', borderColor: color+'33' }}>
+                      {s.status}
+                    </span>
+                    <div className={styles.clientActions}>
+                      <button className={styles.actionBtn}
+                        onClick={() => handleSyncStripe(s.client_id)}
+                        disabled={syncingId === s.client_id}
+                        title="Pull the latest status directly from Stripe">
+                        <FiRefreshCw size={12} className={syncingId === s.client_id ? styles.spinning : ''} />
+                        {syncingId === s.client_id ? 'Syncing...' : 'Sync from Stripe'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
           <p className={styles.adminFormNote}>
             Create a Stripe subscription for a client. You'll need a <strong>Price ID</strong> from
             your <a href="https://dashboard.stripe.com/prices" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-lt)' }}>Stripe dashboard</a>.

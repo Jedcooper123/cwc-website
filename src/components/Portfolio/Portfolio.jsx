@@ -13,7 +13,7 @@ const PROJECTS = [
     type: 'Lawn & Landscaping',
     desc: 'A conversion-focused website for a local lawn care company — designed to filter out tire-kickers and generate quote requests from serious customers.',
     tags: ['Service Business', 'Lead Gen', 'Mobile-First'],
-    url: 'https://qm-lawncare.onrender.com/',
+    url: 'https://qmlawncare.com/',
     accentColor: '#4ade80',
   },
   {
@@ -28,8 +28,8 @@ const PROJECTS = [
     title: 'Zander Keller Photography',
     type: 'Photography & Creative',
     desc: 'A full custom website for a professional photographer built for visual impact, fast load times, and a smooth gallery experience on every device.',
-    tags: ['Custom Design', 'Render', 'Performance'],
-    url: 'https://zander-keller-photography.onrender.com/',
+    tags: ['Custom Design', 'Front-End', 'Performance'],
+    url: 'https://www.zanderkellerphotography.com/',
     accentColor: '#818cf8',
   },
   {

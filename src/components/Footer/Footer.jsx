@@ -46,8 +46,9 @@ export default function Footer() {
               <span className={styles.logoMark}>Launchpad</span>
             </Link>
             <p className={styles.tagline}>
-              Launchpad Web Consulting builds professional websites for NC
-              small businesses. $0 upfront. $85/month. No contracts.
+              Launchpad Web Consulting builds professional websites for
+              small businesses nationwide. Front-End sites from $350 + $35/mo.
+              Full Stack sites from $499 + $50/mo. No contracts.
             </p>
             <div className={styles.social}>
               <Link to="/contact" className={styles.socialLink} aria-label="Email">

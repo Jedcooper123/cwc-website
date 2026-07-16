@@ -45,13 +45,13 @@ export default function Services() {
         <div className={styles.header}>
           <p className="section-label fade-up">What's Included</p>
           <h2 className="section-title fade-up delay-1">
-            One plan. Everything included.<br />
-            <span style={{ color: 'var(--accent)' }}>$85/month.</span>
+            Two plans. Everything included.<br />
+            <span style={{ color: 'var(--accent)' }}>From $350 + $35/mo.</span>
           </h2>
           <p className={`section-sub fade-up delay-2 ${styles.sub}`}>
-            No tiers. No à la carte. No surprise bills.
-            Your $85/month covers everything it takes to have a
-            professional website up and running.
+            No à la carte. No surprise bills. Front-End sites start at $350
+            + $35/month; Full Stack sites with ordering or scheduling start
+            at $499 + $50/month. Every plan covers everything below.
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export default function Services() {
         </div>
 
         <div className={`${styles.bottomCta} fade-up delay-2`}>
-          <p>$0 upfront. $85/month. Everything above included. Cancel anytime.</p>
+          <p>From $350 + $35/mo. Everything above included. Cancel anytime.</p>
           <a href="#contact" className="btn-primary">
             Book a Free 15-Minute Call <FiArrowRight />
           </a>

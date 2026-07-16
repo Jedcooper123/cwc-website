@@ -26,7 +26,7 @@ export default function ServiceDetailPage() {
 
   if (!service) return <Navigate to="/services" replace />
 
-  const { id, title, tagline, fullDesc, whatWeDeliver, goodFor, startingAt, color } = service
+  const { id, title, tagline, fullDesc, whatWeDeliver, goodFor, startingAt, monthlySupport, example, color } = service
 
   // Other services for the "explore more" row
   const others = SERVICES.filter((s) => s.id !== id).slice(0, 3)
@@ -63,9 +63,11 @@ export default function ServiceDetailPage() {
 
             <div className={styles.startBox}>
               <div className={styles.startLabel}>Starting at</div>
-              <div className={styles.startVal} style={{ color }}>{startingAt}</div>
+              <div className={styles.startVal} style={{ color }}>
+                {startingAt}{monthlySupport ? ` + ${monthlySupport}` : ''}
+              </div>
               <p className={styles.startNote}>
-                Final pricing scoped per project.{' '}
+                {monthlySupport ? 'One-time build fee, then a flat monthly rate. ' : 'Final pricing scoped per project. '}
                 <Link to="/#contact" style={{ color }}>Contact us</Link> for a
                 free estimate.
               </p>
@@ -97,6 +99,18 @@ export default function ServiceDetailPage() {
                 </li>
               ))}
             </ul>
+
+            {example && (
+              <div className={styles.exampleBox} style={{ borderColor: color + '40' }}>
+                <div className={styles.startLabel}>Real example</div>
+                <h4 className={styles.h3} style={{ marginTop: '0.35rem' }}>
+                  <a href={example.url} target="_blank" rel="noopener noreferrer" style={{ color }}>
+                    {example.name}
+                  </a>
+                </h4>
+                <p className={styles.fullDesc} style={{ marginBottom: 0 }}>{example.note}</p>
+              </div>
+            )}
 
             <Link to="/#contact" className={`btn-primary ${styles.ctaBtn}`}>
               Start This Service <FiArrowRight />

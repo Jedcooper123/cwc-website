@@ -13,12 +13,12 @@ export default function CtaBanner() {
               Every day without a great website is a day customers choose your competitor.
             </p>
             <p className={styles.sub}>
-              Live in 2 weeks. $0 upfront. Less than $3/day.
+              Live in 2 weeks. Sites start at $350. Plans from $35/month.
             </p>
           </div>
         </div>
         <a href="#contact" className={styles.cta}>
-          Start Today — It's Free <FiArrowRight size={15} />
+          Book Your Free Call <FiArrowRight size={15} />
         </a>
       </div>
     </div>

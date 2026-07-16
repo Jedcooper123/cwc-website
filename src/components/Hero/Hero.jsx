@@ -3,18 +3,18 @@ import { FiArrowRight, FiCalendar, FiChevronDown, FiCheck } from 'react-icons/fi
 import styles from './Hero.module.css'
 
 const METRICS = [
-  { value: '$0',      label: 'To get started'   },
-  { value: '$85/mo',  label: 'Flat monthly rate' },
+  { value: '$350',    label: 'Front-End build' },
+  { value: '$499',    label: 'Full Stack build' },
   { value: '2 weeks', label: 'To go live'        },
   { value: 'Cancel',  label: 'Anytime, no fees'  },
 ]
 
 const TRUST_ITEMS = [
-  '$0 to start — no upfront cost',
+  'Front-End sites from $350 + $35/mo',
+  'Full Stack sites from $499 + $50/mo',
   'Site live in 2 weeks or less',
   'We handle design, hosting, updates',
   'No contracts — cancel anytime',
-  'Less than $3/day',
 ]
 
 export default function Hero() {
@@ -42,8 +42,9 @@ export default function Hero() {
             Whether you have no site or one that isn't working — we build
             professional websites for small businesses across the US that turn
             visitors into calls, reservations, and leads.{' '}
-            <strong>$0 upfront, $85/month.</strong> We handle everything.
-            No contracts, no tech stress.
+            <strong>Front-End sites start at $350 + $35/month. Full Stack
+            sites with ordering and scheduling start at $499 + $50/month.</strong>{' '}
+            We handle everything. No contracts, no tech stress.
           </p>
 
           <div className={styles.actions}>
