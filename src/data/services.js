@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// services.js — Single source of truth for all CWC service data.
-// Used by: ServicesPage overview grid, ServiceDetailPage, Services section,
-//          Navbar dropdown, and Pricing suggestions.
+// services.js — Service types for the client portal admin (project and
+// invoice dropdowns). Existing projects store these ids, so don't rename them.
+// Public pricing lives in components/Pricing/Pricing.jsx.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const SERVICES = [
@@ -28,8 +28,8 @@ export const SERVICES = [
       url: 'https://www.zanderkellerphotography.com/',
       note: 'A portfolio site built for visual impact and fast load times — no backend needed, just a great-looking showcase and a way for clients to get in touch.',
     },
-    startingAt: '$350',
-    monthlySupport: '$35/mo',
+    startingAt: '$750',
+    monthlySupport: '$55/mo',
     color: '#f97316',
   },
   {
@@ -55,8 +55,8 @@ export const SERVICES = [
       url: 'https://qmlawncare.com/',
       note: 'A great example of what a Full Stack upgrade unlocks: instead of just listing a phone number, customers could request quotes and get scheduled for service automatically, right from the site.',
     },
-    startingAt: '$499',
-    monthlySupport: '$50/mo',
+    startingAt: '$750',
+    monthlySupport: '$55/mo',
     color: '#a78bfa',
   },
   {
@@ -77,7 +77,7 @@ export const SERVICES = [
       'Proactive bug identification and fixes',
     ],
     goodFor: ['Businesses without an in-house dev', 'Sites on WordPress or CMS platforms', 'E-commerce'],
-    startingAt: '$50/mo',
+    startingAt: '$55/mo',
     color: '#facc15',
   },
   {

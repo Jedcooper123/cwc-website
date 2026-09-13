@@ -1,109 +1,119 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Portfolio — Live client sites shown in iframe previews.
-// Real sites: Zander Keller Photography & Jed Cooper Portfolio.
+// Portfolio — Client sites shown as screenshots in a browser frame.
+// Screenshots live in public/work/ (1440×900 captures of each live site).
+//
+// variant="full"    → featured project + grid of the rest (Work page)
+// variant="preview" → featured project + link to /work (home page)
 // ─────────────────────────────────────────────────────────────────────────────
-import React, { useState } from 'react'
-import { FiExternalLink } from 'react-icons/fi'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { FiArrowUpRight, FiChevronRight } from 'react-icons/fi'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './Portfolio.module.css'
 
 const PROJECTS = [
   {
-    title: 'QM Lawncare',
+    id: 'classic-cleanz',
+    title: 'Classic Cleanz Detailing',
+    type: 'Mobile Auto Detailing · Boone, NC',
+    desc: 'Online booking, an owner dashboard, and instant email confirmations.',
+    tags: ['Online booking', 'Owner dashboard', 'Email alerts'],
+    url: 'https://www.classiccleanzdetailing.com/',
+    image: '/work/classic-cleanz.jpg',
+    featured: true,
+  },
+  {
+    id: 'qm-lawncare',
+    title: 'Q & M Lawncare',
     type: 'Lawn & Landscaping',
-    desc: 'A conversion-focused website for a local lawn care company — designed to filter out tire-kickers and generate quote requests from serious customers.',
-    tags: ['Service Business', 'Lead Gen', 'Mobile-First'],
     url: 'https://qmlawncare.com/',
-    accentColor: '#4ade80',
+    image: '/work/qm-lawncare.jpg',
   },
   {
-    title: 'Willy B Grill',
+    id: 'willy-b',
+    title: "Willy B's Grill",
     type: 'Food Truck',
-    desc: 'A clean, appetizing website for a burger food truck — showcasing the menu, location, and hours with a strong call-to-action to drive foot traffic and orders.',
-    tags: ['Food Truck', 'Custom Design', 'Render'],
     url: 'https://willy-b-grill-website-1.onrender.com/',
-    accentColor: '#f97316',
+    image: '/work/willy-b.jpg',
   },
   {
+    id: 'zander-keller',
     title: 'Zander Keller Photography',
-    type: 'Photography & Creative',
-    desc: 'A full custom website for a professional photographer built for visual impact, fast load times, and a smooth gallery experience on every device.',
-    tags: ['Custom Design', 'Front-End', 'Performance'],
+    type: 'Photography',
     url: 'https://www.zanderkellerphotography.com/',
-    accentColor: '#818cf8',
-  },
-  {
-    title: 'Jed Cooper — Developer Portfolio',
-    type: 'Personal / Professional',
-    desc: 'A clean, modern portfolio site built to make a strong first impression. Showcases projects, skills, and professional background.',
-    tags: ['Portfolio', 'GitHub Pages', 'Responsive'],
-    url: 'https://jedcooper123.github.io/Professional-Portfolio/',
-    accentColor: '#fb923c',
+    image: '/work/zander-keller.jpg',
   },
 ]
 
-function LiveCard({ project }) {
-  const [loaded, setLoaded] = useState(false)
-  const { title, type, desc, tags, url, accentColor } = project
-
+function Browser({ src, alt }) {
   return (
-    <div className={styles.card}>
-      <div className={styles.thumb}>
-        {!loaded && (
-          <div className={styles.iframeLoader}>
-            <div className={styles.loaderSpinner} />
-            <span>Loading preview...</span>
-          </div>
-        )}
-        <iframe
-          src={url}
-          title={title}
-          className={`${styles.iframe} ${loaded ? styles.iframeLoaded : ''}`}
-          onLoad={() => setLoaded(true)}
-          loading="lazy"
-          sandbox="allow-scripts allow-same-origin"
-          style={{ '--accent': accentColor }}
-        />
-        <div className={styles.thumbOverlay}>
-          <a href={url} target="_blank" rel="noopener noreferrer" className={styles.overlayBtn}>
-            <FiExternalLink size={16} /> Visit Live Site
-          </a>
-        </div>
-        <span className={styles.liveBadge}>
-          <span className={styles.liveDot} /> Live
-        </span>
+    <div className={styles.browser}>
+      <div className={styles.chrome} aria-hidden="true">
+        <span /><span /><span />
       </div>
-
-      <div className={styles.info}>
-        <div className={styles.meta}>
-          <span className={styles.type}>{type}</span>
-          <div className={styles.tags}>
-            {tags.map((t) => <span key={t} className={styles.tag}>{t}</span>)}
-          </div>
-        </div>
-        <h3 className={styles.title}>{title}</h3>
-        <p className={styles.desc}>{desc}</p>
-        <a href={url} target="_blank" rel="noopener noreferrer" className={styles.siteLink}>
-          <FiExternalLink size={12} /> {url.replace('https://', '').replace(/\/$/, '')}
-        </a>
-      </div>
+      <img src={src} alt={alt} width="1440" height="900" loading="lazy" className={styles.shot} />
     </div>
   )
 }
 
-export default function Portfolio() {
+export default function Portfolio({ variant = 'full' }) {
   const ref = useScrollAnimation()
+  const isPreview = variant === 'preview'
+  const featured  = PROJECTS.find((p) => p.featured)
+  const rest      = PROJECTS.filter((p) => !p.featured)
 
   return (
-    <section id="portfolio" className={`section ${styles.portfolio}`} ref={ref}>
+    <section id="work" className={`section ${isPreview ? 'section-surface' : ''}`} ref={ref}>
       <div className="container">
-        <div className={styles.grid}>
-          {PROJECTS.map((project, i) => (
-            <div key={project.title} className={`fade-up delay-${i + 1}`}>
-              <LiveCard project={project} />
-            </div>
-          ))}
-        </div>
+        {isPreview && (
+          <div className="section-head">
+            <p className="section-label fade-up">Our Work</p>
+            <h2 className="section-title fade-up delay-1">Built for real businesses.</h2>
+          </div>
+        )}
+
+        <a
+          href={featured.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${styles.featured} ${isPreview ? styles.onSurface : ''} fade-up delay-1`}
+        >
+          <div className={styles.featuredCopy}>
+            <span className={styles.badge}>New</span>
+            <h3 className={styles.featuredTitle}>{featured.title}</h3>
+            <p className={styles.type}>{featured.type}</p>
+            <p className={styles.desc}>{featured.desc}</p>
+            <ul className={styles.tags}>
+              {featured.tags.map((t) => <li key={t}>{t}</li>)}
+            </ul>
+            <span className="link-arrow">Visit site <FiArrowUpRight /></span>
+          </div>
+          <Browser src={featured.image} alt={`${featured.title} website`} />
+        </a>
+
+        {isPreview ? (
+          <div className={`${styles.more} fade-up delay-2`}>
+            <Link to="/work" className="link-arrow">See all our work <FiChevronRight /></Link>
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {rest.map((p, i) => (
+              <a
+                key={p.id}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.card} fade-up delay-${i + 1}`}
+              >
+                <Browser src={p.image} alt={`${p.title} website`} />
+                <div className={styles.cardInfo}>
+                  <h3 className={styles.cardTitle}>{p.title}</h3>
+                  <p className={styles.type}>{p.type}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

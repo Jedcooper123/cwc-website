@@ -1,37 +1,20 @@
-/* ── Scheduling Section ────────────────────────────────────────────────────── */
 .scheduling {
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
 }
 
-.header {
+.title {
+  margin-bottom: 2.5rem;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 3rem;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
 }
 
-/* Calendly embed wrapper */
 .embedWrap {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
-}
-
-/* Calendly loads its own styles — just ensure the container sizes correctly */
-.embedWrap :global(.calendly-inline-widget) {
-  width: 100%;
-  min-height: 700px;
-}
-
-@media (max-width: 640px) {
-  .embedWrap :global(.calendly-inline-widget) {
-    min-height: 800px;
-  }
+  padding: 0.75rem;
+  overflow: hidden;
+  background: var(--surface);
+  border-radius: var(--r-xl);
 }

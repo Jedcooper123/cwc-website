@@ -1,54 +1,56 @@
 /* =============================================================================
    Launchpad Web Consulting — Global Stylesheet
-   CSS custom properties, resets, typography, and shared utility classes.
+   Apple-inspired system: generous whitespace, large tight headlines, soft gray
+   surfaces, pill buttons. Orange stays the single accent color.
    ============================================================================= */
 
 /* ── Custom Properties ──────────────────────────────────────────────────────── */
 :root {
-  /* ── Light Theme Backgrounds ── */
-  --bg:          #ffffff;   /* white */
-  --surface:     #f7f7f7;   /* light surface */
-  --card:        #ffffff;   /* card bg */
-  --card-hover:  #fafafa;   /* card hover */
+  /* ── Backgrounds ── */
+  --bg:           #ffffff;
+  --surface:      #f5f5f7;   /* light gray section / tile */
+  --card:         #ffffff;
+  --card-hover:   #fafafa;
 
   /* ── Borders ── */
-  --border:      #e8e8e8;
-  --border-hover:#cccccc;
+  --border:       #e5e5ea;
+  --border-hover: #d2d2d7;
 
   /* ── Text ── */
-  --text:        #0a0a0a;   /* near-black primary */
-  --text-2:      #4a4a4a;   /* secondary */
-  --text-3:      #888888;   /* muted */
+  --text:         #1d1d1f;
+  --text-2:       #6e6e73;
+  --text-3:       #86868b;
 
   /* ── Accent: Orange ── */
-  --accent:      #f97316;
-  --accent-lt:   #fb923c;
-  --accent-bg:   rgba(249, 115, 22, 0.08);
-  --accent-glow: rgba(249, 115, 22, 0.25);
+  --accent:       #f97316;
+  --accent-dk:    #ea580c;
+  --accent-lt:    #fb923c;   /* also used by the client portal */
+  --accent-bg:    rgba(249, 115, 22, 0.08);
+  --accent-glow:  rgba(249, 115, 22, 0.25);
+  --grad:         linear-gradient(135deg, #f97316 0%, #ef4444 100%);
 
-  /* ── Gradient (orange → red) ── */
-  --grad:        linear-gradient(135deg, #f97316 0%, #ef4444 100%);
-
-  /* ── Typography: Helvetica Neue → Arial → system-ui ── */
-  --font:        'Helvetica Neue', 'Helvetica', 'Arial', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* ── Typography: SF Pro on Apple devices, Inter everywhere else ── */
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   /* Layout */
-  --max-w:       1200px;
-  --px:          1.5rem;
+  --max-w:  1120px;
+  --px:     1.5rem;
+  --nav-h:  56px;
 
   /* Radii */
-  --r-sm:  6px;
-  --r-md:  12px;
-  --r-lg:  18px;
-  --r-xl:  26px;
+  --r-sm:   8px;
+  --r-md:   14px;
+  --r-lg:   22px;
+  --r-xl:   30px;
+  --r-pill: 980px;
 
   /* Shadows */
-  --shadow:      0 4px 32px rgba(0, 0, 0, 0.5);
-  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.35);
+  --shadow:      0 30px 80px rgba(0, 0, 0, 0.14);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
 
-  /* Transitions */
+  /* Motion */
   --ease:  0.24s cubic-bezier(0.4, 0, 0.2, 1);
-  --ease2: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --ease2: 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────────────── */
@@ -60,29 +62,33 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-h);
   font-size: 16px;
 }
 
 body {
   font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  letter-spacing: -0.011em;
   background-color: var(--bg);
   color: var(--text);
-  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   color: var(--text);
+  text-wrap: balance;
 }
 
 p {
   color: var(--text-2);
-  line-height: 1.75;
+  text-wrap: pretty;
 }
 
 a {
@@ -105,10 +111,16 @@ button {
   border: none;
   background: none;
   font-family: inherit;
+  color: inherit;
 }
 
 input, textarea, select {
   font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 /* ── Layout Helpers ─────────────────────────────────────────────────────────── */
@@ -119,114 +131,148 @@ input, textarea, select {
 }
 
 .section {
-  padding: 6rem 0;
+  padding: 7.5rem 0;
 }
 
-/* ── Section Labels / Headings ──────────────────────────────────────────────── */
+.section-surface {
+  background: var(--surface);
+}
+
+@media (max-width: 734px) {
+  .section { padding: 5rem 0; }
+}
+
+/* ── Section Headings ───────────────────────────────────────────────────────── */
+.section-head {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 4rem;
+}
+
 .section-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.72rem;
+  display: block;
+  font-size: 1.0625rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: 1rem;
-}
-
-.section-label::before {
-  content: '';
-  width: 22px;
-  height: 2px;
-  background: var(--accent);
-  flex-shrink: 0;
+  margin-bottom: 0.6rem;
 }
 
 .section-title {
-  font-size: clamp(1.8rem, 3.5vw, 2.75rem);
-  font-weight: 800;
-  margin-bottom: 1rem;
-  color: var(--text);
+  font-size: clamp(2.5rem, 5.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
 }
 
 .section-sub {
-  font-size: 1.05rem;
+  font-size: clamp(1.1875rem, 2vw, 1.5rem);
+  line-height: 1.35;
+  letter-spacing: -0.015em;
   color: var(--text-2);
-  max-width: 560px;
-  line-height: 1.75;
+  margin-top: 1rem;
 }
 
 /* ── Buttons ────────────────────────────────────────────────────────────────── */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.75rem;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: var(--r-md);
-  transition: background var(--ease), transform var(--ease), box-shadow var(--ease);
-  white-space: nowrap;
-}
-
-.btn-primary:hover {
-  background: var(--accent-lt);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px var(--accent-glow);
-}
-
+.btn-primary,
 .btn-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.75rem;
-  background: transparent;
-  color: var(--text);
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: 1px solid var(--border-hover);
-  border-radius: var(--r-md);
-  transition: border-color var(--ease), color var(--ease), transform var(--ease), background var(--ease);
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.3rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: var(--r-pill);
   white-space: nowrap;
+  transition: background var(--ease), color var(--ease), transform var(--ease);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dk);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 .btn-secondary:hover {
-  border-color: var(--accent);
-  color: var(--accent-lt);
-  background: var(--accent-bg);
-  transform: translateY(-2px);
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-lg {
+  padding: 0.9rem 1.6rem;
+  font-size: 1.0625rem;
+}
+
+/* Text link with a trailing chevron, Apple-style */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--accent);
+  font-size: 1.0625rem;
+}
+
+.link-arrow:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link-arrow svg {
+  transition: transform var(--ease);
+}
+
+.link-arrow:hover svg {
+  transform: translateX(2px);
 }
 
 /* ── Scroll Animations ──────────────────────────────────────────────────────── */
 .fade-up {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
+  transform: translateY(24px);
+  transition: opacity var(--ease2), transform var(--ease2);
 }
 
 .fade-up.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
-.fade-up.delay-1 { transition-delay: 0.1s; }
-.fade-up.delay-2 { transition-delay: 0.2s; }
-.fade-up.delay-3 { transition-delay: 0.3s; }
-.fade-up.delay-4 { transition-delay: 0.4s; }
-.fade-up.delay-5 { transition-delay: 0.5s; }
-.fade-up.delay-6 { transition-delay: 0.6s; }
+.fade-up.delay-1 { transition-delay: 0.08s; }
+.fade-up.delay-2 { transition-delay: 0.16s; }
+.fade-up.delay-3 { transition-delay: 0.24s; }
+.fade-up.delay-4 { transition-delay: 0.32s; }
+.fade-up.delay-5 { transition-delay: 0.4s; }
+.fade-up.delay-6 { transition-delay: 0.48s; }
 
-/* ── Scrollbar ──────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar               { width: 5px; }
-::-webkit-scrollbar-track         { background: var(--surface); }
-::-webkit-scrollbar-thumb         { background: var(--border-hover); border-radius: 100px; }
-::-webkit-scrollbar-thumb:hover   { background: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .fade-up { opacity: 1; transform: none; transition: none; }
+}
 
 /* ── Selection ──────────────────────────────────────────────────────────────── */
 ::selection {
-  background: var(--accent-bg);
-  color: var(--accent-lt);
+  background: rgba(249, 115, 22, 0.2);
+  color: var(--text);
 }

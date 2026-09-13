@@ -1,33 +1,30 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiMail, FiPhone, FiLinkedin, FiArrowRight, FiGlobe } from 'react-icons/fi'
 import styles from './Footer.module.css'
 
-const NAV_COLS = [
+const COLS = [
   {
-    heading: 'Company',
+    heading: 'Explore',
     links: [
-      { label: 'About',         href: '/#about'   },
-      { label: 'How It Works',  href: '/#process' },
-      { label: 'Why Launchpad', href: '/#why-cwc' },
+      { label: 'Our Work',     to: '/work'     },
+      { label: 'Pricing',      to: '/pricing'  },
+      { label: 'How It Works', to: '/#process' },
+      { label: 'FAQ',          to: '/#faq'     },
     ],
   },
   {
-    heading: 'Work',
+    heading: 'Get in Touch',
     links: [
-      { label: 'Our Work',   href: '/work'    },
-      { label: 'Pricing',    href: '/pricing' },
-      { label: 'Contact Us', href: '/contact' },
+      { label: 'Book a Call',          to: '/contact' },
+      { label: '(336) 707-0245',       href: 'tel:+13367070245' },
+      { label: 'jedpcooper@gmail.com', href: 'mailto:jedpcooper@gmail.com' },
+      { label: 'LinkedIn',             href: 'https://www.linkedin.com/in/jed-cooper-a5816a208/', external: true },
     ],
   },
   {
-    heading: 'What\'s Included',
+    heading: 'Clients',
     links: [
-      { label: 'Custom Design',    href: '/#services' },
-      { label: 'Hosting & SSL',    href: '/#services' },
-      { label: 'Maintenance',      href: '/#services' },
-      { label: 'Content Updates',  href: '/#services' },
-      { label: 'SEO Basics',       href: '/#services' },
+      { label: 'Client Portal', to: '/portal' },
     ],
   },
 ]
@@ -37,84 +34,42 @@ const YEAR = new Date().getFullYear()
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={`${styles.inner} container`}>
-
-        {/* ── Top: Brand + Nav ── */}
+      <div className="container">
         <div className={styles.top}>
           <div className={styles.brand}>
             <Link to="/" className={styles.logo}>
-              <span className={styles.logoMark}>Launchpad</span>
+              <span className={styles.logoMark} aria-hidden="true">L</span>
+              Launchpad Web Consulting
             </Link>
-            <p className={styles.tagline}>
-              Launchpad Web Consulting builds professional websites for
-              small businesses nationwide. Front-End sites from $350 + $35/mo.
-              Full Stack sites from $499 + $50/mo. No contracts.
-            </p>
-            <div className={styles.social}>
-              <Link to="/contact" className={styles.socialLink} aria-label="Email">
-                <FiMail />
-              </Link>
-              <a
-                href="https://www.linkedin.com/in/jed-cooper-a5816a208/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.socialLink}
-                aria-label="LinkedIn"
-              >
-                <FiLinkedin />
-              </a>
-              <a href="tel:+13367070245" className={styles.socialLink} aria-label="Phone">
-                <FiPhone />
-              </a>
-              <Link to="/" className={styles.socialLink} aria-label="Website">
-                <FiGlobe />
-              </Link>
-            </div>
+            <p className={styles.tagline}>Websites for small businesses.</p>
           </div>
 
-          {NAV_COLS.map(({ heading, links }) => (
-            <div key={heading} className={styles.navCol}>
-              <h4 className={styles.navHeading}>{heading}</h4>
-              <ul className={styles.navList}>
-                {links.map(({ label, href }) => (
+          {COLS.map(({ heading, links }) => (
+            <div key={heading}>
+              <h4 className={styles.heading}>{heading}</h4>
+              <ul className={styles.list}>
+                {links.map(({ label, to, href, external }) => (
                   <li key={label}>
-                    <Link to={href} className={styles.navLink}>{label}</Link>
+                    {to ? (
+                      <Link to={to} className={styles.link}>{label}</Link>
+                    ) : (
+                      <a
+                        href={href}
+                        className={styles.link}
+                        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        {label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-
-          <div className={styles.ctaCol}>
-            <h4 className={styles.navHeading}>Get Your Business Online</h4>
-            <p className={styles.ctaBody}>
-              15 minutes is all it takes to get started.
-              Book a free call today.
-            </p>
-            <Link to="/contact" className={`btn-primary ${styles.ctaBtn}`}>
-              Book a Free 15-Minute Call <FiArrowRight />
-            </Link>
-            <div className={styles.contact}>
-              <a href="mailto:jedpcooper@gmail.com" className={styles.contactLink}>
-                jedpcooper@gmail.com
-              </a>
-              <a href="tel:+13367070245" className={styles.contactLink}>
-                (336) 707-0245
-              </a>
-            </div>
-          </div>
         </div>
 
-        {/* ── Bottom: Legal ── */}
         <div className={styles.bottom}>
-          <span className={styles.copy}>
-            © {YEAR} Launchpad Web Consulting. All rights reserved.
-          </span>
-          <div className={styles.legal}>
-            <a href="#" className={styles.legalLink}>Privacy Policy</a>
-            <span className={styles.dot}>·</span>
-            <a href="#" className={styles.legalLink}>Terms of Service</a>
-          </div>
+          © {YEAR} Launchpad Web Consulting. All rights reserved.
         </div>
       </div>
     </footer>

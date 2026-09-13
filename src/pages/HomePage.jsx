@@ -1,26 +1,22 @@
 import React from 'react'
 import Hero      from '../components/Hero/Hero'
-import About     from '../components/About/About'
-import Services  from '../components/Services/Services'
+import Features  from '../components/Features/Features'
 import Portfolio from '../components/Portfolio/Portfolio'
-import CtaBanner from '../components/CtaBanner/CtaBanner'
 import Pricing   from '../components/Pricing/Pricing'
 import Process   from '../components/Process/Process'
 import FAQ       from '../components/FAQ/FAQ'
-import Contact   from '../components/Contact/Contact'
+import FinalCta  from '../components/FinalCta/FinalCta'
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <About />
-      <Services />
-      <Portfolio />
-      <CtaBanner />
+      <Features />
+      <Portfolio variant="preview" />
       <Pricing />
       <Process />
       <FAQ />
-      <Contact />
+      <FinalCta />
     </>
   )
 }

@@ -1,225 +1,180 @@
-/* ── Navbar ──────────────────────────────────────────────────────────────── */
+/* ── Bar ─────────────────────────────────────────────────────────────────────── */
 .header {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  transition: background var(--ease), border-color var(--ease), box-shadow var(--ease);
+  height: var(--nav-h);
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid transparent;
+  transition: background var(--ease), border-color var(--ease);
 }
 
-.header.scrolled {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom-color: var(--border);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+.scrolled {
+  background: rgba(255, 255, 255, 0.86);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
 }
 
 .nav {
+  position: relative;
   display: flex;
   align-items: center;
-  height: 70px;
-  gap: 2rem;
+  justify-content: space-between;
+  height: 100%;
 }
 
-/* ── Logo ── */
+/* ── Logo ────────────────────────────────────────────────────────────────────── */
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.55rem;
   flex-shrink: 0;
-  text-decoration: none;
 }
 
 .logoMark {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--grad);
-  border-radius: 10px;
-  font-size: 1.1rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  font-size: 0.875rem;
+  font-weight: 700;
   color: #fff;
-  flex-shrink: 0;
-  box-shadow: 0 4px 18px rgba(249,115,22,0.3);
+  background: var(--accent);
+  border-radius: 7px;
 }
 
 .logoText {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.logoPrimary {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--text);
+  font-size: 1.0625rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
-  white-space: nowrap;
+  color: var(--text);
 }
 
-.logoSub {
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: var(--text-3);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-@media (max-width: 560px) {
-  .logoText { display: none; }
-}
-
-/* ── Desktop Links ── */
+/* ── Desktop links (centered) ────────────────────────────────────────────────── */
 .links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 0.15rem;
-  margin-left: auto;
-  list-style: none;
-  padding: 0;
-  margin-right: 0;
+  gap: 2.25rem;
 }
 
 .link {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
   font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-2);
-  padding: 0.45rem 0.8rem;
-  border-radius: var(--r-sm);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color var(--ease), background var(--ease);
-  text-decoration: none;
+  color: var(--text);
+  opacity: 0.8;
+  transition: opacity var(--ease), color var(--ease);
 }
 
 .link:hover {
-  color: var(--text);
-  background: rgba(0,0,0,0.04);
+  opacity: 1;
 }
 
-/* ── Right actions ── */
-.rightActions {
+.active {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.right {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  flex-shrink: 0;
+  gap: 1.25rem;
 }
 
 .portalLink {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--text-3);
-  padding: 0.45rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  transition: color var(--ease), border-color var(--ease), background var(--ease);
-  text-decoration: none;
-}
-.portalLink:hover {
+  font-size: 0.875rem;
   color: var(--text-2);
-  border-color: var(--border-hover);
-  background: rgba(0,0,0,0.03);
 }
 
-.ctaBtn {
-  font-size: 0.84rem;
-  padding: 0.65rem 1.25rem;
+.portalLink:hover {
+  color: var(--text);
 }
 
-/* ── Mobile toggle ── */
+.cta {
+  padding: 0.4rem 0.95rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--accent);
+  border-radius: var(--r-pill);
+  transition: background var(--ease);
+}
+
+.cta:hover {
+  color: #fff;
+  background: var(--accent-dk);
+}
+
 .toggle {
   display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-right: -0.5rem;
   color: var(--text);
-  padding: 0.4rem;
-  border-radius: var(--r-sm);
-  transition: background var(--ease);
-  margin-left: auto;
 }
-.toggle:hover { background: rgba(0,0,0,0.05); }
 
-/* ── Mobile drawer ──
-   z-index: 999 keeps it below the header (1000) so the header
-   always sits on top, but above the backdrop (998).
-   height: calc(100svh - 70px) uses the small viewport height unit
-   so it fills the visible screen correctly even when the mobile
-   browser's address bar is visible. */
-.drawer {
+/* ── Mobile menu ─────────────────────────────────────────────────────────────── */
+.menu {
   position: fixed;
-  top: 70px;
+  top: var(--nav-h);
   left: 0;
   right: 0;
-  height: calc(100svh - 70px);
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 1.5rem var(--px) 2.5rem;
+  bottom: 0;
+  z-index: 999;
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  transform: translateX(-100%);
+  padding: 1.5rem var(--px) 2.5rem;
+  background: rgba(255, 255, 255, 0.97);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   opacity: 0;
-  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease;
-  overflow-y: auto;
-  z-index: 999;
-  -webkit-overflow-scrolling: touch;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
 }
-.drawerOpen { transform: translateX(0); opacity: 1; }
 
-.drawerGroup {
+.menuOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.menuLinks {
   display: flex;
   flex-direction: column;
 }
 
-.drawerLabel {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  padding-bottom: 0.65rem;
-}
-
-.drawerLink {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-2);
-  padding: 0.7rem 0;
-  border-bottom: 1px solid var(--border);
+.menuLink {
   display: block;
-  text-decoration: none;
-  transition: color var(--ease);
-}
-.drawerLink:hover { color: var(--text); }
-
-.drawerCtas {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: auto;
+  padding: 0.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--text);
 }
 
-.backdrop {
-  position: fixed;
-  inset: 0;
-  top: 70px;
-  background: rgba(0,0,0,0.55);
-  z-index: 998;
+.menuLink:hover {
+  color: var(--accent);
 }
 
-/* ── Responsive breakpoint ── */
-@media (max-width: 980px) {
-  .links, .rightActions { display: none; }
-  .toggle { display: flex; }
+@media (max-width: 1023px) {
+  .links { gap: 1.5rem; }
+}
+
+@media (max-width: 833px) {
+  .links,
+  .right { display: none; }
+  .toggle { display: inline-flex; }
+}
+
+@media (min-width: 834px) {
+  .menu { display: none; }
 }

@@ -1,116 +1,54 @@
 import React from 'react'
-import { FiArrowRight, FiCalendar, FiChevronDown, FiCheck } from 'react-icons/fi'
+import { Link } from 'react-router-dom'
+import { FiChevronRight } from 'react-icons/fi'
 import styles from './Hero.module.css'
 
-const METRICS = [
-  { value: '$350',    label: 'Front-End build' },
-  { value: '$499',    label: 'Full Stack build' },
-  { value: '2 weeks', label: 'To go live'        },
-  { value: 'Cancel',  label: 'Anytime, no fees'  },
-]
-
-const TRUST_ITEMS = [
-  'Front-End sites from $350 + $35/mo',
-  'Full Stack sites from $499 + $50/mo',
-  'Site live in 2 weeks or less',
-  'We handle design, hosting, updates',
-  'No contracts — cancel anytime',
+// Fanned screenshots of real client sites (files in public/work/)
+const SHOTS = [
+  { src: '/work/qm-lawncare.jpg',    alt: 'Q & M Lawncare website',           pos: 'left'   },
+  { src: '/work/willy-b.jpg',        alt: "Willy B's Grill website",          pos: 'right'  },
+  { src: '/work/classic-cleanz.jpg', alt: 'Classic Cleanz Detailing website', pos: 'center' },
 ]
 
 export default function Hero() {
   return (
     <section id="hero" className={styles.hero}>
-      <div className={styles.gridBg} aria-hidden="true" />
-      <div className={styles.glow}   aria-hidden="true" />
+      <div className={`${styles.copy} container`}>
+        <p className={styles.eyebrow}>Launchpad Web Consulting</p>
 
-      <div className={`${styles.inner} container`}>
+        <h1 className={styles.headline}>
+          Websites that<br />
+          bring in <span className={styles.grad}>business.</span>
+        </h1>
 
-        {/* ── Left: Copy ── */}
-        <div className={styles.copy}>
-          <div className={styles.eyebrow}>
-            <span className={styles.eyebrowLine} />
-            Launchpad Web Consulting
-          </div>
+        <p className={styles.sub}>
+          Designed, built, and hosted for you. Live in two weeks.
+        </p>
 
-          <h1 className={styles.headline}>
-            A Website That<br />
-            Actually Brings You<br />
-            <span className={styles.gradText}>More Business.</span>
-          </h1>
-
-          <p className={styles.sub}>
-            Whether you have no site or one that isn't working — we build
-            professional websites for small businesses across the US that turn
-            visitors into calls, reservations, and leads.{' '}
-            <strong>Front-End sites start at $350 + $35/month. Full Stack
-            sites with ordering and scheduling start at $499 + $50/month.</strong>{' '}
-            We handle everything. No contracts, no tech stress.
-          </p>
-
-          <div className={styles.actions}>
-            <a href="#contact" className="btn-primary">
-              Book a Free 15-Minute Call <FiArrowRight size={15} />
-            </a>
-            <a href="/work" className="btn-secondary">
-              See Our Work
-            </a>
-          </div>
+        <div className={styles.actions}>
+          <Link to="/contact" className="btn-primary btn-lg">
+            Book a Free 15-Minute Call
+          </Link>
+          <Link to="/work" className="link-arrow">
+            See our work <FiChevronRight />
+          </Link>
         </div>
 
-        {/* ── Right: Trust card ── */}
-        <div className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <div className={styles.panelDots}>
-              <span className={styles.dot} />
-              <span className={styles.dot} />
-              <span className={styles.dot} />
+        <p className={styles.price}>
+          <strong>$750</strong> deposit <span aria-hidden="true">·</span> <strong>$55</strong>/month
+        </p>
+      </div>
+
+      <div className={styles.stage}>
+        {SHOTS.map(({ src, alt, pos }) => (
+          <figure key={src} className={`${styles.shot} ${styles[pos]}`}>
+            <div className={styles.chrome} aria-hidden="true">
+              <span /><span /><span />
             </div>
-            <span className={styles.panelFile}>What You Get</span>
-          </div>
-
-          <div className={styles.trustList}>
-            {TRUST_ITEMS.map((item) => (
-              <div key={item} className={styles.trustItem}>
-                <FiCheck className={styles.trustCheck} size={16} />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.guarantee}>
-            <span className={styles.guaranteeBadge}>2-Week Guarantee</span>
-            <p>If your site isn't live in 2 weeks, your first month is free.</p>
-          </div>
-
-          <div className={styles.statusBar}>
-            <span className={styles.statusDot} />
-            Accepting new clients — small businesses nationwide
-          </div>
-        </div>
+            <img src={src} alt={alt} width="1440" height="900" />
+          </figure>
+        ))}
       </div>
-
-      {/* ── Metrics strip ── */}
-      <div className={styles.metricsStrip}>
-        <div className="container">
-          <div className={styles.metrics}>
-            {METRICS.map(({ value, label }, i) => (
-              <React.Fragment key={label}>
-                <div className={styles.metric}>
-                  <span className={styles.metricVal}>{value}</span>
-                  <span className={styles.metricLabel}>{label}</span>
-                </div>
-                {i < METRICS.length - 1 && (
-                  <div className={styles.metricDivider} aria-hidden="true" />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <a href="#about" className={styles.scrollHint} aria-label="Scroll down">
-        <FiChevronDown size={18} />
-      </a>
     </section>
   )
 }

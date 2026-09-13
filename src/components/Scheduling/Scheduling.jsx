@@ -1,18 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Scheduling — Calendly inline embed for booking a free discovery call.
-// To activate: replace CALENDLY_URL below with your actual Calendly link.
-// Get yours at https://calendly.com → share your scheduling link.
+// Scheduling — Calendly inline embed for booking a free call.
+// To change the calendar: replace CALENDLY_URL with your Calendly link.
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useEffect } from 'react'
-import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import styles from './Scheduling.module.css'
 
-// !! IMPORTANT: Replace this with your real Calendly link !!
 const CALENDLY_URL = 'https://calendly.com/jedpcooper'
 
 export default function Scheduling() {
-  const ref = useScrollAnimation()
-
   useEffect(() => {
     // Load the Calendly widget script once
     if (document.querySelector('script[data-calendly]')) return
@@ -31,23 +26,13 @@ export default function Scheduling() {
   }, [])
 
   return (
-    <section id="schedule" className={`section ${styles.scheduling}`} ref={ref}>
+    <section id="schedule" className={`section ${styles.scheduling}`}>
       <div className="container">
-        <div className={styles.header}>
-          <p className="section-label fade-up">Book a Call</p>
-          <h2 className="section-title fade-up delay-1">
-            Free 30-minute discovery call.
-          </h2>
-          <p className={`section-sub fade-up delay-2`}>
-            Pick a time that works for you. We'll talk through your project,
-            answer questions, and figure out the best path forward. No pressure.
-          </p>
-        </div>
-
-        <div className={`${styles.embedWrap} fade-up delay-2`}>
+        <h2 className={styles.title}>Pick a time.</h2>
+        <div className={styles.embedWrap}>
           <div
             className="calendly-inline-widget"
-            data-url={`${CALENDLY_URL}?hide_gdpr_banner=1&background_color=ffffff&text_color=0a0a0a&primary_color=f97316`}
+            data-url={`${CALENDLY_URL}?hide_gdpr_banner=1&background_color=f5f5f7&text_color=1d1d1f&primary_color=f97316`}
             style={{ minWidth: '320px', height: '700px' }}
           />
         </div>
