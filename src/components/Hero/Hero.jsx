@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 import { FiChevronRight } from 'react-icons/fi'
 import styles from './Hero.module.css'
 
-// Fanned screenshots of real client sites (files in public/work/)
+// Fanned screenshots of real client sites (files in public/portfolio/)
 const SHOTS = [
-  { src: '/work/qm-lawncare.jpg',    alt: 'Q & M Lawncare website',           pos: 'left'   },
-  { src: '/work/willy-b.jpg',        alt: "Willy B's Grill website",          pos: 'right'  },
-  { src: '/work/classic-cleanz.jpg', alt: 'Classic Cleanz Detailing website', pos: 'center' },
+  { src: '/portfolio/qm-lawncare.jpg',    alt: 'Q & M Lawncare website',           pos: 'left'   },
+  { src: '/portfolio/willy-b.jpg',        alt: "Willy B's Grill website",          pos: 'right'  },
+  { src: '/portfolio/classic-cleanz.jpg', alt: 'Classic Cleanz Detailing website', pos: 'center' },
 ]
 
 export default function Hero() {

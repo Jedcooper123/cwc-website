@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Portfolio — Client sites shown as screenshots in a browser frame.
-// Screenshots live in public/work/ (1440×900 captures of each live site).
+// Screenshots live in public/portfolio/ (1440×900 captures of each live site).
 //
 // variant="full"    → featured project + grid of the rest (Work page)
 // variant="preview" → featured project + link to /work (home page)
@@ -19,7 +19,7 @@ const PROJECTS = [
     desc: 'Online booking, an owner dashboard, and instant email confirmations.',
     tags: ['Online booking', 'Owner dashboard', 'Email alerts'],
     url: 'https://www.classiccleanzdetailing.com/',
-    image: '/work/classic-cleanz.jpg',
+    image: '/portfolio/classic-cleanz.jpg',
     featured: true,
   },
   {
@@ -27,21 +27,21 @@ const PROJECTS = [
     title: 'Q & M Lawncare',
     type: 'Lawn & Landscaping',
     url: 'https://qmlawncare.com/',
-    image: '/work/qm-lawncare.jpg',
+    image: '/portfolio/qm-lawncare.jpg',
   },
   {
     id: 'willy-b',
     title: "Willy B's Grill",
     type: 'Food Truck',
     url: 'https://willy-b-grill-website-1.onrender.com/',
-    image: '/work/willy-b.jpg',
+    image: '/portfolio/willy-b.jpg',
   },
   {
     id: 'zander-keller',
     title: 'Zander Keller Photography',
     type: 'Photography',
     url: 'https://www.zanderkellerphotography.com/',
-    image: '/work/zander-keller.jpg',
+    image: '/portfolio/zander-keller.jpg',
   },
 ]
 
