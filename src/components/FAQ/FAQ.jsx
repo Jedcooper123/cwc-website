@@ -5,11 +5,11 @@ import styles from './FAQ.module.css'
 
 const FAQS = [
   {
-    q: 'What does the $750 deposit cover?',
-    a: 'It gets your project started. We design and build your site from there.',
+    q: 'How much does a website cost?',
+    a: 'Every business is different, so every quote is personalized. After a free 15-minute call you get one clear price for the build and a simple monthly plan. No hidden fees.',
   },
   {
-    q: 'What does $55/month include?',
+    q: 'What does the monthly plan include?',
     a: 'Hosting, security, maintenance, and changes whenever you need them.',
   },
   {

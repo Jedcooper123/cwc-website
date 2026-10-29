@@ -1,5 +1,5 @@
 .card {
-  max-width: 820px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 3.5rem 3rem;
   text-align: center;
@@ -7,38 +7,53 @@
   border-radius: var(--r-xl);
 }
 
-.prices {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem 2rem;
+.steps {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  text-align: left;
 }
 
-.price {
+.step {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem;
+  background: var(--card);
+  border-radius: var(--r-lg);
 }
 
-.amount {
-  font-size: clamp(3.5rem, 8vw, 5.5rem);
+.stepNum {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.4rem;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent-dk);
   font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  color: var(--text);
+  font-size: 0.9rem;
 }
 
-.unit {
-  margin-top: 0.5rem;
+.stepTitle {
+  font-weight: 650;
+  font-size: 1.0625rem;
+  letter-spacing: -0.015em;
+}
+
+.stepBody {
   font-size: 0.9375rem;
-  color: var(--text-3);
+  color: var(--text-2);
 }
 
-.plus {
-  padding-bottom: 1.75rem;
-  font-size: 2.25rem;
-  font-weight: 300;
+.includedLabel {
+  margin-top: 3rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text-3);
 }
 
@@ -47,7 +62,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 0.9rem 2.5rem;
   max-width: 640px;
-  margin: 3rem auto;
+  margin: 1.25rem auto 3rem;
   text-align: left;
 }
 
@@ -77,10 +92,11 @@
   color: var(--text-3);
 }
 
+@media (max-width: 760px) {
+  .steps { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 600px) {
-  .card   { padding: 2.5rem 1.5rem; border-radius: var(--r-lg); }
-  .prices { gap: 1rem 1.25rem; }
-  .amount { font-size: 3rem; }
-  .plus   { padding-bottom: 1.5rem; font-size: 1.75rem; }
-  .list   { grid-template-columns: 1fr; margin: 2.25rem auto; }
+  .card { padding: 2.5rem 1.25rem; border-radius: var(--r-lg); }
+  .list { grid-template-columns: 1fr; margin: 1.25rem auto 2.25rem; }
 }

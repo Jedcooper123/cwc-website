@@ -11,7 +11,7 @@ import styles from './Navbar.module.css'
 
 const LINKS = [
   { label: 'Work',         to: '/work'     },
-  { label: 'Pricing',      to: '/pricing'  },
+  { label: 'Plans',        to: '/pricing'  },
   { label: 'How It Works', to: '/#process' },
   { label: 'Contact',      to: '/contact'  },
 ]

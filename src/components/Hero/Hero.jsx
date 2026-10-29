@@ -35,7 +35,7 @@ export default function Hero() {
         </div>
 
         <p className={styles.price}>
-          <strong>$750</strong> deposit <span aria-hidden="true">·</span> <strong>$55</strong>/month
+          Personalized quote <span aria-hidden="true">·</span> No pressure <span aria-hidden="true">·</span> Live in two weeks
         </p>
       </div>
 

@@ -76,16 +76,21 @@ export default function Contact() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setSubmitting(true)
     try {
-      await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(form),
       })
-    } catch (_) {
-      // API unavailable — still show success (form data captured client-side)
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error)
+      }
+      setSubmitted(true)
+    } catch (err) {
+      setErrors({ submit: err.message || "We couldn't send your message. Please call or email Jed directly." })
+    } finally {
+      setSubmitting(false)
     }
-    setSubmitting(false)
-    setSubmitted(true)
   }
 
   /* ── Success state ── */
@@ -288,6 +293,8 @@ export default function Contact() {
                 </div>
               </div>
             )}
+
+            {errors.submit && <p className={styles.error} role="alert">{errors.submit}</p>}
 
             {/* Navigation */}
             <div className={styles.formNav}>
