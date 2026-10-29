@@ -4,7 +4,7 @@ import styles from './Process.module.css'
 
 const STEPS = [
   { title: 'Free call', desc: '15 minutes to talk through what you need.' },
-  { title: 'Kickoff',   desc: 'Pay the deposit and send your logo, photos, and prices.' },
+  { title: 'Kickoff',   desc: 'Approve your quote and send your logo, photos, and prices.' },
   { title: 'Review',    desc: 'See your site and tell us what to change.' },
   { title: 'Launch',    desc: 'We go live and keep it running.' },
 ]

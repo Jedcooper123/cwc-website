@@ -4,7 +4,7 @@
 // Routes:
 //   /           → HomePage    (hero, features, work, pricing, process, FAQ)
 //   /work       → WorkPage    (full portfolio)
-//   /pricing    → PricingPage (pricing + FAQ)
+//   /pricing    → PricingPage (how quotes work + FAQ)
 //   /contact    → ContactPage (Calendly + contact form)
 //   /portal     → PortalPage  (client login + dashboard)
 //   /services/* → redirect to /pricing (old service pages were retired)
@@ -52,8 +52,9 @@ function AppLayout() {
           <Route path="/"           element={<HomePage />}    />
           <Route path="/work"       element={<WorkPage />}    />
           <Route path="/pricing"    element={<PricingPage />} />
+          <Route path="/plans"      element={<Navigate to="/pricing" replace />} />
           <Route path="/contact"    element={<ContactPage />} />
-          <Route path="/portal"     element={<PortalPage />}  />
+          <Route path="/portal/*"   element={<PortalPage />}  />
           <Route path="/services/*" element={<Navigate to="/pricing" replace />} />
           <Route path="*"           element={<Navigate to="/" replace />} />
         </Routes>

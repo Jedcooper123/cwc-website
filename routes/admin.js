@@ -1,415 +1,232 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// routes/admin.js — Admin-only routes for managing clients, projects, invoices.
-// All routes require: authenticated + role === 'admin'
+// routes/admin.js — Owner-only: clients, projects, monthly plans, and the
+// inbox of client requests. Every route requires role = 'admin'.
 // ─────────────────────────────────────────────────────────────────────────────
-import { Router } from 'express'
-import bcrypt     from 'bcryptjs'
-import { getDb }  from '../database/db.js'
+import { query, one } from '../database/db.js'
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js'
-import { sendInvoiceEmail, sendReminderEmail, sendWelcomeEmail } from '../utils/email.js'
-import { getStripe } from './payments.js'
+import { sendInviteEmail } from '../utils/email.js'
+import { createAuthLink } from '../utils/authLinks.js'
+import { asyncRouter } from '../utils/asyncRouter.js'
 
-const router = Router()
+const router = asyncRouter()
 router.use(requireAuth, requireAdmin)
 
-// ── POST /api/admin/clients ───────────────────────────────────────────────
-router.post('/clients', async (req, res) => {
-  const { email, name, company, password } = req.body
-  if (!email || !name || !password)
-    return res.status(400).json({ error: 'email, name, and password are required.' })
-  if (password.length < 8)
-    return res.status(400).json({ error: 'Password must be at least 8 characters.' })
-  try {
-    const hash = await bcrypt.hash(password, 12)
-    const db   = getDb()
-    const info = db.prepare(`
-      INSERT INTO users (email, name, company, password_hash, role)
-      VALUES (?, ?, ?, ?, 'client')
-    `).run(email.trim(), name.trim(), company?.trim() || null, hash)
-    return res.status(201).json({ clientId: info.lastInsertRowid })
-  } catch (err) {
-    if (err.message.includes('UNIQUE'))
-      return res.status(409).json({ error: 'A client with that email already exists.' })
-    console.error(err)
-    return res.status(500).json({ error: 'Server error.' })
+const clip = (v, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '')
+const isUniqueViolation = (err) => err.code === '23505'
+
+function clientFields(body = {}) {
+  let website = clip(body.website_url, 300)
+  if (website && !/^https?:\/\//i.test(website)) website = `https://${website}`
+  return {
+    name:        clip(body.name, 120),
+    email:       clip(body.email, 200),
+    company:     clip(body.company, 120) || null,
+    phone:       clip(body.phone, 40) || null,
+    website_url: website || null,
+    notes:       clip(body.notes, 5000) || null,
   }
+}
+
+// ── Overview ─────────────────────────────────────────────────────────────
+router.get('/overview', async (_req, res) => {
+  const stats = await one(`
+    SELECT
+      (SELECT count(*) FROM users WHERE role = 'client')::int                            AS clients,
+      (SELECT count(*) FROM users WHERE role = 'client' AND password_hash IS NULL)::int  AS invited,
+      (SELECT count(*) FROM plans WHERE status = 'active')::int                          AS active_plans,
+      (SELECT COALESCE(sum(price_cents),0) FROM plans WHERE status = 'active')::int      AS mrr_cents,
+      (SELECT count(*) FROM plans WHERE status = 'active'
+         AND next_due_date <= current_date + 7)::int                                    AS due_soon,
+      (SELECT count(*) FROM client_requests WHERE status <> 'done')::int                 AS open_requests,
+      (SELECT count(*) FROM projects WHERE status = 'active')::int                       AS active_projects
+  `)
+  return res.json({ stats })
 })
 
-// ── PATCH /api/admin/clients/:id ─────────────────────────────────────────
-router.patch('/clients/:id', (req, res) => {
-  const { name, email, company } = req.body
-  const id = parseInt(req.params.id, 10)
-  if (!name || !email)
-    return res.status(400).json({ error: 'name and email are required.' })
-  const db     = getDb()
-  const client = db.prepare('SELECT id FROM users WHERE id = ? AND role = ?').get(id, 'client')
-  if (!client) return res.status(404).json({ error: 'Client not found.' })
-  try {
-    db.prepare('UPDATE users SET name = ?, email = ?, company = ? WHERE id = ?')
-      .run(name.trim(), email.trim(), company?.trim() || null, id)
-    return res.json({ ok: true })
-  } catch (err) {
-    if (err.message.includes('UNIQUE'))
-      return res.status(409).json({ error: 'That email is already in use.' })
-    return res.status(500).json({ error: 'Server error.' })
-  }
-})
-
-// ── DELETE /api/admin/clients/:id ────────────────────────────────────────
-// Deletes the client and cascades their projects, invoices, and subscription
-// rows (ON DELETE CASCADE). Cancels any live Stripe subscription first so
-// they stop being billed.
-router.delete('/clients/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10)
-  const db     = getDb()
-  const client = db.prepare('SELECT id, stripe_customer_id FROM users WHERE id = ? AND role = ?').get(id, 'client')
-  if (!client) return res.status(404).json({ error: 'Client not found.' })
-
-  const activeSubs = db.prepare(`
-    SELECT stripe_subscription_id FROM subscriptions
-    WHERE client_id = ? AND stripe_subscription_id IS NOT NULL AND status NOT IN ('cancelled')
-  `).all(id)
-
-  if (activeSubs.length > 0) {
-    try {
-      const stripe = getStripe()
-      for (const sub of activeSubs) {
-        await stripe.subscriptions.cancel(sub.stripe_subscription_id).catch(() => {})
-      }
-    } catch (err) {
-      console.error('[Stripe] Failed to cancel subscription(s) during client delete:', err.message)
-    }
-  }
-
-  db.prepare('DELETE FROM users WHERE id = ?').run(id)
-  return res.json({ ok: true })
-})
-
-// ── GET /api/admin/clients ────────────────────────────────────────────────
-router.get('/clients', (req, res) => {
-  const db      = getDb()
-  const clients = db.prepare(`
-    SELECT id, email, name, company, role, created_at
-    FROM users WHERE role = 'client'
-    ORDER BY created_at DESC
-  `).all()
+// ── Clients ──────────────────────────────────────────────────────────────
+router.get('/clients', async (_req, res) => {
+  const clients = await query(`
+    SELECT u.id, u.email, u.name, u.company, u.phone, u.website_url, u.created_at, u.last_login_at,
+           (u.password_hash IS NULL) AS invite_pending,
+           p.status AS plan_status, p.price_cents, p.next_due_date,
+           (SELECT count(*) FROM projects pr WHERE pr.client_id = u.id AND pr.status = 'active')::int AS active_projects,
+           (SELECT pr.stage FROM projects pr WHERE pr.client_id = u.id ORDER BY pr.updated_at DESC LIMIT 1) AS latest_stage,
+           (SELECT count(*) FROM client_requests r WHERE r.client_id = u.id AND r.status <> 'done')::int AS open_requests
+    FROM users u
+    LEFT JOIN plans p ON p.client_id = u.id
+    WHERE u.role = 'client'
+    ORDER BY lower(COALESCE(u.company, u.name))
+  `)
   return res.json({ clients })
 })
 
-// ── GET /api/admin/projects ── all projects with client info ──────────────
-router.get('/projects', (req, res) => {
-  const db = getDb()
-  const projects = db.prepare(`
-    SELECT p.*,
-           u.name    AS client_name,
-           u.email   AS client_email,
-           u.company AS client_company
-    FROM projects p
-    JOIN users u ON u.id = p.client_id
-    WHERE u.role = 'client'
-    ORDER BY p.updated_at DESC
-  `).all()
-  return res.json({ projects })
+// Everything about one client, for the detail view.
+router.get('/clients/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const client = await one(`
+    SELECT id, email, name, company, phone, website_url, notes,
+           created_at, last_login_at, (password_hash IS NULL) AS invite_pending
+    FROM users WHERE id = $1 AND role = 'client'`, [id])
+  if (!client) return res.status(404).json({ error: 'Client not found.' })
+
+  const [projects, plan, requests] = await Promise.all([
+    query('SELECT * FROM projects WHERE client_id = $1 ORDER BY updated_at DESC', [id]),
+    one('SELECT * FROM plans WHERE client_id = $1', [id]),
+    query('SELECT * FROM client_requests WHERE client_id = $1 ORDER BY created_at DESC', [id]),
+  ])
+  return res.json({ client, projects, plan, requests })
 })
 
-// ── GET /api/admin/invoices ── all invoices with client info ──────────────
-router.get('/invoices', (req, res) => {
-  const db = getDb()
-  const invoices = db.prepare(`
-    SELECT i.*,
-           u.name  AS client_name,
-           u.email AS client_email
-    FROM invoices i
-    JOIN users u ON u.id = i.client_id
-    ORDER BY i.created_at DESC
-  `).all()
-  return res.json({ invoices })
-})
+// Create a client. No password: they get an invite link to set their own.
+// Body: { name, email, company?, phone?, website_url?, notes?, sendInvite? }
+router.post('/clients', async (req, res) => {
+  const f = clientFields(req.body)
+  if (!f.name || !/^\S+@\S+\.\S+$/.test(f.email))
+    return res.status(400).json({ error: 'A name and a valid email are required.' })
 
-// ── POST /api/admin/projects ──────────────────────────────────────────────
-// Body: { clientId, name, description?, serviceId?, monthlyPriceDollars?, stage?, status? }
-router.post('/projects', (req, res) => {
-  const {
-    clientId, name, description,
-    serviceId, monthlyPriceDollars,
-    stage   = 'discovery',
-    status  = 'active',
-  } = req.body
-
-  if (!clientId || !name)
-    return res.status(400).json({ error: 'clientId and name are required.' })
-
-  const monthlyPriceCents = monthlyPriceDollars
-    ? Math.round(parseFloat(monthlyPriceDollars) * 100)
-    : 0
-
+  let client
   try {
-    const db   = getDb()
-    const info = db.prepare(`
-      INSERT INTO projects
-        (client_id, name, description, service_id, monthly_price_cents, stage, status, progress)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 0)
-    `).run(
-      clientId,
-      name.trim(),
-      description?.trim() || null,
-      serviceId || null,
-      monthlyPriceCents,
-      stage,
-      status,
+    client = await one(
+      `INSERT INTO users (email, name, company, phone, website_url, notes, role)
+       VALUES ($1, $2, $3, $4, $5, $6, 'client') RETURNING id, name, email`,
+      [f.email, f.name, f.company, f.phone, f.website_url, f.notes],
     )
-    return res.status(201).json({ projectId: info.lastInsertRowid })
   } catch (err) {
-    console.error(err)
-    return res.status(500).json({ error: 'Server error.' })
+    if (isUniqueViolation(err)) return res.status(409).json({ error: 'A client with that email already exists.' })
+    throw err
   }
+
+  const link = await createAuthLink(client.id, 'invite')
+  const mail = req.body?.sendInvite === false ? null : await sendInviteEmail({ ...client, link })
+  return res.status(201).json({ clientId: client.id, inviteLink: link, emailed: !!mail?.ok, emailError: mail && !mail.ok ? mail.reason : null })
 })
 
-// ── PATCH /api/admin/projects/:id ─────────────────────────────────────────
-// Body: { status?, stage?, description?, monthlyPriceDollars? }
-router.patch('/projects/:id', (req, res) => {
-  const { status, stage, description, monthlyPriceDollars } = req.body
+router.patch('/clients/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10)
-
-  const db      = getDb()
-  const project = db.prepare('SELECT id FROM projects WHERE id = ?').get(id)
-  if (!project) return res.status(404).json({ error: 'Project not found.' })
-
-  const updates = []
-  const values  = []
-
-  if (status              !== undefined) { updates.push('status = ?');              values.push(status) }
-  if (stage               !== undefined) { updates.push('stage = ?');               values.push(stage) }
-  if (description         !== undefined) { updates.push('description = ?');         values.push(description) }
-  if (monthlyPriceDollars !== undefined) {
-    updates.push('monthly_price_cents = ?')
-    values.push(Math.round(parseFloat(monthlyPriceDollars) * 100))
+  const f  = clientFields(req.body)
+  if (!f.name || !/^\S+@\S+\.\S+$/.test(f.email))
+    return res.status(400).json({ error: 'A name and a valid email are required.' })
+  try {
+    const updated = await one(
+      `UPDATE users SET name = $1, email = $2, company = $3, phone = $4, website_url = $5, notes = $6
+       WHERE id = $7 AND role = 'client' RETURNING id`,
+      [f.name, f.email, f.company, f.phone, f.website_url, f.notes, id],
+    )
+    if (!updated) return res.status(404).json({ error: 'Client not found.' })
+    return res.json({ ok: true })
+  } catch (err) {
+    if (isUniqueViolation(err)) return res.status(409).json({ error: 'That email is already in use.' })
+    throw err
   }
+})
 
-  if (updates.length === 0)
-    return res.status(400).json({ error: 'No fields to update.' })
+// Set the client's monthly plan by hand: what they see on their Billing tab.
+// Body: { planName?, priceDollars, nextDueDate?, status? }
+router.put('/clients/:id/plan', async (req, res) => {
+  const id     = parseInt(req.params.id, 10)
+  const cents  = Math.round(parseFloat(req.body?.priceDollars) * 100)
+  const status = req.body?.status || 'active'
+  const due    = req.body?.nextDueDate || null
+  if (!Number.isFinite(cents) || cents < 0) return res.status(400).json({ error: 'Enter a monthly price (0 or more).' })
+  if (!['active', 'paused', 'cancelled'].includes(status)) return res.status(400).json({ error: 'Invalid plan status.' })
+  if (due && !/^\d{4}-\d{2}-\d{2}$/.test(due)) return res.status(400).json({ error: 'Invalid due date.' })
 
-  updates.push("updated_at = datetime('now')")
-  values.push(id)
-  db.prepare(`UPDATE projects SET ${updates.join(', ')} WHERE id = ?`).run(...values)
+  const client = await one(`SELECT id FROM users WHERE id = $1 AND role = 'client'`, [id])
+  if (!client) return res.status(404).json({ error: 'Client not found.' })
+
+  const plan = await one(
+    `INSERT INTO plans (client_id, plan_name, price_cents, next_due_date, status)
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (client_id) DO UPDATE SET
+       plan_name = EXCLUDED.plan_name, price_cents = EXCLUDED.price_cents,
+       next_due_date = EXCLUDED.next_due_date, status = EXCLUDED.status, updated_at = now()
+     RETURNING *`,
+    [id, clip(req.body?.planName, 80) || 'Monthly Care Plan', cents, due, status],
+  )
+  return res.json({ plan })
+})
+
+// Send (or re-send) a portal link: an invite if they never set a password,
+// otherwise a password reset. Returns the link so it can be copied manually.
+router.post('/clients/:id/invite', async (req, res) => {
+  const client = await one(
+    `SELECT id, name, email, (password_hash IS NULL) AS invite_pending
+     FROM users WHERE id = $1 AND role = 'client'`, [req.params.id])
+  if (!client) return res.status(404).json({ error: 'Client not found.' })
+
+  const link = await createAuthLink(client.id, client.invite_pending ? 'invite' : 'reset')
+  const mail = await sendInviteEmail({ ...client, link })
+  return res.json({ inviteLink: link, emailed: mail.ok, emailError: mail.ok ? null : mail.reason })
+})
+
+// Deletes the client and everything attached (ON DELETE CASCADE).
+router.delete('/clients/:id', async (req, res) => {
+  const deleted = await one(`DELETE FROM users WHERE id = $1 AND role = 'client' RETURNING id`, [req.params.id])
+  if (!deleted) return res.status(404).json({ error: 'Client not found.' })
   return res.json({ ok: true })
 })
 
-// ── DELETE /api/admin/projects/:id ────────────────────────────────────────
-router.delete('/projects/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10)
-  const db      = getDb()
-  const project = db.prepare('SELECT id FROM projects WHERE id = ?').get(id)
-  if (!project) return res.status(404).json({ error: 'Project not found.' })
-  db.prepare('DELETE FROM projects WHERE id = ?').run(id)
+// ── Requests inbox ───────────────────────────────────────────────────────
+router.get('/requests', async (req, res) => {
+  const status = ['open', 'in_progress', 'done'].includes(req.query.status) ? req.query.status : null
+  const requests = await query(`
+    SELECT r.*, u.name AS client_name, u.company AS client_company, u.email AS client_email
+    FROM client_requests r JOIN users u ON u.id = r.client_id
+    WHERE ($1::text IS NULL AND r.status <> 'done') OR r.status = $1
+    ORDER BY (r.type = 'cancel') DESC, r.created_at DESC
+    LIMIT 200`, [status])
+  return res.json({ requests })
+})
+
+router.patch('/requests/:id', async (req, res) => {
+  const status = req.body?.status
+  if (!['open', 'in_progress', 'done'].includes(status)) return res.status(400).json({ error: 'Invalid status.' })
+  const updated = await one(
+    'UPDATE client_requests SET status = $1, updated_at = now() WHERE id = $2 RETURNING id',
+    [status, req.params.id],
+  )
+  if (!updated) return res.status(404).json({ error: 'Request not found.' })
   return res.json({ ok: true })
 })
 
-// ── POST /api/admin/invoices ──────────────────────────────────────────────
-// Body: { clientId, description, amountDollars, serviceId?, invoiceType?, dueDate? }
-router.post('/invoices', (req, res) => {
-  const {
-    clientId, description, amountDollars,
-    serviceId, invoiceType = 'one-time', dueDate,
-  } = req.body
-
-  if (!clientId || !description || !amountDollars)
-    return res.status(400).json({ error: 'clientId, description, and amountDollars are required.' })
-
-  const amountCents = Math.round(parseFloat(amountDollars) * 100)
-  if (isNaN(amountCents) || amountCents <= 0)
-    return res.status(400).json({ error: 'amountDollars must be a positive number.' })
-
-  try {
-    const db   = getDb()
-    const info = db.prepare(`
-      INSERT INTO invoices (client_id, description, amount_cents, service_id, invoice_type, due_date)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(clientId, description.trim(), amountCents, serviceId || null, invoiceType, dueDate || null)
-    return res.status(201).json({ invoiceId: info.lastInsertRowid })
-  } catch (err) {
-    console.error(err)
-    return res.status(500).json({ error: 'Server error.' })
-  }
+// ── Projects ─────────────────────────────────────────────────────────────
+// Body: { clientId, name, description?, stage?, status? }
+router.post('/projects', async (req, res) => {
+  const { clientId, name, description, stage = 'discovery', status = 'active' } = req.body || {}
+  if (!clientId || !clip(name)) return res.status(400).json({ error: 'clientId and name are required.' })
+  const project = await one(
+    `INSERT INTO projects (client_id, name, description, stage, status)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+    [clientId, clip(name), clip(description, 2000) || null, stage, status],
+  )
+  return res.status(201).json({ projectId: project.id })
 })
 
-// ── PATCH /api/admin/invoices/:id/void ───────────────────────────────────
-router.patch('/invoices/:id/void', (req, res) => {
-  const db      = getDb()
-  const invoice = db.prepare("SELECT id FROM invoices WHERE id = ? AND status = 'pending'").get(req.params.id)
-  if (!invoice) return res.status(404).json({ error: 'Pending invoice not found.' })
-  db.prepare("UPDATE invoices SET status = 'void' WHERE id = ?").run(req.params.id)
+// Body: { status?, stage?, description? }
+router.patch('/projects/:id', async (req, res) => {
+  const { status, stage, description } = req.body || {}
+  const sets = []
+  const vals = []
+  const add  = (col, val) => { vals.push(val); sets.push(`${col} = $${vals.length}`) }
+
+  if (status      !== undefined) add('status', status)
+  if (stage       !== undefined) add('stage', stage)
+  if (description !== undefined) add('description', description)
+  if (!sets.length) return res.status(400).json({ error: 'No fields to update.' })
+
+  vals.push(parseInt(req.params.id, 10))
+  const updated = await one(
+    `UPDATE projects SET ${sets.join(', ')}, updated_at = now() WHERE id = $${vals.length} RETURNING id`,
+    vals,
+  )
+  if (!updated) return res.status(404).json({ error: 'Project not found.' })
   return res.json({ ok: true })
 })
 
-// ── POST /api/admin/invoices/:id/notify ── email the client ──────────────
-router.post('/invoices/:id/notify', async (req, res) => {
-  const db = getDb()
-  const invoice = db.prepare(`
-    SELECT i.*, u.name AS client_name, u.email AS client_email
-    FROM invoices i
-    JOIN users u ON u.id = i.client_id
-    WHERE i.id = ?
-  `).get(req.params.id)
-
-  if (!invoice) return res.status(404).json({ error: 'Invoice not found.' })
-
-  try {
-    const result = await sendInvoiceEmail({
-      clientName:    invoice.client_name,
-      clientEmail:   invoice.client_email,
-      description:   invoice.description,
-      amountDollars: (invoice.amount_cents / 100).toFixed(2),
-      dueDate:       invoice.due_date,
-      invoiceType:   invoice.invoice_type,
-    })
-    if (!result.ok) return res.status(400).json({ error: result.reason })
-    return res.json({ ok: true })
-  } catch (err) {
-    console.error('[Email]', err.message)
-    return res.status(500).json({ error: 'Failed to send email: ' + err.message })
-  }
-})
-
-// ── POST /api/admin/clients/:id/welcome ── email login info to client ─────
-// Body: { tempPassword } — the plain-text password you set for them
-router.post('/clients/:id/welcome', async (req, res) => {
-  const { tempPassword } = req.body
-  if (!tempPassword)
-    return res.status(400).json({ error: 'tempPassword is required.' })
-
-  const db     = getDb()
-  const client = db.prepare('SELECT id, name, email FROM users WHERE id = ? AND role = ?')
-    .get(req.params.id, 'client')
-  if (!client) return res.status(404).json({ error: 'Client not found.' })
-
-  try {
-    const result = await sendWelcomeEmail({
-      clientName:   client.name,
-      clientEmail:  client.email,
-      tempPassword,
-    })
-    if (!result.ok) return res.status(400).json({ error: result.reason })
-    return res.json({ ok: true })
-  } catch (err) {
-    console.error('[Email]', err.message)
-    return res.status(500).json({ error: 'Failed to send email: ' + err.message })
-  }
-})
-
-// ── GET /api/admin/clients/:id/subscription ───────────────────────────────
-router.get('/clients/:id/subscription', (req, res) => {
-  const db  = getDb()
-  const sub = db.prepare(`
-    SELECT id, plan_name, plan_price_cents, status,
-           stripe_subscription_id, stripe_customer_id,
-           current_period_end, created_at, updated_at
-    FROM subscriptions WHERE client_id = ? ORDER BY created_at DESC LIMIT 1
-  `).get(req.params.id)
-  const user = db.prepare('SELECT stripe_customer_id FROM users WHERE id = ?').get(req.params.id)
-  return res.json({ subscription: sub || null, stripeCustomerId: user?.stripe_customer_id || null })
-})
-
-// ── GET /api/admin/subscriptions ── all subscriptions with client info ────
-router.get('/subscriptions', (req, res) => {
-  const db = getDb()
-  const subscriptions = db.prepare(`
-    SELECT s.*, u.name AS client_name, u.email AS client_email
-    FROM subscriptions s
-    JOIN users u ON u.id = s.client_id
-    ORDER BY s.updated_at DESC
-  `).all()
-  return res.json({ subscriptions })
-})
-
-// ── POST /api/admin/clients/:id/sync-stripe ── pull live status from Stripe ─
-// Reconciles local subscription/invoice status directly against Stripe, in
-// case a webhook event was missed (server downtime, webhook not configured
-// yet, etc). The webhook keeps things current in real time; this is the
-// manual backstop.
-router.post('/clients/:id/sync-stripe', async (req, res) => {
-  const db     = getDb()
-  const client = db.prepare('SELECT id, stripe_customer_id FROM users WHERE id = ? AND role = ?')
-    .get(req.params.id, 'client')
-  if (!client) return res.status(404).json({ error: 'Client not found.' })
-  if (!client.stripe_customer_id)
-    return res.status(400).json({ error: 'This client has no Stripe customer yet.' })
-
-  try {
-    const stripe = getStripe()
-
-    // 1. Reconcile subscriptions
-    const subs = await stripe.subscriptions.list({ customer: client.stripe_customer_id, limit: 10 })
-    for (const sub of subs.data) {
-      const periodEnd = sub.current_period_end
-        ? new Date(sub.current_period_end * 1000).toISOString()
-        : null
-      const existing = db.prepare('SELECT id FROM subscriptions WHERE stripe_subscription_id = ?').get(sub.id)
-      if (existing) {
-        db.prepare(`
-          UPDATE subscriptions
-          SET status = ?, current_period_end = ?, updated_at = datetime('now')
-          WHERE stripe_subscription_id = ?
-        `).run(sub.status, periodEnd, sub.id)
-      } else {
-        db.prepare(`
-          INSERT INTO subscriptions
-            (client_id, stripe_subscription_id, stripe_customer_id, status, current_period_end)
-          VALUES (?, ?, ?, ?, ?)
-        `).run(client.id, sub.id, client.stripe_customer_id, sub.status, periodEnd)
-      }
-    }
-
-    // 2. Reconcile any pending one-time invoices tied to a payment intent
-    const pendingInvoices = db.prepare(`
-      SELECT id, stripe_payment_intent FROM invoices
-      WHERE client_id = ? AND status = 'pending' AND stripe_payment_intent IS NOT NULL
-    `).all(client.id)
-    let invoicesSynced = 0
-    for (const inv of pendingInvoices) {
-      const intent = await stripe.paymentIntents.retrieve(inv.stripe_payment_intent)
-      if (intent.status === 'succeeded') {
-        db.prepare(`UPDATE invoices SET status = 'paid', paid_at = datetime('now') WHERE id = ?`).run(inv.id)
-        invoicesSynced++
-      }
-    }
-
-    return res.json({ ok: true, subscriptionsSynced: subs.data.length, invoicesSynced })
-  } catch (err) {
-    console.error('[Stripe sync]', err.message)
-    return res.status(500).json({ error: 'Could not sync with Stripe: ' + err.message })
-  }
-})
-
-// ── POST /api/admin/clients/:id/remind ── send reminder to a client ──────
-router.post('/clients/:id/remind', async (req, res) => {
-  const db     = getDb()
-  const client = db.prepare('SELECT id, name, email FROM users WHERE id = ? AND role = ?')
-    .get(req.params.id, 'client')
-  if (!client) return res.status(404).json({ error: 'Client not found.' })
-
-  const pending = db.prepare(
-    "SELECT id, amount_cents FROM invoices WHERE client_id = ? AND status = 'pending'"
-  ).all(client.id)
-
-  if (pending.length === 0)
-    return res.status(400).json({ error: 'No pending invoices for this client.' })
-
-  const totalOwed = pending.reduce((s, i) => s + i.amount_cents, 0)
-
-  try {
-    const result = await sendReminderEmail({
-      clientName:   client.name,
-      clientEmail:  client.email,
-      pendingCount: pending.length,
-      totalOwed,
-    })
-    if (!result.ok) return res.status(400).json({ error: result.reason })
-    return res.json({ ok: true })
-  } catch (err) {
-    console.error('[Email]', err.message)
-    return res.status(500).json({ error: 'Failed to send email: ' + err.message })
-  }
+router.delete('/projects/:id', async (req, res) => {
+  const deleted = await one('DELETE FROM projects WHERE id = $1 RETURNING id', [req.params.id])
+  if (!deleted) return res.status(404).json({ error: 'Project not found.' })
+  return res.json({ ok: true })
 })
 
 export default router

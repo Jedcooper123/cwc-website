@@ -1,192 +1,177 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// utils/email.js — Nodemailer-based email utility for CWC portal.
+// utils/email.js — Transactional email through Resend (https://resend.com).
 //
-// Required env vars (set in Render):
-//   EMAIL_FROM   — Gmail address to send from  (e.g. jedpcooper@gmail.com)
-//   EMAIL_PASS   — Gmail App Password          (not your regular password)
-//                  Generate at: https://myaccount.google.com/apppasswords
-//   APP_URL      — Your deployed URL            (e.g. https://cwcwebconsulting.com)
+// Env vars (Render → Environment):
+//   RESEND_API_KEY        — Resend API key. Without it, emails print to the
+//                           server log instead of sending (safe for local dev).
+//   EMAIL_FROM            — verified sender, e.g.
+//                           "Launchpad Web Consulting <hello@launchpadwebconsulting.com>"
+//   OWNER_NOTIFY_EMAIL    — where client requests + contact forms go
+//                           (default: jedpcooper@gmail.com)
+//   APP_URL               — site URL used in links (default: https://www.launchpadwebconsulting.com)
+//   REDIRECT_ALL_EMAIL_TO — test mode: every email goes to this address instead
 //
-// If EMAIL_FROM / EMAIL_PASS are not set, email functions return { ok: false }
-// without crashing — invoices still get created, emails just won't send.
+// Every send returns { ok, id?, reason? } and never throws, so a mail outage
+// can't break a request that already saved to the database.
 // ─────────────────────────────────────────────────────────────────────────────
-import nodemailer from 'nodemailer'
 
-function getTransporter() {
-  const user = process.env.EMAIL_FROM
-  const pass = process.env.EMAIL_PASS
-  if (!user || !pass) return null
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
+export const APP_URL     = () => (process.env.APP_URL || 'https://www.launchpadwebconsulting.com').replace(/\/$/, '')
+export const PORTAL_URL  = () => `${APP_URL()}/portal`
+export const OWNER_EMAIL = () => process.env.OWNER_NOTIFY_EMAIL || 'jedpcooper@gmail.com'
+const FROM = () => process.env.EMAIL_FROM || 'Launchpad Web Consulting <onboarding@resend.dev>'
+
+// Escape anything a user typed before it goes into an HTML email.
+export const esc = (s = '') => String(s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+
+const nl2br = (s) => esc(s).replace(/\n/g, '<br>')
+
+async function send({ to, subject, html, text, replyTo }) {
+  const redirect = process.env.REDIRECT_ALL_EMAIL_TO
+  const finalTo  = redirect || to
+  const finalSubject = redirect ? `[TEST → ${to}] ${subject}` : subject
+
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[Email:not-sent] to=${finalTo} subject="${finalSubject}"\n${text}`)
+    return { ok: false, reason: 'Email is not configured (RESEND_API_KEY missing).' }
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method:  'POST',
+      headers: {
+        Authorization:  `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: FROM(), to: [finalTo], subject: finalSubject, html, text,
+        ...(replyTo ? { reply_to: replyTo } : {}),
+      }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      console.error('[Email] Resend error:', res.status, data?.message)
+      return { ok: false, reason: data?.message || `Resend returned ${res.status}` }
+    }
+    return { ok: true, id: data.id }
+  } catch (err) {
+    console.error('[Email] Send failed:', err.message)
+    return { ok: false, reason: err.message }
+  }
+}
+
+// ── Layout ─────────────────────────────────────────────────────────────────
+// Table layout + inline styles: the only thing every mail client agrees on.
+const button = (href, label) => `
+  <a href="${href}" style="display:inline-block;background:#FF6B00;color:#ffffff;text-decoration:none;
+     font-weight:600;font-size:15px;padding:13px 26px;border-radius:999px;">${label}</a>`
+
+const layout = (body) => `<!DOCTYPE html>
+<html><body style="margin:0;padding:0;background:#f5f5f7;font-family:Helvetica,Arial,sans-serif;color:#1d1d1f;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" style="padding:32px 16px;">
+  <table width="560" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;width:100%;background:#ffffff;border-radius:18px;overflow:hidden;">
+    <tr><td style="padding:28px 32px 0;">
+      <span style="display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;background:#FF6B00;color:#fff;font-weight:700;border-radius:8px;">L</span>
+      <span style="font-weight:700;font-size:15px;vertical-align:middle;margin-left:8px;">Launchpad Web Consulting</span>
+    </td></tr>
+    <tr><td style="padding:24px 32px 32px;font-size:15px;line-height:1.6;">${body}</td></tr>
+    <tr><td style="padding:18px 32px;border-top:1px solid #ececf0;font-size:12px;color:#86868b;">
+      Questions? Just reply to this email, or sign in at
+      <a href="${PORTAL_URL()}" style="color:#FF6B00;text-decoration:none;">${PORTAL_URL().replace(/^https?:\/\//, '')}</a>.
+    </td></tr>
+  </table>
+</td></tr></table>
+</body></html>`
+
+const firstName = (name = '') => esc(name.trim().split(/\s+/)[0] || 'there')
+
+// ── Client-facing emails ──────────────────────────────────────────────────
+export function sendInviteEmail({ name, email, link }) {
+  return send({
+    to: email,
+    subject: 'Your Launchpad client portal is ready',
+    text: `Hi ${name},\n\nYour Launchpad client portal is set up. Create your password here (link works for 7 days):\n${link}\n\nIn the portal you can track your project, request website edits, message Jed, and manage billing.\n\n— Jed, Launchpad Web Consulting`,
+    html: layout(`
+      <h1 style="font-size:22px;margin:0 0 12px;">Welcome aboard, ${firstName(name)}.</h1>
+      <p style="margin:0 0 20px;">Your client portal is set up. Create a password to sign in. From there you can follow your project, request website edits, message me directly, and manage billing.</p>
+      <p style="margin:0 0 24px;">${button(link, 'Create my password')}</p>
+      <p style="margin:0;color:#86868b;font-size:13px;">This link works for 7 days. If it expires, reply here and I'll send a new one.<br>— Jed</p>`),
   })
 }
 
-const PORTAL_URL = () =>
-  `${process.env.APP_URL || 'https://cwcwebconsulting.com'}/portal`
-
-// ── Shared HTML header / footer ────────────────────────────────────────────
-const emailWrap = (body) => `
-<!DOCTYPE html>
-<html>
-<body style="margin:0;padding:0;background:#0b0d14;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0">
-  <tr><td align="center" style="padding:40px 16px;">
-    <table width="540" cellpadding="0" cellspacing="0" style="background:#111420;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.07);">
-      <!-- Header -->
-      <tr>
-        <td style="background:linear-gradient(135deg,#5b8df5 0%,#7c3aed 100%);padding:28px 32px;text-align:center;">
-          <div style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;background:rgba(255,255,255,0.15);border-radius:10px;font-size:0.78rem;font-weight:900;color:#fff;letter-spacing:0.08em;margin-bottom:10px;">CWC</div>
-          <div style="color:rgba(255,255,255,0.8);font-size:0.8rem;margin-top:4px;">Cooper Web Consulting</div>
-        </td>
-      </tr>
-      <!-- Body -->
-      <tr><td style="padding:32px;">${body}</td></tr>
-      <!-- Footer -->
-      <tr>
-        <td style="padding:20px 32px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;">
-          <p style="color:#475569;font-size:0.72rem;margin:0;">
-            Questions? Reply to this email or visit your portal at
-            <a href="${PORTAL_URL()}" style="color:#5b8df5;text-decoration:none;">${PORTAL_URL()}</a>
-          </p>
-        </td>
-      </tr>
-    </table>
-  </td></tr>
-</table>
-</body>
-</html>`
-
-// ── Send new-invoice notification ──────────────────────────────────────────
-export async function sendInvoiceEmail({
-  clientName, clientEmail, description, amountDollars, dueDate, invoiceType,
-}) {
-  const transporter = getTransporter()
-  if (!transporter) {
-    console.warn('[CWC Email] EMAIL_FROM/EMAIL_PASS not set — invoice email skipped.')
-    return { ok: false, reason: 'Email not configured. Add EMAIL_FROM and EMAIL_PASS in Render env vars.' }
-  }
-
-  const amount    = `$${parseFloat(amountDollars).toFixed(2)}`
-  const typeLabel = invoiceType === 'monthly' ? 'Monthly' : 'One-time'
-  const portalUrl = PORTAL_URL()
-
-  const body = `
-    <p style="color:#e2e8f0;font-size:1rem;margin:0 0 8px;">Hi ${clientName},</p>
-    <p style="color:#94a3b8;font-size:0.875rem;margin:0 0 24px;line-height:1.6;">
-      You have a new invoice from Cooper Web Consulting ready for payment.
-    </p>
-    <!-- Invoice block -->
-    <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:20px;margin-bottom:24px;">
-      <div style="color:#94a3b8;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">${typeLabel} Invoice</div>
-      <div style="color:#e2e8f0;font-weight:600;font-size:0.95rem;margin-bottom:12px;">${description}</div>
-      <div style="color:#5b8df5;font-size:2rem;font-weight:800;line-height:1;">${amount}</div>
-      ${dueDate ? `<div style="color:#64748b;font-size:0.78rem;margin-top:8px;">Due: ${new Date(dueDate).toLocaleDateString()}</div>` : ''}
-    </div>
-    <!-- CTA -->
-    <a href="${portalUrl}" style="display:inline-block;background:linear-gradient(135deg,#5b8df5,#7c3aed);color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:700;font-size:0.875rem;">
-      Pay Invoice →
-    </a>
-    <p style="color:#64748b;font-size:0.78rem;margin-top:20px;line-height:1.6;">
-      Log in with your email at <a href="${portalUrl}" style="color:#5b8df5;">${portalUrl}</a> to pay securely by card.
-    </p>`
-
-  await transporter.sendMail({
-    from:    `"Cooper Web Consulting" <${process.env.EMAIL_FROM}>`,
-    to:      clientEmail,
-    subject: `New Invoice from Cooper Web Consulting — ${amount}`,
-    html:    emailWrap(body),
+export function sendPasswordResetEmail({ name, email, link }) {
+  return send({
+    to: email,
+    subject: 'Reset your Launchpad portal password',
+    text: `Hi ${name},\n\nReset your password here (link works for 1 hour):\n${link}\n\nIf you didn't ask for this, you can ignore this email.`,
+    html: layout(`
+      <h1 style="font-size:22px;margin:0 0 12px;">Reset your password</h1>
+      <p style="margin:0 0 20px;">Hi ${firstName(name)}, use the button below to choose a new password.</p>
+      <p style="margin:0 0 24px;">${button(link, 'Choose a new password')}</p>
+      <p style="margin:0;color:#86868b;font-size:13px;">This link works for 1 hour. If you didn't ask for a reset, you can ignore this email. Your password won't change.</p>`),
   })
-
-  console.log(`[CWC Email] Invoice email sent to ${clientEmail}`)
-  return { ok: true }
 }
 
-// ── Send welcome / login-info email ───────────────────────────────────────
-export async function sendWelcomeEmail({
-  clientName, clientEmail, tempPassword,
-}) {
-  const transporter = getTransporter()
-  if (!transporter) {
-    console.warn('[CWC Email] EMAIL_FROM/EMAIL_PASS not set — welcome email skipped.')
-    return { ok: false, reason: 'Email not configured. Add EMAIL_FROM and EMAIL_PASS in Render env vars.' }
-  }
+export function sendPasswordChangedEmail({ name, email }) {
+  return send({
+    to: email,
+    subject: 'Your Launchpad portal password was changed',
+    text: `Hi ${name},\n\nYour portal password was just changed. If this wasn't you, reply to this email right away.`,
+    html: layout(`
+      <h1 style="font-size:22px;margin:0 0 12px;">Password changed</h1>
+      <p style="margin:0;">Hi ${firstName(name)}, your portal password was just changed and other devices were signed out. If this wasn't you, reply to this email right away.</p>`),
+  })
+}
 
-  const portalUrl = PORTAL_URL()
+// ── Owner notifications ───────────────────────────────────────────────────
+export const REQUEST_LABELS = {
+  message: 'Message',
+  edit:    'Website edit request',
+  billing: 'Billing question',
+  cancel:  'Cancellation request',
+}
 
-  const body = `
-    <p style="color:#e2e8f0;font-size:1rem;margin:0 0 8px;">Hi ${clientName},</p>
-    <p style="color:#94a3b8;font-size:0.875rem;margin:0 0 24px;line-height:1.6;">
-      Welcome to the Cooper Web Consulting client portal! Your account is ready.
-      Here are your login details — keep these somewhere safe.
-    </p>
-    <!-- Credentials block -->
-    <div style="background:#1a1f2e;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:20px;margin-bottom:24px;">
-      <table cellpadding="0" cellspacing="0" width="100%">
-        <tr>
-          <td style="color:#64748b;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;padding-bottom:10px;">Login Email</td>
-          <td style="color:#e2e8f0;font-weight:600;font-size:0.9rem;padding-bottom:10px;text-align:right;">${clientEmail}</td>
-        </tr>
-        <tr>
-          <td style="color:#64748b;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;">Password</td>
-          <td style="color:#e2e8f0;font-weight:600;font-size:0.9rem;text-align:right;font-family:monospace;">${tempPassword}</td>
-        </tr>
+export function sendRequestToOwner({ request, client }) {
+  const label   = REQUEST_LABELS[request.type] || 'Request'
+  const urgent  = request.type === 'cancel'
+  const details = [
+    ['Client',  `${client.name}${client.company ? ` (${client.company})` : ''}`],
+    ['Email',   client.email],
+    client.phone       && ['Phone',   client.phone],
+    client.website_url && ['Website', client.website_url],
+    request.page_url   && ['Page',    request.page_url],
+  ].filter(Boolean)
+
+  return send({
+    to: OWNER_EMAIL(),
+    replyTo: client.email,
+    subject: `${urgent ? '⚠️ ' : ''}${label} from ${client.company || client.name}: ${request.subject}`,
+    text: `${label} from ${client.name} <${client.email}>\n\n${request.subject}\n\n${request.body}\n\nReply to this email to answer them directly.\nAdmin: ${APP_URL()}/portal`,
+    html: layout(`
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${urgent ? '#d70015' : '#FF6B00'};">${label}</p>
+      <h1 style="font-size:20px;margin:0 0 16px;">${esc(request.subject)}</h1>
+      <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:0 0 20px;">${nl2br(request.body)}</div>
+      <table cellpadding="0" cellspacing="0" role="presentation" style="font-size:14px;margin:0 0 20px;">
+        ${details.map(([k, v]) => `<tr><td style="color:#86868b;padding:2px 16px 2px 0;">${k}</td><td>${esc(v)}</td></tr>`).join('')}
       </table>
-    </div>
-    <!-- CTA -->
-    <a href="${portalUrl}" style="display:inline-block;background:linear-gradient(135deg,#5b8df5,#7c3aed);color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:700;font-size:0.875rem;">
-      Sign In to Your Portal →
-    </a>
-    <p style="color:#64748b;font-size:0.78rem;margin-top:20px;line-height:1.6;">
-      Visit <a href="${portalUrl}" style="color:#5b8df5;">${portalUrl}</a> any time to view your projects,
-      track progress, and manage billing. Reply to this email if you have any questions.
-    </p>`
-
-  await transporter.sendMail({
-    from:    `"Cooper Web Consulting" <${process.env.EMAIL_FROM}>`,
-    to:      clientEmail,
-    subject: 'Your Cooper Web Consulting Portal Access',
-    html:    emailWrap(body),
+      <p style="margin:0;color:#86868b;font-size:13px;">Reply to this email to answer ${firstName(client.name)} directly. Mark it done in the <a href="${APP_URL()}/portal" style="color:#FF6B00;">admin portal</a>.</p>`),
   })
-
-  console.log(`[CWC Email] Welcome email sent to ${clientEmail}`)
-  return { ok: true }
 }
 
-// ── Send payment reminder ──────────────────────────────────────────────────
-export async function sendReminderEmail({
-  clientName, clientEmail, pendingCount, totalOwed,
-}) {
-  const transporter = getTransporter()
-  if (!transporter) {
-    console.warn('[CWC Email] EMAIL_FROM/EMAIL_PASS not set — reminder email skipped.')
-    return { ok: false, reason: 'Email not configured. Add EMAIL_FROM and EMAIL_PASS in Render env vars.' }
-  }
-
-  const amount    = `$${(totalOwed / 100).toFixed(2)}`
-  const portalUrl = PORTAL_URL()
-
-  const body = `
-    <p style="color:#e2e8f0;font-size:1rem;margin:0 0 8px;">Hi ${clientName},</p>
-    <p style="color:#94a3b8;font-size:0.875rem;margin:0 0 24px;line-height:1.6;">
-      This is a friendly reminder that you have
-      <strong style="color:#f97316;">${pendingCount} outstanding invoice${pendingCount > 1 ? 's' : ''}</strong>
-      totalling <strong style="color:#f97316;">${amount}</strong>.
-    </p>
-    <a href="${portalUrl}" style="display:inline-block;background:linear-gradient(135deg,#5b8df5,#7c3aed);color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:700;font-size:0.875rem;">
-      View &amp; Pay →
-    </a>
-    <p style="color:#64748b;font-size:0.78rem;margin-top:20px;line-height:1.6;">
-      Log in at <a href="${portalUrl}" style="color:#5b8df5;">${portalUrl}</a> to pay securely by card.
-    </p>`
-
-  await transporter.sendMail({
-    from:    `"Cooper Web Consulting" <${process.env.EMAIL_FROM}>`,
-    to:      clientEmail,
-    subject: `Payment Reminder — ${amount} outstanding`,
-    html:    emailWrap(body),
+export function sendContactToOwner({ name, email, phone, business, message }) {
+  const rows = [['Name', name], ['Email', email], phone && ['Phone', phone], business && ['Business', business]].filter(Boolean)
+  return send({
+    to: OWNER_EMAIL(),
+    replyTo: email,
+    subject: `New website inquiry from ${name || email}`,
+    text: `${rows.map(([k, v]) => `${k}: ${v}`).join('\n')}\n\n${message}`,
+    html: layout(`
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#FF6B00;">New inquiry</p>
+      <h1 style="font-size:20px;margin:0 0 16px;">${esc(name || email)}</h1>
+      <table cellpadding="0" cellspacing="0" role="presentation" style="font-size:14px;margin:0 0 16px;">
+        ${rows.map(([k, v]) => `<tr><td style="color:#86868b;padding:2px 16px 2px 0;">${k}</td><td>${esc(v)}</td></tr>`).join('')}
+      </table>
+      <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;">${nl2br(message)}</div>`),
   })
-
-  console.log(`[CWC Email] Reminder email sent to ${clientEmail}`)
-  return { ok: true }
 }

@@ -8,9 +8,9 @@ export default function PricingPage() {
   return (
     <>
       <PageHeader
-        label="Pricing"
-        title="One simple price."
-        sub="The same plan for every business."
+        label="Plans"
+        title="Priced for your business."
+        sub="Every site is personalized, so every quote is too. Here’s how it works."
       />
       <Pricing showHeader={false} />
       <FAQ />
