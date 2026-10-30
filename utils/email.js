@@ -159,8 +159,11 @@ export function sendRequestToOwner({ request, client }) {
   })
 }
 
-export function sendContactToOwner({ name, email, phone, business, message }) {
-  const rows = [['Name', name], ['Email', email], phone && ['Phone', phone], business && ['Business', business]].filter(Boolean)
+export function sendContactToOwner({ name, email, phone, business, source, message }) {
+  const rows = [
+    ['Name', name], ['Email', email], phone && ['Phone', phone], business && ['Business', business],
+    ['Came from', source || 'Direct / unknown'],
+  ].filter(Boolean)
   return send({
     to: OWNER_EMAIL(),
     replyTo: email,

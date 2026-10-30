@@ -4,10 +4,22 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import React, { useEffect } from 'react'
 import styles from './Scheduling.module.css'
+import { track } from '../../lib/analytics'
 
 const CALENDLY_URL = 'https://calendly.com/jedpcooper'
 
 export default function Scheduling() {
+  // Calendly posts a message to the page when someone books: count it as a
+  // Schedule conversion for the Meta Pixel.
+  useEffect(() => {
+    const onMessage = (e) => {
+      if (e.origin === 'https://calendly.com' && e.data?.event === 'calendly.event_scheduled')
+        track('Schedule', { content_name: 'Free 15-minute call' })
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
   useEffect(() => {
     // Load the Calendly widget script once
     if (document.querySelector('script[data-calendly]')) return
