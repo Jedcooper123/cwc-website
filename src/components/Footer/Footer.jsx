@@ -39,7 +39,7 @@ export default function Footer() {
         <div className={styles.top}>
           <div className={styles.brand}>
             <Link to="/" className={styles.logo}>
-              <span className={styles.logoMark} aria-hidden="true">L</span>
+              <span className={styles.logoMark} aria-hidden="true" />
               Launchpad Web Consulting
             </Link>
             <p className={styles.tagline}>Websites for small businesses.</p>

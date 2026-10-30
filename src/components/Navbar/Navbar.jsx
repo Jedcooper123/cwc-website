@@ -55,7 +55,7 @@ export default function Navbar() {
         <nav className={`${styles.nav} container`} aria-label="Main">
 
           <Link to="/" className={styles.logo} aria-label="Launchpad Web Consulting home">
-            <span className={styles.logoMark} aria-hidden="true">L</span>
+            <span className={styles.logoMark} aria-hidden="true" />
             <span className={styles.logoText}>Launchpad</span>
           </Link>
 
