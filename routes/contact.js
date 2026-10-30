@@ -54,6 +54,7 @@ router.post('/', contactLimiter, async (req, res) => {
     email,
     phone:    clip(b.phone, 40),
     business: clip(b.business),
+    source:   clip(b.source, 300),
     message:  lines.join('\n'),
   })
 

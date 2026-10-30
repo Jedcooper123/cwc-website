@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FiArrowRight, FiArrowLeft, FiCheckCircle, FiPhone, FiMail } from 'react-icons/fi'
 import styles from './Contact.module.css'
+import { getSource, track } from '../../lib/analytics'
 
 const INDUSTRIES = [
   'Contractor / Trades (HVAC, Plumbing, Electrical, Roofing)',
@@ -79,12 +80,13 @@ export default function Contact() {
       const res = await fetch('/api/contact', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(form),
+        body:    JSON.stringify({ ...form, source: getSource() }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error)
       }
+      track('Lead', { content_name: 'Contact form' })
       setSubmitted(true)
     } catch (err) {
       setErrors({ submit: err.message || "We couldn't send your message. Please call or email Jed directly." })

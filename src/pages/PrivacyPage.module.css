@@ -1,0 +1,25 @@
+.body {
+  max-width: 680px;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.body h2 {
+  margin: 2.25rem 0 0.5rem;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.body h2:first-child { margin-top: 0; }
+
+.body ul {
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.body a {
+  color: var(--accent-dk);
+}

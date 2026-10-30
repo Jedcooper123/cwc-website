@@ -25,6 +25,7 @@ const COLS = [
     heading: 'Clients',
     links: [
       { label: 'Client Portal', to: '/portal' },
+      { label: 'Privacy',       to: '/privacy' },
     ],
   },
 ]

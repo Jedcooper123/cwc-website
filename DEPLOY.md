@@ -42,5 +42,13 @@ For each one: **Clients** → **Add client** with **Email them a link** checked.
 
 Then open the client and fill in **Monthly plan** (price and next due date). That's what they see on their Billing tab. Update the due date each month after they pay.
 
+## Meta Pixel (Facebook / Instagram ads)
+1. Meta **Events Manager** → **Connect data** → **Web** → name it `Launchpad site` → copy the **Pixel ID** (a long number).
+2. Render → **Environment** → add `VITE_META_PIXEL_ID` = that number → **Save, rebuild, and deploy**.
+3. Events Manager → **Test events** → open the site. You should see `PageView`. Submitting the contact form sends `Lead`, booking in Calendly sends `Schedule`, and tapping the phone or email sends `Contact`. Nothing is sent from `/portal`.
+4. In every ad, set the website URL's **URL parameters** to:
+   `utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}`
+   Inquiry emails then show a **Came from** line with the campaign and ad name.
+
 ## Forgot the admin password?
 Change `ADMIN_PASSWORD` in Render and redeploy. It's re-applied on every boot.
