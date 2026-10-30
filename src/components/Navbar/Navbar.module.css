@@ -34,16 +34,11 @@
   flex-shrink: 0;
 }
 
+/* Same artwork as the favicon, so the site, browser tab and Facebook all match. */
 .logoMark {
-  display: grid;
-  place-items: center;
   width: 26px;
   height: 26px;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #fff;
-  background: var(--accent);
-  border-radius: 7px;
+  background: url("/favicon.svg?v=3") center / contain no-repeat;
 }
 
 .logoText {
